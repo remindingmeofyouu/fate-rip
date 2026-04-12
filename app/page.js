@@ -56,7 +56,7 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
     fate.rip
   </a>
   <ul class="nav-links">
-    <li><a href="#">Discord</a></li>
+    <li><a href="https://discord.gg/tdvqDAdRYt" target="_blank">Discord</a></li>
     <li><a href="#">Pricing</a></li>
     <li><a href="#">Dashboard</a></li>
     <li><a href="#" class="btn-signup">Sign Up</a></li>
