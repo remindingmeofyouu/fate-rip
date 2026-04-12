@@ -80,7 +80,7 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
       <div class="or-row"><hr/>or<hr/></div>
       <div class="secondary-btns">
         <a href="#" class="btn-outline">View Pricing</a>
-        <a href="#" class="btn-outline">Join Discord</a>
+        <a href="https://discord.gg/tdvqDAdRYt" target="_blank" class="btn-outline">Join Discord</a>
       </div>
     </div>
   </div>
