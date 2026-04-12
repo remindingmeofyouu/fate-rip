@@ -17,7 +17,7 @@ export default function Pricing() {
             <p style={{fontSize:"40px",fontWeight:600,color:"#fff"}}>$0</p>
           </div>
           <div style={{height:"1px",background:"#1e1e1e"}}/>
-          <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:"10px",flex:1}}>
             {["Basic customization","Basic effects","Add your socials","1 alias"].map(f => (
               <Feature key={f} label={f} active />
             ))}
@@ -25,7 +25,7 @@ export default function Pricing() {
               <Feature key={f} label={f} active={false} />
             ))}
           </div>
-          <button style={{width:"100%",padding:"12px",borderRadius:"999px",fontFamily:"inherit",fontSize:"14px",fontWeight:500,cursor:"pointer",border:"none",background:"#1e1e1e",color:"#888"}}>
+          <button style={{width:"100%",padding:"12px",borderRadius:"999px",fontFamily:"inherit",fontSize:"14px",fontWeight:500,cursor:"pointer",border:"none",background:"#1e1e1e",color:"#888",marginTop:"auto"}}>
             Get started free
           </button>
         </div>
@@ -45,12 +45,12 @@ export default function Pricing() {
             </div>
           </div>
           <div style={{height:"1px",background:"#1e1e1e"}}/>
-          <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+          <div style={{display:"flex",flexDirection:"column",gap:"10px",flex:1}}>
             {["Everything in Free","Advanced effects","Advanced customization","Exclusive badge","Exclusive Discord role","Priority support","2 aliases"].map(f => (
               <Feature key={f} label={f} active />
             ))}
           </div>
-          <button style={{width:"100%",padding:"12px",borderRadius:"999px",fontFamily:"inherit",fontSize:"14px",fontWeight:500,cursor:"pointer",border:"none",background:"#e02020",color:"#fff"}}>
+          <button style={{width:"100%",padding:"12px",borderRadius:"999px",fontFamily:"inherit",fontSize:"14px",fontWeight:500,cursor:"pointer",border:"none",background:"#e02020",color:"#fff",marginTop:"auto"}}>
             Get Premium
           </button>
         </div>
