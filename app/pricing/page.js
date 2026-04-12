@@ -1,3 +1,6 @@
+export const metadata = {
+  title: 'Pricing | fate.rip',
+}
 export default function Pricing() {
   return (
     <main className="pg">
