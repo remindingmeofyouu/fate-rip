@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Pricing | fate.rip',
+  title: 'fate.rip | Pricing',
 }
 export default function Pricing() {
   return (
