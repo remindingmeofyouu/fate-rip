@@ -15,9 +15,10 @@ export const metadata = {
   title: "fate.rip | Home",
   description: "Claim your unique profile link today.",
   icons: {
-   icon: "/scythe.png",
-  },
-};
+    icon: [
+      { url: "/scythe.png", type: "image/png" },
+    ],
+},
 
 export default function RootLayout({ children }) {
   return (
