@@ -50,7 +50,6 @@ button:hover{background:#a80000;}
   <div>
     <div class="field-label">Email</div>
     <div class="input-wrap">
-      <span>✉️</span>
       <input id="email" type="email" placeholder="Email" />
     </div>
   </div>
@@ -58,7 +57,6 @@ button:hover{background:#a80000;}
   <div>
     <div class="field-label">Password</div>
     <div class="input-wrap">
-      <span>🔑</span>
       <input id="password" type="password" placeholder="Password" />
     </div>
   </div>
@@ -66,7 +64,6 @@ button:hover{background:#a80000;}
   <div>
     <div class="field-label">Username</div>
     <div class="input-wrap">
-      <span>👤</span>
       <input id="username" type="text" placeholder="fate.rip/" />
     </div>
   </div>
