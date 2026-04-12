@@ -57,9 +57,9 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
   </a>
   <ul class="nav-links">
     <li><a href="https://discord.gg/tdvqDAdRYt" target="_blank">Discord</a></li>
-    <li><a href="#">Pricing</a></li>
-    <li><a href="#">Dashboard</a></li>
-    <li><a href="#" class="btn-signup">Sign Up</a></li>
+    <li><a href="/pricing" target="_top">Pricing</a></li>
+    <li><a href="/dashboard" target="_top">Dashboard</a></li>
+    <li><a href="/signup" target="_top" class="btn-signup">Sign Up</a></li>
   </ul>
 </nav>
 <section class="hero">
@@ -79,7 +79,7 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
       </div>
       <div class="or-row"><hr/>or<hr/></div>
       <div class="secondary-btns">
-        <a href="#" class="btn-outline">View Pricing</a>
+        <a href="/pricing" target="_top" class="btn-outline">View Pricing</a>
         <a href="https://discord.gg/tdvqDAdRYt" target="_blank" class="btn-outline">Join Discord</a>
       </div>
     </div>
