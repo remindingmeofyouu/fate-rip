@@ -27,6 +27,68 @@ export default function ProfilePage() {
     fetchProfile()
   }, [username])
 
+  useEffect(() => {
+    if (!profile) return
+
+    const fullText = `@${profile.username}`
+    let i = 0
+    let deleting = false
+    let timeout
+
+    const canvas = document.createElement('canvas')
+    canvas.width = 32
+    canvas.height = 32
+    const ctx = canvas.getContext('2d')
+
+    const drawFavicon = (text) => {
+      ctx.clearRect(0, 0, 32, 32)
+      ctx.fillStyle = '#080808'
+      ctx.fillRect(0, 0, 32, 32)
+      ctx.fillStyle = '#ffffff'
+      ctx.font = 'bold 13px monospace'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText(text, 16, 16)
+
+      let link = document.querySelector("link[rel~='icon']")
+      if (!link) {
+        link = document.createElement('link')
+        link.rel = 'icon'
+        document.head.appendChild(link)
+      }
+      link.href = canvas.toDataURL()
+    }
+
+    const type = () => {
+      if (!deleting) {
+        i++
+        const current = fullText.slice(0, i)
+        drawFavicon(current)
+        document.title = current
+        if (i === fullText.length) {
+          deleting = false
+          timeout = setTimeout(() => { deleting = true; timeout = setTimeout(type, 80) }, 1500)
+        } else {
+          timeout = setTimeout(type, 120)
+        }
+      } else {
+        i--
+        const current = fullText.slice(0, i)
+        drawFavicon(current || '@')
+        document.title = current || `@${profile.username}`
+        if (i === 0) {
+          deleting = false
+          timeout = setTimeout(type, 400)
+        } else {
+          timeout = setTimeout(type, 60)
+        }
+      }
+    }
+
+    timeout = setTimeout(type, 600)
+    return () => clearTimeout(timeout)
+  }, [profile])
+
   if (loading) {
     return (
       <div style={{ background: '#080808', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -53,27 +115,20 @@ export default function ProfilePage() {
 
   return (
     <div style={{ background: '#080808', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito, sans-serif', padding: '40px 16px' }}>
-      <title>{`${profile.username} — fate.rip`}</title>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         .profile-wrap { width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 0; }
-
         .avatar-ring { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #CC0000, #ff4444); padding: 2px; margin-bottom: 16px; }
         .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #0f0f0f; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; color: #fff; }
-
         .profile-name { font-size: 22px; font-weight: 900; color: #fff; letter-spacing: -0.5px; margin-bottom: 6px; }
         .profile-bio { font-size: 13px; color: #444; font-weight: 600; text-align: center; max-width: 300px; line-height: 1.6; margin-bottom: 28px; }
-
         .links { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-
         .link-btn { width: 100%; padding: 14px 20px; border-radius: 14px; background: #111; border: 1px solid #1e1e1e; color: #888; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px; position: relative; }
         .link-btn:hover { background: #181818; color: #fff; border-color: #2a2a2a; transform: translateY(-2px); }
         .link-btn:active { transform: translateY(0); }
         .link-arrow { position: absolute; right: 18px; opacity: 0; transition: opacity 0.2s; font-size: 12px; }
         .link-btn:hover .link-arrow { opacity: 1; }
-
         .footer { margin-top: 36px; font-size: 12px; color: #252525; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
         .footer a { color: #CC0000; text-decoration: none; opacity: 0.7; transition: opacity 0.15s; }
         .footer a:hover { opacity: 1; }
@@ -83,28 +138,14 @@ export default function ProfilePage() {
         <div className="avatar-ring">
           <div className="avatar-inner">{initial}</div>
         </div>
-
         <div className="profile-name">@{profile.username}</div>
         <div className="profile-bio">{profile.bio || 'No bio yet.'}</div>
-
         <div className="links">
-          <a href="#" className="link-btn">
-            Twitter / X
-            <span className="link-arrow">↗</span>
-          </a>
-          <a href="#" className="link-btn">
-            Discord
-            <span className="link-arrow">↗</span>
-          </a>
-          <a href="#" className="link-btn">
-            GitHub
-            <span className="link-arrow">↗</span>
-          </a>
+          <a href="#" className="link-btn">Twitter / X<span className="link-arrow">↗</span></a>
+          <a href="#" className="link-btn">Discord<span className="link-arrow">↗</span></a>
+          <a href="#" className="link-btn">GitHub<span className="link-arrow">↗</span></a>
         </div>
-
-        <div className="footer">
-          powered by <a href="/">fate.rip</a>
-        </div>
+        <div className="footer">powered by <a href="/">fate.rip</a></div>
       </div>
     </div>
   )
