@@ -30,53 +30,46 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!profile) return
 
+    // Set scythe favicon once and never touch it again
+    let link = document.querySelector("link[rel~='icon']")
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = 'icon'
+      document.head.appendChild(link)
+    }
+    link.href = '/scythe.png'
+
+    // Typewriter only on the title
     const fullText = `@${profile.username}`
     let i = 0
     let deleting = false
     let timeout
 
-    const setFaviconEmoji = (emoji) => {
-      const canvas = document.createElement('canvas')
-      canvas.width = 32
-      canvas.height = 32
-      const ctx = canvas.getContext('2d')
-      ctx.font = '28px serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(emoji, 16, 16)
-      let link = document.querySelector("link[rel~='icon']")
-      if (!link) {
-        link = document.createElement('link')
-        link.rel = 'icon'
-        document.head.appendChild(link)
-      }
-      link.href = canvas.toDataURL()
-    }
-
-    setFaviconEmoji('🔱')
-
-    const type = () => {
+    const tick = () => {
       if (!deleting) {
         i++
         document.title = fullText.slice(0, i)
         if (i === fullText.length) {
-          timeout = setTimeout(() => { deleting = true; timeout = setTimeout(type, 100) }, 2000)
+          timeout = setTimeout(() => {
+            deleting = true
+            timeout = setTimeout(tick, 100)
+          }, 2000)
         } else {
-          timeout = setTimeout(type, 150)
+          timeout = setTimeout(tick, 150)
         }
       } else {
         i--
-        document.title = i === 0 ? `@${profile.username}` : fullText.slice(0, i)
+        document.title = fullText.slice(0, i) || fullText
         if (i === 0) {
           deleting = false
-          timeout = setTimeout(type, 500)
+          timeout = setTimeout(tick, 500)
         } else {
-          timeout = setTimeout(type, 80)
+          timeout = setTimeout(tick, 80)
         }
       }
     }
 
-    timeout = setTimeout(type, 800)
+    timeout = setTimeout(tick, 800)
     return () => clearTimeout(timeout)
   }, [profile])
 
@@ -106,6 +99,7 @@ export default function ProfilePage() {
 
   return (
     <div style={{ background: '#080808', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito, sans-serif', padding: '40px 16px' }}>
+      <link rel="icon" href="/scythe.png" />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
