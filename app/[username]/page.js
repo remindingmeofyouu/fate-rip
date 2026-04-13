@@ -50,26 +50,23 @@ export default function ProfilePage() {
         i++
         document.title = fullText.slice(0, i)
         if (i === fullText.length) {
-          timeout = setTimeout(() => {
-            deleting = true
-            timeout = setTimeout(tick, 100)
-          }, 2000)
+          timeout = setTimeout(() => { deleting = true; timeout = setTimeout(tick, 200) }, 2500)
         } else {
-          timeout = setTimeout(tick, 150)
+          timeout = setTimeout(tick, 200)
         }
       } else {
         i--
-        document.title = fullText.slice(0, i) || fullText
+        document.title = fullText.slice(0, i) || ' '
         if (i === 0) {
           deleting = false
-          timeout = setTimeout(tick, 500)
+          timeout = setTimeout(tick, 1200)
         } else {
-          timeout = setTimeout(tick, 80)
+          timeout = setTimeout(tick, 120)
         }
       }
     }
 
-    timeout = setTimeout(tick, 800)
+    timeout = setTimeout(tick, 1200)
     return () => clearTimeout(timeout)
   }, [profile])
 
