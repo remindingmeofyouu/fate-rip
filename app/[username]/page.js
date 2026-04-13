@@ -56,7 +56,7 @@ export default function ProfilePage() {
         }
       } else {
         i--
-        document.title = fullText.slice(0, i) || ' '
+        document.title = fullText.slice(0, i)
         if (i === 0) {
           deleting = false
           timeout = setTimeout(tick, 1200)
