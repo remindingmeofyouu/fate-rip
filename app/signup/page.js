@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
@@ -11,10 +11,21 @@ export default function SignUp() {
   const [usernameStatus, setUsernameStatus] = useState('')
   const [usernameTimer, setUsernameTimer] = useState(null)
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const u = params.get('username')
+    if (u) {
+      const input = document.getElementById('username')
+      if (input) {
+        input.value = u
+        checkUsername(u)
+      }
+    }
+  }, [])
+
   const checkUsername = (value) => {
     if (usernameTimer) clearTimeout(usernameTimer)
     if (!value) { setUsernameStatus(''); return }
-
     setUsernameStatus('checking')
     const timer = setTimeout(async () => {
       const { data } = await supabase

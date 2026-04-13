@@ -75,7 +75,7 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
       <div class="input-row">
         <div class="input-prefix">fate.rip/</div>
         <input class="input-field" type="text" placeholder="yourname" autocomplete="off" spellcheck="false"/>
-        <button class="input-btn">Claim →</button>
+        <button class="input-btn" onclick="const v=document.querySelector('.input-field').value; if(v) window.parent.location.href='/signup?username='+encodeURIComponent(v); else window.parent.location.href='/signup'">Claim →</button>
       </div>
       <div class="or-row"><hr/>or<hr/></div>
       <div class="secondary-btns">
