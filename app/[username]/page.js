@@ -35,21 +35,15 @@ export default function ProfilePage() {
     let deleting = false
     let timeout
 
-    const canvas = document.createElement('canvas')
-    canvas.width = 32
-    canvas.height = 32
-    const ctx = canvas.getContext('2d')
-
-    const drawFavicon = (text) => {
-      ctx.clearRect(0, 0, 32, 32)
-      ctx.fillStyle = '#080808'
-      ctx.fillRect(0, 0, 32, 32)
-      ctx.fillStyle = '#ffffff'
-      ctx.font = 'bold 13px monospace'
+    const setFaviconEmoji = (emoji) => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 32
+      canvas.height = 32
+      const ctx = canvas.getContext('2d')
+      ctx.font = '28px serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
-      ctx.fillText(text, 16, 16)
-
+      ctx.fillText(emoji, 16, 16)
       let link = document.querySelector("link[rel~='icon']")
       if (!link) {
         link = document.createElement('link')
@@ -59,33 +53,30 @@ export default function ProfilePage() {
       link.href = canvas.toDataURL()
     }
 
+    setFaviconEmoji('🔱')
+
     const type = () => {
       if (!deleting) {
         i++
-        const current = fullText.slice(0, i)
-        drawFavicon(current)
-        document.title = current
+        document.title = fullText.slice(0, i)
         if (i === fullText.length) {
-          deleting = false
-          timeout = setTimeout(() => { deleting = true; timeout = setTimeout(type, 80) }, 1500)
+          timeout = setTimeout(() => { deleting = true; timeout = setTimeout(type, 100) }, 2000)
         } else {
-          timeout = setTimeout(type, 120)
+          timeout = setTimeout(type, 150)
         }
       } else {
         i--
-        const current = fullText.slice(0, i)
-        drawFavicon(current || '@')
-        document.title = current || `@${profile.username}`
+        document.title = i === 0 ? `@${profile.username}` : fullText.slice(0, i)
         if (i === 0) {
           deleting = false
-          timeout = setTimeout(type, 400)
+          timeout = setTimeout(type, 500)
         } else {
-          timeout = setTimeout(type, 60)
+          timeout = setTimeout(type, 80)
         }
       }
     }
 
-    timeout = setTimeout(type, 600)
+    timeout = setTimeout(type, 800)
     return () => clearTimeout(timeout)
   }, [profile])
 
