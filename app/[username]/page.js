@@ -6,24 +6,33 @@ export default function ProfilePage({ params }) {
   const { username } = params
   const [profile, setProfile] = useState(null)
   const [notFound, setNotFound] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
-        .single()
 
-      if (!data) {
+      if (error || !data || data.length === 0) {
         setNotFound(true)
       } else {
-        setProfile(data)
+        setProfile(data[0])
       }
+      setLoading(false)
     }
 
     fetchProfile()
   }, [username])
+
+  if (loading) {
+    return (
+      <div style={{ background: '#0A0A0A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#444', fontFamily: 'DM Sans, sans-serif', fontSize: '14px' }}>Loading...</div>
+      </div>
+    )
+  }
 
   if (notFound) {
     return (
@@ -34,14 +43,6 @@ export default function ProfilePage({ params }) {
           <div style={{ fontSize: '16px', color: '#555', marginBottom: '24px' }}>This profile doesn't exist.</div>
           <a href="/" style={{ color: '#CC0000', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>← Back to fate.rip</a>
         </div>
-      </div>
-    )
-  }
-
-  if (!profile) {
-    return (
-      <div style={{ background: '#0A0A0A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#444', fontFamily: 'DM Sans, sans-serif', fontSize: '14px' }}>Loading...</div>
       </div>
     )
   }
