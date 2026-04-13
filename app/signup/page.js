@@ -26,6 +26,11 @@ export default function SignUp() {
   const checkUsername = (value) => {
     if (usernameTimer) clearTimeout(usernameTimer)
     if (!value) { setUsernameStatus(''); return }
+
+    const valid = /^[a-zA-Z0-9_]+$/.test(value)
+    if (!valid) { setUsernameStatus('invalid'); return }
+    if (value.length < 3) { setUsernameStatus('short'); return }
+
     setUsernameStatus('checking')
     const timer = setTimeout(async () => {
       const { data } = await supabase
@@ -45,6 +50,16 @@ export default function SignUp() {
 
     if (!email || !password || !username) {
       setMessage('Please fill in all fields!')
+      return
+    }
+
+    if (username.length < 3) {
+      setMessage('Username must be at least 3 characters!')
+      return
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setMessage('Only letters, numbers, and _ allowed!')
       return
     }
 
@@ -126,6 +141,8 @@ export default function SignUp() {
           {usernameStatus === 'available' && <div className="username-status status-available">✓ This username is available!</div>}
           {usernameStatus === 'taken' && <div className="username-status status-taken">✗ Sorry, this username is taken!</div>}
           {usernameStatus === 'checking' && <div className="username-status status-checking">Checking...</div>}
+          {usernameStatus === 'invalid' && <div className="username-status status-taken">✗ Only letters, numbers, and _ allowed!</div>}
+          {usernameStatus === 'short' && <div className="username-status status-taken">✗ Username must be at least 3 characters!</div>}
         </div>
         <button className="btn" onClick={handleSignUp} disabled={loading}>
           {loading ? 'Creating account...' : 'Sign Up'}
