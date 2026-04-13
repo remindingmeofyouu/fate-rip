@@ -25,7 +25,7 @@ export default function Pricing() {
               <div key={f} className="feat dim"><span className="dot"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#333" strokeWidth="2"><path d="M3 3l4 4M7 3l-4 4"/></svg></span>{f}</div>
             ))}
           </div>
-          <button className="btn btn-free">Get started free</button>
+          <a href="/" className="btn btn-free" style={{textDecoration:'none',textAlign:'center'}}>Get started free</a>
         </div>
 
         <div className="card premium">
