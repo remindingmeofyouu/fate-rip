@@ -3,10 +3,6 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
-export const metadata = {
-  title: 'fate.rip | Sign Up',
-}
-
 export default function SignUp() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
