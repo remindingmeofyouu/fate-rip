@@ -1,19 +1,27 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 
-export default function ProfilePage({ params }) {
-  const { username } = params
+export default function ProfilePage() {
+  const params = useParams()
+  const username = params?.username
   const [profile, setProfile] = useState(null)
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!username) return
+
     const fetchProfile = async () => {
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('username', username)
+
+      console.log('username:', username)
+      console.log('data:', data)
+      console.log('error:', error)
 
       if (error || !data || data.length === 0) {
         setNotFound(true)
