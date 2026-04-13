@@ -1,8 +1,10 @@
 'use client'
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { useRouter } from 'next/navigation'
 
 export default function SignUp() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -19,14 +21,13 @@ export default function SignUp() {
     setLoading(true)
     setMessage('')
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({ email, password })
     if (error) { setMessage(error.message); setLoading(false); return }
 
     const { error: dbError } = await supabase.from('users').insert([{ username, email }])
     if (dbError) { setMessage('Username already taken!'); setLoading(false); return }
 
-    setMessage('Account created! Check your email to confirm.')
-    setLoading(false)
+    router.push('/dashboard')
   }
 
   return (
