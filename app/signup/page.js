@@ -8,7 +8,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [usernameStatus, setUsernameStatus] = useState('') // 'available' | 'taken' | 'checking' | ''
+  const [usernameStatus, setUsernameStatus] = useState('')
   const [usernameTimer, setUsernameTimer] = useState(null)
 
   const checkUsername = (value) => {
@@ -56,7 +56,6 @@ export default function SignUp() {
 
   return (
     <div style={{ background: '#0A0A0A', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito, sans-serif' }}>
-      <title>fate.rip | Sign Up</title>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -67,7 +66,7 @@ export default function SignUp() {
         .input-wrap:focus-within { border-color: rgba(204,0,0,0.5); }
         .input-wrap input { background: transparent; border: none; outline: none; color: #F0F0F0; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700; width: 100%; }
         .input-wrap input::placeholder { color: #333; }
-        .eye-btn { background: none; border: none; cursor: pointer; padding: 0; margin-left: 8px; color: #444; display: flex; align-items: center; transition: color 0.15s; }
+        .eye-btn { background: none; border: none; cursor: pointer; padding: 8px; margin-left: 4px; color: #444; display: flex; align-items: center; transition: color 0.15s; border-radius: 6px; flex-shrink: 0; }
         .eye-btn:hover { color: #888; }
         .username-status { font-size: 12px; font-weight: 700; margin-top: 6px; padding-left: 4px; }
         .status-available { color: #22c55e; }
