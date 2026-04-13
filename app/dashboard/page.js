@@ -53,6 +53,7 @@ export default function Dashboard() {
   return (
     <div style={{ background: '#0d0d0d', minHeight: '100vh', fontFamily: 'DM Sans, sans-serif' }}>
       <style>{`
+      <title>fate.rip | Dashboard</title>
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #0d0d0d; }
