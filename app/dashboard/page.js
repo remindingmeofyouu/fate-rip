@@ -229,61 +229,166 @@ export default function Dashboard() {
         {/* OVERVIEW */}
         {activePage === 'overview' && (
           <div>
-            <div className="page-breadcrumb">ACCOUNT • OVERVIEW</div>
-            <div className="page-title">Account Overview</div>
-            <div className="page-subtitle" style={{ marginBottom: 22 }}>High-level snapshot of your profile.</div>
-            <div className="panel">
-              <div className="panel-header">
-                <h2>Profile Snapshot</h2>
-                <div className="panel-note">Live Data</div>
+            <div style={{ marginBottom: 22 }}>
+              <div className="page-breadcrumb">ACCOUNT • OVERVIEW</div>
+              <div className="page-title">Account Overview</div>
+            </div>
+
+            {/* Top 4 stat cards */}
+            <div className="stats-grid" style={{ marginBottom: 22 }}>
+              <div className="stat-card" style={{ position: 'relative' }}>
+                <div className="stat-label">Username</div>
+                <div className="stat-value">{username || '—'}</div>
+                <div className="stat-sub">Change available now</div>
+                <span style={{ position: 'absolute', top: 10, right: 12, fontSize: 14, color: '#444' }}>✎</span>
               </div>
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <div className="stat-label">Username</div>
-                  <div className="stat-value">{username || '—'}</div>
-                  <div className="stat-sub">Primary Handle</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Profile Views</div>
-                  <div className="stat-value">0</div>
-                  <div className="stat-sub">Last 7 Days</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Links</div>
-                  <div className="stat-value">{links.length}</div>
-                  <div className="stat-sub">Active Links</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-label">Profile Status</div>
-                  <div className="stat-value">{bio ? 'Active' : 'Incomplete'}</div>
-                  <div className="stat-sub">Visibility: {bio ? 'Full' : 'Limited'}</div>
-                </div>
+              <div className="stat-card" style={{ position: 'relative' }}>
+                <div className="stat-label">Alias</div>
+                <div className="stat-value">0 Aliases Used</div>
+                <div className="stat-sub">1 Alias Slot Remaining</div>
+                <span style={{ position: 'absolute', top: 10, right: 12, fontSize: 14, color: '#444' }}>👤</span>
+              </div>
+              <div className="stat-card" style={{ position: 'relative' }}>
+                <div className="stat-label">UID</div>
+                <div className="stat-value">—</div>
+                <div className="stat-sub">Profile Identifier</div>
+                <span style={{ position: 'absolute', top: 10, right: 12, fontSize: 14, color: '#444' }}>#</span>
+              </div>
+              <div className="stat-card" style={{ position: 'relative' }}>
+                <div className="stat-label">Profile Views</div>
+                <div className="stat-value">0</div>
+                <div className="stat-sub">+0 views since last 7 days</div>
+                <span style={{ position: 'absolute', top: 10, right: 12, fontSize: 14, color: '#444' }}>👁</span>
               </div>
             </div>
-            <div className="panel">
-              <div className="panel-header">
-                <h2>Profile Completion</h2>
-                <div className="panel-note">Complete these steps to boost visibility.</div>
-              </div>
-              <div className="panel-body">
-                {(() => {
-                  const steps = [!!bio, links.length > 0]
-                  const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
-                  return (
-                    <>
-                      <div>Completion: <b>{pct}%</b></div>
-                      <div className="progress-bar-bg">
-                        <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+
+            {/* Two-column layout */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 18, alignItems: 'start' }}>
+
+              {/* Left: Account Statistics */}
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 14 }}>Account Statistics</div>
+                <div className="panel">
+                  <div style={{ marginBottom: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                      <span style={{ fontSize: 13, color: '#b8b8c4', fontWeight: 500 }}>Profile Completion</span>
+                    </div>
+                    {(() => {
+                      const steps = [!!bio, links.length > 0]
+                      const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
+                      return (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div className="progress-bar-bg" style={{ flex: 1, margin: 0 }}>
+                            <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span style={{ fontSize: 12, color: '#7a7a8a', flexShrink: 0 }}>{pct}% completed</span>
+                        </div>
+                      )
+                    })()}
+                  </div>
+
+                  {/* Incomplete warning */}
+                  <div style={{ background: 'rgba(196,0,29,0.07)', border: '1px solid rgba(196,0,29,0.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                      <span style={{ fontSize: 14, color: '#f59e0b' }}>⚠</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Your profile isn't complete yet!</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: '#7a7a8a' }}>Complete your profile to make it more discoverable and appealing.</div>
+                  </div>
+
+                  {/* Checklist items */}
+                  {[
+                    { label: 'Upload An Avatar', done: false, onClick: () => setActivePage('customize') },
+                    { label: 'Add A Description', done: !!bio, onClick: () => setActivePage('customize') },
+                    { label: 'Add Links', done: links.length > 0, onClick: () => setActivePage('links') },
+                    { label: 'Reach 10 Profile Views', done: false, onClick: null },
+                  ].map((step, i) => (
+                    <div
+                      key={i}
+                      onClick={step.onClick || undefined}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        background: '#0d0d10', border: '1px solid rgba(196,0,29,0.15)',
+                        borderRadius: 10, padding: '10px 14px', marginBottom: 8,
+                        cursor: step.onClick ? 'pointer' : 'default',
+                        transition: 'border-color .15s',
+                      }}
+                      onMouseEnter={e => { if (step.onClick) e.currentTarget.style.borderColor = 'rgba(196,0,29,0.4)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(196,0,29,0.15)' }}
+                    >
+                      <div style={{
+                        width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                        background: step.done ? 'rgba(34,197,94,0.15)' : 'rgba(196,0,29,0.1)',
+                        border: `1px solid ${step.done ? 'rgba(34,197,94,0.4)' : 'rgba(196,0,29,0.3)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, color: step.done ? '#22c55e' : '#ff2340',
+                      }}>
+                        {step.done ? '✓' : '!'}
                       </div>
-                      <div className="progress-label">Add A Bio • Add Links</div>
-                      <div className="button-row">
-                        <button className="button-secondary" onClick={() => setActivePage('customize')}>Edit Profile</button>
-                        <button className="button-secondary" onClick={() => setActivePage('links')}>Add Links</button>
-                      </div>
-                    </>
-                  )
-                })()}
+                      <span style={{ fontSize: 13, color: step.done ? '#22c55e' : '#b8b8c4' }}>{step.label}</span>
+                      {!step.done && step.onClick && (
+                        <span style={{ marginLeft: 'auto', fontSize: 12, color: '#444' }}>›</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
+
+              {/* Right: Manage account + Connections */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                <div className="panel" style={{ padding: '18px 16px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Manage your account</div>
+                  <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 14 }}>Change your email, username and more.</div>
+                  {[
+                    { label: 'Change Username', icon: '✎', page: 'settings' },
+                    { label: 'Change Display Name', icon: '✎', page: 'customize' },
+                    { label: 'Manage Aliases', icon: '⚙', page: 'settings' },
+                    { label: 'Account Settings', icon: '⚙', page: 'settings' },
+                  ].map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActivePage(item.page)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        width: '100%', padding: '9px 12px', marginBottom: 6,
+                        background: '#0d0d10', border: '1px solid rgba(196,0,29,0.2)',
+                        borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
+                        color: '#b8b8c4', fontSize: 12, textAlign: 'left',
+                        transition: 'border-color .15s, color .15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = '#c4001d'; e.currentTarget.style.color = '#fff' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(196,0,29,0.2)'; e.currentTarget.style.color = '#b8b8c4' }}
+                    >
+                      <span style={{ fontSize: 12, color: '#555' }}>{item.icon}</span>
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="panel" style={{ padding: '18px 16px' }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Connections</div>
+                  <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 14 }}>Link external accounts to your profile.</div>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <div style={{
+                      flex: 1, display: 'flex', alignItems: 'center', gap: 8,
+                      background: '#5865F2', borderRadius: 10, padding: '9px 12px',
+                      fontSize: 12, fontWeight: 600, color: '#fff',
+                    }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                      </svg>
+                      Discord Connected
+                    </div>
+                    <button style={{
+                      width: 34, height: 34, border: 'none', borderRadius: 8,
+                      background: 'rgba(196,0,29,0.2)', color: '#ff2340',
+                      cursor: 'pointer', fontSize: 14, flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>✕</button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
