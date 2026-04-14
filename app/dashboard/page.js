@@ -12,11 +12,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveMsg, setSaveMsg] = useState('')
-  const [activeTab, setActiveTab] = useState('customize')
-  const [accountOpen, setAccountOpen] = useState(true)
+  const [activePage, setActivePage] = useState('overview')
   const [newLinkTitle, setNewLinkTitle] = useState('')
   const [newLinkUrl, setNewLinkUrl] = useState('')
-  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     const init = async () => {
@@ -52,7 +50,6 @@ export default function Dashboard() {
       .from('users')
       .update({ bio, links })
       .eq('username', username)
-
     setSaving(false)
     if (error) {
       setSaveMsg('Failed to save.')
@@ -80,350 +77,436 @@ export default function Dashboard() {
     setLinks(arr)
   }
 
-  const shareProfile = () => {
-    const url = `https://fate.rip/${username}`
-    if (navigator.share) {
-      navigator.share({ title: `@${username} on fate.rip`, url })
-    } else {
-      navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-
   const initial = username ? username[0].toUpperCase() : '?'
 
   if (loading) {
     return (
-      <div style={{ background: '#13111a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');`}</style>
-        <div style={{ color: '#555', fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>Loading...</div>
+      <div style={{ background: '#050506', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: '#7a7a8a', fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>Loading...</div>
       </div>
     )
   }
 
+  const navSections = [
+    { section: 'ACCOUNT', items: [
+      { id: 'overview', label: 'Overview' },
+      { id: 'analytics', label: 'Analytics' },
+      { id: 'badges', label: 'Badges' },
+      { id: 'settings', label: 'Settings' },
+    ]},
+    { section: 'CUSTOMIZE', items: [
+      { id: 'customize', label: 'Appearance' },
+      { id: 'links', label: 'Links' },
+      { id: 'themes', label: 'Themes' },
+    ]},
+    { section: 'PREMIUM', items: [
+      { id: 'premium', label: 'Upgrade' },
+    ]},
+  ]
+
   return (
-    <div style={{ background: '#13111a', minHeight: '100vh', fontFamily: 'Inter, sans-serif', display: 'flex' }}>
+    <div style={{ margin: 0, background: 'radial-gradient(circle at top, #09090d 0%, #050506 45%, #020203 100%)', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#fff', display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <title>fate.rip | Dashboard</title>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(196,0,29,0.3); border-radius: 4px; }
 
-        /* Sidebar */
-        .sidebar { width: 240px; background: #1a1724; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; position: sticky; top: 0; overflow-y: auto; }
-        .sidebar-top { padding: 20px 16px 8px; }
-        .logo { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.3px; text-decoration: none; display: block; padding: 4px 8px 20px; }
-        .logo span { color: #e02020; }
+        .sidebar { width: 250px; background: linear-gradient(180deg, #050506 0%, #09090d 40%, #050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; }
+        .logo { font-size: 26px; font-weight: 800; letter-spacing: 1.2px; text-decoration: none; display: block; }
+        .logo .fate { color: #ff2340; }
+        .logo .rip { color: #fff; }
+        .logo-sub { font-size: 11px; color: #b8b8c4; margin-top: 4px; letter-spacing: 0.16em; text-transform: uppercase; }
+        .nav-section { display: flex; flex-direction: column; gap: 8px; }
+        .nav-title { font-size: 12px; color: #7a7a8a; margin-bottom: 4px; letter-spacing: 0.16em; text-transform: uppercase; }
+        .nav-item { padding: 9px 11px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: border .15s, background .15s, color .15s; font-size: 13px; color: #b8b8c4; display: flex; align-items: center; justify-content: space-between; background: none; width: 100%; text-align: left; font-family: inherit; }
+        .nav-item:hover, .nav-item.active { border-color: #c4001d; background: rgba(196,0,29,0.08); color: #fff; }
+        .nav-item .chevron { font-size: 11px; opacity: 0.7; }
+        .sidebar-footer { margin-top: auto; font-size: 11px; color: #7a7a8a; border-top: 1px solid rgba(196,0,29,0.25); padding-top: 12px; }
+        .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; margin-top: 8px; transition: color .15s; display: block; }
+        .logout-link:hover { color: #ff2340; }
 
-        /* Nav sections */
-        .nav-section-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 10px; cursor: pointer; user-select: none; color: #aaa; font-size: 13px; font-weight: 600; transition: background 0.15s; }
-        .nav-section-header:hover { background: rgba(255,255,255,0.05); }
-        .nav-section-header svg { width: 14px; height: 14px; transition: transform 0.2s; }
-        .nav-section-header.open svg { transform: rotate(180deg); }
-        .nav-section-header-left { display: flex; align-items: center; gap: 10px; }
-        .nav-section-header-left svg { width: 16px; height: 16px; opacity: 0.6; }
+        .main { flex: 1; padding: 32px 40px; overflow-y: auto; }
+        .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+        .page-breadcrumb { font-size: 11px; color: #7a7a8a; letter-spacing: 0.16em; text-transform: uppercase; }
+        .page-title { font-size: 24px; font-weight: 600; color: #ff2340; letter-spacing: 0.4px; margin: 2px 0; }
+        .page-subtitle { font-size: 12px; color: #b8b8c4; }
+        .back-button { border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); background: rgba(10,10,13,0.9); color: #b8b8c4; font-size: 11px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; flex-shrink: 0; margin-top: 4px; }
+        .back-button:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
 
-        .sub-nav { padding: 2px 0 6px 36px; display: flex; flex-direction: column; gap: 1px; }
-        .sub-nav-item { padding: 6px 10px; border-radius: 8px; font-size: 12.5px; color: #666; cursor: pointer; transition: all 0.15s; border: none; background: none; text-align: left; width: 100%; }
-        .sub-nav-item:hover { color: #aaa; background: rgba(255,255,255,0.04); }
-        .sub-nav-item.active { color: #ddd; background: rgba(255,255,255,0.07); }
+        .panel { background: #111114; border: 1px solid rgba(196,0,29,0.35); border-radius: 16px; padding: 20px; margin-bottom: 22px; }
+        .panel-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .panel h2 { margin: 0; font-size: 17px; color: #ff2340; }
+        .panel-note { font-size: 11px; color: #7a7a8a; }
+        .panel-body { font-size: 13px; color: #b8b8c4; }
 
-        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #777; cursor: pointer; transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: #bbb; }
-        .nav-item.active { background: #4a2d8a; color: #fff; }
-        .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
-        .nav-item.active svg { opacity: 1; }
-        .nav-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 8px 16px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 10px; }
+        .stat-card { background: #141419; border-radius: 12px; border: 1px solid rgba(196,0,29,0.35); padding: 10px 12px; font-size: 12px; }
+        .stat-label { color: #7a7a8a; margin-bottom: 4px; }
+        .stat-value { font-size: 16px; font-weight: 600; color: #fff; }
+        .stat-sub { font-size: 11px; color: #b8b8c4; margin-top: 2px; }
 
-        /* Sidebar bottom */
-        .sidebar-bottom { margin-top: auto; padding: 16px; }
-        .help-box { background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
-        .help-title { font-size: 12px; color: #aaa; font-weight: 500; margin-bottom: 10px; line-height: 1.4; }
-        .help-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 14px; border-radius: 8px; background: #4a2d8a; border: none; color: #fff; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .help-btn:hover { background: #5a35a8; }
-        .mypage-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 14px; border-radius: 8px; background: rgba(255,255,255,0.06); border: none; color: #bbb; font-family: 'Inter', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: all 0.15s; margin-top: 8px; text-decoration: none; justify-content: center; }
-        .mypage-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .progress-bar-bg { width: 100%; height: 8px; border-radius: 999px; background: #15151c; overflow: hidden; border: 1px solid rgba(196,0,29,0.35); margin: 8px 0 4px; }
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #c4001d, #ff2340); transition: width 0.5s; }
+        .progress-label { font-size: 11px; color: #7a7a8a; }
+        .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 
-        .share-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 11px 14px; border-radius: 10px; background: #4a2d8a; border: none; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; margin-top: 10px; }
-        .share-btn:hover { background: #5a35a8; }
-        .share-btn.copied { background: #1a6b3c; }
-
-        .user-row { display: flex; align-items: center; gap: 10px; padding: 12px 4px 4px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 10px; }
-        .user-avatar { width: 34px; height: 34px; border-radius: 50%; background: #e02020; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
-        .user-name { font-size: 13px; font-weight: 600; color: #ddd; }
-        .user-meta { font-size: 11px; color: #444; }
-        .user-more { margin-left: auto; color: #333; font-size: 16px; cursor: pointer; padding: 4px; }
-        .user-more:hover { color: #666; }
-
-        /* Main */
-        .main { flex: 1; padding: 32px 40px; overflow: auto; }
-        .page-title { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.3px; margin-bottom: 24px; }
-
-        /* Cards */
-        .card { background: #1e1b2e; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 24px; margin-bottom: 16px; }
-        .card-title { font-size: 11px; color: #444; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 16px; }
-        .field-label { font-size: 12px; color: #555; font-weight: 500; margin-bottom: 6px; }
-        .input { width: 100%; background: #13111a; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: #ddd; outline: none; transition: border-color 0.15s; resize: none; }
-        .input:focus { border-color: rgba(90,53,168,0.6); }
-        .input::placeholder { color: #333; }
+        .field { display: flex; flex-direction: column; margin-bottom: 14px; }
+        .field label { font-size: 13px; margin-bottom: 6px; color: #b8b8c4; }
+        .input { background: #0c0c10; border: 1px solid rgba(196,0,29,0.35); border-radius: 12px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; transition: border .15s, background .15s; font-family: inherit; width: 100%; resize: none; }
+        .input:focus { border-color: #c4001d; background: #101018; }
         .input:disabled { opacity: 0.3; cursor: not-allowed; }
+        .input::placeholder { color: #2a2a2a; }
 
-        /* Link items */
-        .link-item { display: flex; align-items: center; gap: 10px; background: #13111a; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 11px 14px; margin-bottom: 8px; }
-        .link-item-title { font-size: 13px; color: #ccc; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .link-item-url { font-size: 11px; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .link-actions { display: flex; gap: 4px; flex-shrink: 0; }
-        .link-action-btn { width: 28px; height: 28px; border-radius: 7px; border: none; background: rgba(255,255,255,0.05); color: #444; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all 0.15s; }
-        .link-action-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
-        .link-action-btn.del:hover { background: rgba(224,32,32,0.12); color: #e02020; }
-
-        .save-btn { padding: 10px 22px; background: #4a2d8a; border: none; border-radius: 9px; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
-        .save-btn:hover { background: #5a35a8; }
-        .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .button { background: linear-gradient(135deg, #c4001d, #ff2340); border: none; padding: 11px 16px; border-radius: 14px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s, transform .15s; font-family: inherit; }
+        .button:hover { opacity: .9; transform: translateY(-1px); }
+        .button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .button-secondary { background: transparent; border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); color: #b8b8c4; padding: 8px 14px; font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
+        .button-secondary:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
+        .save-bar { margin-top: 10px; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
         .save-msg { font-size: 12px; color: #22c55e; font-weight: 500; }
 
-        .add-link-btn { padding: 10px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; color: #777; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-        .add-link-btn:hover { background: rgba(255,255,255,0.09); color: #ccc; }
+        .link-item { display: flex; align-items: center; gap: 10px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
+        .link-item-title { font-size: 13px; color: #ddd; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-item-url { font-size: 11px; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .link-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .link-action-btn { width: 28px; height: 28px; border-radius: 7px; border: none; background: rgba(255,255,255,0.05); color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; }
+        .link-action-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
+        .link-action-btn.del:hover { background: rgba(196,0,29,0.15); color: #ff2340; }
 
-        /* Overview stats */
-        .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-        .stat-card { background: #1e1b2e; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 18px 20px; }
-        .stat-label { font-size: 11px; color: #444; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .stat-val { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
-
-        /* Preview */
-        .editor-grid { display: grid; grid-template-columns: 1fr 300px; gap: 16px; }
-        .preview-panel { background: #1e1b2e; border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 20px; position: sticky; top: 32px; }
-        .preview-label { font-size: 10px; color: #333; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
-        .preview-card { background: #13111a; border-radius: 12px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .preview-avatar-ring { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #CC0000, #ff4444); padding: 2px; margin-bottom: 4px; }
-        .preview-avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #1a1724; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: #fff; }
-        .preview-name { font-size: 14px; font-weight: 700; color: #fff; }
-        .preview-bio { font-size: 11.5px; color: #444; text-align: center; max-width: 200px; line-height: 1.5; }
-        .preview-link { width: 100%; padding: 9px 14px; border-radius: 8px; background: #1e1b2e; border: 1px solid rgba(255,255,255,0.07); color: #555; font-size: 12px; font-weight: 600; text-align: center; }
-        .preview-powered { font-size: 10px; color: #222; font-weight: 600; margin-top: 4px; }
-        .preview-powered span { color: #e02020; opacity: 0.4; }
+        .avatar-orb { width: 90px; height: 90px; border-radius: 50%; background: radial-gradient(circle at 30% 0%, #ff4d5f 0%, #c4001d 50%, #5a000c 100%); box-shadow: 0 0 20px rgba(196,0,29,0.4); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 700; }
+        .theme-row { display: flex; gap: 12px; margin-top: 10px; }
+        .theme-box { width: 60px; height: 40px; border-radius: 10px; border: 2px solid rgba(196,0,29,0.35); cursor: pointer; transition: all .15s; }
+        .theme-box:hover { border-color: #c4001d; transform: translateY(-1px); }
+        .badge-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+        .badge-card { border-radius: 12px; border: 1px dashed rgba(196,0,29,0.35); padding: 10px; font-size: 11px; color: #7a7a8a; text-align: center; }
+        .settings-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .settings-pill { border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); padding: 7px 12px; font-size: 12px; color: #b8b8c4; }
+        .graph-legend { margin-top: 8px; font-size: 11px; color: #7a7a8a; }
       `}</style>
 
       {/* Sidebar */}
       <nav className="sidebar">
-        <div className="sidebar-top">
-          <a href="/" className="logo">fate<span>.rip</span></a>
-
-          {/* Account collapsible */}
-          <div
-            className={`nav-section-header ${accountOpen ? 'open' : ''}`}
-            onClick={() => setAccountOpen(!accountOpen)}
-          >
-            <div className="nav-section-header-left">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-              Account
-            </div>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6l4 4 4-4"/></svg>
-          </div>
-
-          {accountOpen && (
-            <div className="sub-nav">
-              <button className={`sub-nav-item ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-              <button className="sub-nav-item">Analytics</button>
-              <button className="sub-nav-item">Badges</button>
-              <button className="sub-nav-item">Settings</button>
-            </div>
-          )}
-
-          <div className="nav-divider" />
-
-          <button className={`nav-item ${activeTab === 'customize' ? 'active' : ''}`} onClick={() => setActiveTab('customize')}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="8" cy="8" r="5.5"/><circle cx="8" cy="8" r="2"/></svg>
-            Customize
-          </button>
-
-          <button className={`nav-item ${activeTab === 'links' ? 'active' : ''}`} onClick={() => setActiveTab('links')}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 8a2 2 0 0 1 2-2h2a2 2 0 1 1 0 4H8"/><path d="M10 8a2 2 0 0 1-2 2H6a2 2 0 1 1 0-4h2"/></svg>
-            Links
-          </button>
-
-          <button className="nav-item">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.3 5.3 12.3l.7-4.1-3-2.9 4.2-.7z"/></svg>
-            Premium
-          </button>
-
-          <button className="nav-item">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h4"/></svg>
-            Image Host
-          </button>
-
-          <button className="nav-item">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>
-            Templates
-          </button>
+        <div>
+          <a href="/" className="logo">
+            <span className="fate">FATE.</span><span className="rip">RIP</span>
+          </a>
+          <div className="logo-sub">Profile Control Surface</div>
         </div>
 
-        {/* Bottom */}
-        <div className="sidebar-bottom">
-          <div className="help-box">
-            <div className="help-title">Have a question or need support?</div>
-            <button className="help-btn">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14"><circle cx="8" cy="8" r="6"/><path d="M8 10v1"/><path d="M8 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-              Help Center
-            </button>
-            <a className="mypage-btn" href={`/${username}`} target="_blank">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" width="13" height="13"><path d="M10 3h3v3"/><path d="M13 3L8 8"/><path d="M6 4H4a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-2"/></svg>
-              My Page
+        {navSections.map(({ section, items }) => (
+          <div className="nav-section" key={section}>
+            <div className="nav-title">{section}</div>
+            {items.map(item => (
+              <button
+                key={item.id}
+                className={`nav-item ${activePage === item.id ? 'active' : ''}`}
+                onClick={() => setActivePage(item.id)}
+              >
+                <span>{item.label}</span>
+                <span className="chevron">›</span>
+              </button>
+            ))}
+          </div>
+        ))}
+
+        <div className="sidebar-footer">
+          <div>Powered By <span style={{ color: '#ff2340' }}>FATE.</span>RIP</div>
+          <div style={{ marginTop: 4 }}>No Tracking. Just Signal.</div>
+          <div style={{ marginTop: 6 }}>
+            <a href={`/${username}`} target="_blank" style={{ color: '#444', fontSize: 11, textDecoration: 'none' }}>
+              fate.rip/{username} ↗
             </a>
           </div>
-
-          <button className={`share-btn ${copied ? 'copied' : ''}`} onClick={shareProfile}>
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" width="14" height="14"><circle cx="12" cy="4" r="1.5"/><circle cx="4" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/><path d="M5.5 7.1l5 -2.2M5.5 8.9l5 2.2"/></svg>
-            {copied ? 'Copied!' : 'Share Your Profile'}
-          </button>
-
-          <div className="user-row">
-            <div className="user-avatar">{initial}</div>
-            <div>
-              <div className="user-name">{username}</div>
-              <div className="user-meta">fate.rip/{username}</div>
-            </div>
-            <button className="user-more" onClick={handleLogout} title="Log out">···</button>
-          </div>
+          <button className="logout-link" onClick={handleLogout}>← Log Out</button>
         </div>
       </nav>
 
-      {/* Main content */}
+      {/* Main */}
       <div className="main">
 
-        {/* Overview */}
-        {activeTab === 'overview' && (
-          <>
-            <div className="page-title">Overview</div>
-            <div className="stats">
-              <div className="stat-card">
-                <div className="stat-label">Profile Views</div>
-                <div className="stat-val">0</div>
+        {/* OVERVIEW */}
+        {activePage === 'overview' && (
+          <div>
+            <div className="page-breadcrumb">ACCOUNT • OVERVIEW</div>
+            <div className="page-title">Account Overview</div>
+            <div className="page-subtitle" style={{ marginBottom: 22 }}>High-level snapshot of your profile.</div>
+            <div className="panel">
+              <div className="panel-header">
+                <h2>Profile Snapshot</h2>
+                <div className="panel-note">Live Data</div>
               </div>
-              <div className="stat-card">
-                <div className="stat-label">Link Clicks</div>
-                <div className="stat-val">0</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Links</div>
-                <div className="stat-val">{links.length}</div>
-              </div>
-            </div>
-            <div className="card">
-              <div className="card-title">Profile Preview</div>
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <div className="preview-card" style={{ width: '100%', maxWidth: '320px' }}>
-                  <div className="preview-avatar-ring">
-                    <div className="preview-avatar-inner">{initial}</div>
-                  </div>
-                  <div className="preview-name">@{username}</div>
-                  <div className="preview-bio">{bio || 'No bio yet.'}</div>
-                  {links.length === 0 && <div className="preview-bio" style={{ color: '#222', marginTop: 4 }}>No links added yet.</div>}
-                  {links.map((l, i) => <div key={i} className="preview-link">{l.title}</div>)}
-                  <div className="preview-powered">powered by <span>fate.rip</span></div>
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-label">Username</div>
+                  <div className="stat-value">{username || '—'}</div>
+                  <div className="stat-sub">Primary Handle</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">Profile Views</div>
+                  <div className="stat-value">0</div>
+                  <div className="stat-sub">Last 7 Days</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">Links</div>
+                  <div className="stat-value">{links.length}</div>
+                  <div className="stat-sub">Active Links</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-label">Profile Status</div>
+                  <div className="stat-value">{bio ? 'Active' : 'Incomplete'}</div>
+                  <div className="stat-sub">Visibility: {bio ? 'Full' : 'Limited'}</div>
                 </div>
               </div>
             </div>
-          </>
-        )}
-
-        {/* Customize (profile editor) */}
-        {activeTab === 'customize' && (
-          <>
-            <div className="page-title">Customize</div>
-            <div className="editor-grid">
-              <div>
-                <div className="card">
-                  <div className="card-title">Profile Info</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    <div>
-                      <div className="field-label">Username</div>
-                      <input className="input" value={username} disabled />
-                      <div style={{ fontSize: '11px', color: '#333', marginTop: 4 }}>Username cannot be changed.</div>
-                    </div>
-                    <div>
-                      <div className="field-label">Bio</div>
-                      <textarea className="input" rows={4} placeholder="Tell the world about yourself..." value={bio} onChange={e => setBio(e.target.value)} maxLength={160} />
-                      <div style={{ fontSize: '11px', color: '#333', marginTop: 4 }}>{bio.length}/160</div>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>
-                    <button className="save-btn" onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Changes'}</button>
-                    {saveMsg && <span className="save-msg">{saveMsg}</span>}
-                  </div>
-                </div>
+            <div className="panel">
+              <div className="panel-header">
+                <h2>Profile Completion</h2>
+                <div className="panel-note">Complete these steps to boost visibility.</div>
               </div>
-
-              <div className="preview-panel">
-                <div className="preview-label">Live Preview</div>
-                <div className="preview-card">
-                  <div className="preview-avatar-ring">
-                    <div className="preview-avatar-inner">{initial}</div>
-                  </div>
-                  <div className="preview-name">@{username}</div>
-                  <div className="preview-bio">{bio || 'No bio yet.'}</div>
-                  {links.map((l, i) => <div key={i} className="preview-link">{l.title}</div>)}
-                  <div className="preview-powered">powered by <span>fate.rip</span></div>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Links */}
-        {activeTab === 'links' && (
-          <>
-            <div className="page-title">Links</div>
-            <div className="editor-grid">
-              <div>
-                <div className="card">
-                  <div className="card-title">Your Links</div>
-                  {links.length === 0 && <div style={{ fontSize: '13px', color: '#333', padding: '8px 0 16px' }}>No links yet. Add one below!</div>}
-                  {links.map((l, i) => (
-                    <div key={i} className="link-item">
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div className="link-item-title">{l.title}</div>
-                        <div className="link-item-url">{l.url}</div>
+              <div className="panel-body">
+                {(() => {
+                  const steps = [!!bio, links.length > 0]
+                  const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
+                  return (
+                    <>
+                      <div>Completion: <b>{pct}%</b></div>
+                      <div className="progress-bar-bg">
+                        <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
                       </div>
-                      <div className="link-actions">
-                        <button className="link-action-btn" onClick={() => moveLink(i, -1)}>↑</button>
-                        <button className="link-action-btn" onClick={() => moveLink(i, 1)}>↓</button>
-                        <button className="link-action-btn del" onClick={() => removeLink(i)}>✕</button>
+                      <div className="progress-label">Add A Bio • Add Links</div>
+                      <div className="button-row">
+                        <button className="button-secondary" onClick={() => setActivePage('customize')}>Edit Profile</button>
+                        <button className="button-secondary" onClick={() => setActivePage('links')}>Add Links</button>
                       </div>
-                    </div>
-                  ))}
-
-                  <div className="card-title" style={{ marginTop: 20 }}>Add Link</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <input className="input" placeholder="Label (e.g. Twitter)" value={newLinkTitle} onChange={e => setNewLinkTitle(e.target.value)} />
-                    <input className="input" placeholder="URL (e.g. https://twitter.com/you)" value={newLinkUrl} onChange={e => setNewLinkUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addLink()} />
-                    <button className="add-link-btn" onClick={addLink}>+ Add Link</button>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20 }}>
-                    <button className="save-btn" onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Links'}</button>
-                    {saveMsg && <span className="save-msg">{saveMsg}</span>}
-                  </div>
-                </div>
+                    </>
+                  )
+                })()}
               </div>
+            </div>
+          </div>
+        )}
 
-              <div className="preview-panel">
-                <div className="preview-label">Live Preview</div>
-                <div className="preview-card">
-                  <div className="preview-avatar-ring">
-                    <div className="preview-avatar-inner">{initial}</div>
-                  </div>
-                  <div className="preview-name">@{username}</div>
-                  <div className="preview-bio">{bio || 'No bio yet.'}</div>
-                  {links.length === 0 && <div className="preview-bio" style={{ color: '#222' }}>No links added yet.</div>}
-                  {links.map((l, i) => <div key={i} className="preview-link">{l.title}</div>)}
-                  <div className="preview-powered">powered by <span>fate.rip</span></div>
+        {/* ANALYTICS */}
+        {activePage === 'analytics' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">ACCOUNT • ANALYTICS</div>
+                <div className="page-title">Analytics</div>
+                <div className="page-subtitle">Profile activity overview.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Profile Views (Last 7 Days)</h2><div className="panel-note">Coming Soon</div></div>
+              <div className="panel-body">
+                <div style={{ height: 160, background: 'linear-gradient(180deg,#0d0d10,#09090d)', border: '1px solid rgba(196,0,29,0.35)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>
+                  Analytics tracking coming soon
+                </div>
+                <div className="graph-legend">View counts, click-throughs and referrers will appear here.</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* BADGES */}
+        {activePage === 'badges' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">ACCOUNT • BADGES</div>
+                <div className="page-title">Badges</div>
+                <div className="page-subtitle">Achievements and milestones.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Your Badges</h2><div className="panel-note">None unlocked yet</div></div>
+              <div className="panel-body">
+                <div className="badge-grid">
+                  <div className="badge-card">First View</div>
+                  <div className="badge-card">Ten Views</div>
+                  <div className="badge-card">Linked Socials</div>
+                  <div className="badge-card">Custom Theme</div>
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
+
+        {/* SETTINGS */}
+        {activePage === 'settings' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">ACCOUNT • SETTINGS</div>
+                <div className="page-title">Settings</div>
+                <div className="page-subtitle">Account configuration.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Account Settings</h2></div>
+              <div className="panel-body">
+                <div className="field">
+                  <label>Email</label>
+                  <input className="input" value={user?.email || ''} disabled />
+                </div>
+                <div className="settings-row">
+                  <div className="settings-pill">Two-Factor Authentication</div>
+                  <div className="settings-pill">Session Management</div>
+                  <div className="settings-pill">Export Data</div>
+                </div>
+                <div className="save-bar" style={{ marginTop: 16 }}>
+                  <button className="button-secondary" onClick={handleLogout}>Log Out</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CUSTOMIZE */}
+        {activePage === 'customize' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">CUSTOMIZE • APPEARANCE</div>
+                <div className="page-title">Customize Profile</div>
+                <div className="page-subtitle">Control how your public profile looks.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Profile Information</h2></div>
+              <div className="panel-body">
+                <div className="field">
+                  <label>Username</label>
+                  <input className="input" value={username} disabled />
+                  <div style={{ fontSize: 11, color: '#2a2a2a', marginTop: 4 }}>Username cannot be changed.</div>
+                </div>
+                <div className="field">
+                  <label>Bio</label>
+                  <textarea className="input" rows={4} placeholder="Short description..." value={bio} onChange={e => setBio(e.target.value)} maxLength={160} />
+                  <div style={{ fontSize: 11, color: '#2a2a2a', marginTop: 4 }}>{bio.length}/160</div>
+                </div>
+                <div className="save-bar">
+                  {saveMsg && <span className="save-msg">{saveMsg}</span>}
+                  <button className="button" onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Profile'}</button>
+                </div>
+              </div>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Avatar</h2><div className="panel-note">Upload coming soon</div></div>
+              <div className="panel-body">
+                <div className="avatar-orb">{initial}</div>
+                <button className="button" style={{ opacity: 0.4, cursor: 'not-allowed' }}>Upload Avatar</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* LINKS */}
+        {activePage === 'links' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">CUSTOMIZE • LINKS</div>
+                <div className="page-title">Links</div>
+                <div className="page-subtitle">Configure links on your public profile.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Your Links</h2><div className="panel-note">{links.length} link{links.length !== 1 ? 's' : ''}</div></div>
+              <div className="panel-body">
+                {links.length === 0 && <div style={{ color: '#2a2a2a', padding: '8px 0 16px', fontSize: 13 }}>No links yet. Add one below!</div>}
+                {links.map((l, i) => (
+                  <div key={i} className="link-item">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="link-item-title">{l.title}</div>
+                      <div className="link-item-url">{l.url}</div>
+                    </div>
+                    <div className="link-actions">
+                      <button className="link-action-btn" onClick={() => moveLink(i, -1)}>↑</button>
+                      <button className="link-action-btn" onClick={() => moveLink(i, 1)}>↓</button>
+                      <button className="link-action-btn del" onClick={() => removeLink(i)}>✕</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Add Link</h2></div>
+              <div className="panel-body">
+                <div className="field">
+                  <label>Label</label>
+                  <input className="input" placeholder="e.g. Twitter" value={newLinkTitle} onChange={e => setNewLinkTitle(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>URL</label>
+                  <input className="input" placeholder="https://twitter.com/you" value={newLinkUrl} onChange={e => setNewLinkUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addLink()} />
+                </div>
+                <div className="save-bar">
+                  {saveMsg && <span className="save-msg">{saveMsg}</span>}
+                  <button className="button-secondary" onClick={addLink}>+ Add Link</button>
+                  <button className="button" onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Links'}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* THEMES */}
+        {activePage === 'themes' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">CUSTOMIZE • THEMES</div>
+                <div className="page-title">Themes</div>
+                <div className="page-subtitle">Choose your profile theme.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Theme Presets</h2><div className="panel-note">Coming Soon</div></div>
+              <div className="panel-body">
+                <div className="theme-row">
+                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#050506,#0a0a0d)' }} />
+                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#1a0004,#3a0008)' }} />
+                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#0d0d0d,#1a1a1a)' }} />
+                </div>
+                <div className="graph-legend" style={{ marginTop: 10 }}>Custom themes will apply to your public profile page.</div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* PREMIUM */}
+        {activePage === 'premium' && (
+          <div>
+            <div className="page-title-row">
+              <div>
+                <div className="page-breadcrumb">PREMIUM</div>
+                <div className="page-title">Premium</div>
+                <div className="page-subtitle">Unlock extended features.</div>
+              </div>
+              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>Upgrade</h2><div className="panel-note">Coming Soon</div></div>
+              <div className="panel-body">
+                <p style={{ marginBottom: 12 }}>Unlock additional customization, advanced analytics, and more profile slots.</p>
+                <div className="button-row">
+                  <button className="button" style={{ opacity: 0.5, cursor: 'not-allowed' }}>Upgrade Now</button>
+                  <button className="button-secondary">View Benefits</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
