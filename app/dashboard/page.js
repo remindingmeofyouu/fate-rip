@@ -15,6 +15,7 @@ export default function Dashboard() {
   const [activePage, setActivePage] = useState('overview')
   const [newLinkTitle, setNewLinkTitle] = useState('')
   const [newLinkUrl, setNewLinkUrl] = useState('')
+  const [uploadingType, setUploadingType] = useState(null)
 
   // Appearance state
   const [appBio, setAppBio] = useState('')
@@ -48,6 +49,17 @@ export default function Dashboard() {
         setBio(data.bio || '')
         setLinks(data.links || [])
         setAppBio(data.bio || '')
+        setOpacity(data.opacity ?? 100)
+        setBlur(data.blur ?? 0)
+        setUsernameFx(data.username_fx || '')
+        setBgFx(data.bg_fx || 'nighttime')
+        setLocation(data.location || '')
+        setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
+        setDiscordPresence(data.discord_presence || 'Enabled')
+        if (data.avatar_url) setAvatarPreview(data.avatar_url)
+        if (data.bg_url) setBgPreview(data.bg_url)
+        if (data.cursor_url) setCursorPreview(data.cursor_url)
+        if (data.audio_url) setAudioName('Uploaded ✓')
       }
       setLoading(false)
     }
@@ -69,10 +81,60 @@ export default function Dashboard() {
 
   const saveAppearance = async () => {
     setSaving(true); setAppSaveMsg('')
-    const { error } = await supabase.from('users').update({ bio: appBio }).eq('username', username)
+    const { error } = await supabase.from('users').update({
+      bio: appBio,
+      opacity,
+      blur,
+      username_fx: usernameFx,
+      bg_fx: bgFx,
+      location,
+      glow_settings: glowState,
+      discord_presence: discordPresence,
+    }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
-    setAppSaveMsg('Saved!'); setTimeout(() => setAppSaveMsg(''), 2000)
+    setAppSaveMsg(error ? 'Failed to save.' : 'Saved!')
+    setTimeout(() => setAppSaveMsg(''), 2000)
+  }
+
+  const handleFileUpload = async (type, file) => {
+    if (!file) return
+    setUploadingType(type)
+    const ext = file.name.split('.').pop()
+    const bucket = type === 'audio' ? 'audio' : 'images'
+    const path = `${username}/${type}-${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(path, file, { upsert: true })
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError)
+      setUploadingType(null)
+      return
+    }
+
+    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path)
+    const url = urlData.publicUrl
+
+    const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
+    await supabase.from('users').update({ [colMap[type]]: url }).eq('username', username)
+
+    if (type === 'bg') setBgPreview(url)
+    else if (type === 'avatar') setAvatarPreview(url)
+    else if (type === 'cursor') setCursorPreview(url)
+    else if (type === 'audio') setAudioName(file.name)
+
+    setUploadingType(null)
+  }
+
+  const removeAsset = async (type) => {
+    const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
+    await supabase.from('users').update({ [colMap[type]]: null }).eq('username', username)
+    if (type === 'bg') setBgPreview(null)
+    else if (type === 'avatar') setAvatarPreview(null)
+    else if (type === 'cursor') setCursorPreview(null)
+    else if (type === 'audio') setAudioName(null)
   }
 
   const addLink = () => {
@@ -88,22 +150,13 @@ export default function Dashboard() {
     ;[arr[i], arr[swap]] = [arr[swap], arr[i]]; setLinks(arr)
   }
 
-  const handleFileUpload = (type, file) => {
-    if (!file) return
-    const url = URL.createObjectURL(file)
-    if (type === 'bg') setBgPreview(url)
-    else if (type === 'avatar') setAvatarPreview(url)
-    else if (type === 'cursor') setCursorPreview(url)
-    else if (type === 'audio') setAudioName(file.name)
-  }
-
   const toggleGlow = (key) => setGlowState(prev => ({ ...prev, [key]: !prev[key] }))
 
-  // Compute live preview styles
   const previewNameStyle = (() => {
     if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
     if (usernameFx === 'gold') return { background: 'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
     if (usernameFx === 'neon') return { color: '#ff2340', textShadow: '0 0 8px rgba(255,35,64,0.8)' }
+    if (usernameFx === 'glitch') return { color: '#fff', animation: 'glitch 0.4s infinite' }
     if (glowState.username) return { textShadow: '0 0 12px rgba(196,0,29,0.5)' }
     return {}
   })()
@@ -112,6 +165,8 @@ export default function Dashboard() {
     if (bgFx === 'nighttime') return { background: 'linear-gradient(180deg, rgba(5,5,12,0.3) 0%, rgba(20,0,40,0.4) 100%)' }
     if (bgFx === 'particles') return { background: 'radial-gradient(circle at 20% 80%, rgba(196,0,29,0.15) 0%, transparent 50%)' }
     if (bgFx === 'matrix') return { background: 'linear-gradient(180deg, rgba(0,30,10,0.4) 0%, rgba(0,60,20,0.2) 100%)' }
+    if (bgFx === 'rain') return { background: 'linear-gradient(180deg, rgba(0,10,30,0.4) 0%, rgba(0,20,60,0.2) 100%)' }
+    if (bgFx === 'snow') return { background: 'linear-gradient(180deg, rgba(200,220,255,0.05) 0%, rgba(180,200,255,0.1) 100%)' }
     return {}
   })()
 
@@ -207,8 +262,6 @@ export default function Dashboard() {
         .theme-row { display: flex; gap: 12px; margin-top: 10px; }
         .theme-box { width: 60px; height: 40px; border-radius: 10px; border: 2px solid rgba(196,0,29,0.35); cursor: pointer; transition: all .15s; }
         .theme-box:hover { border-color: #c4001d; transform: translateY(-1px); }
-
-        /* Appearance tab specific */
         .section-title { font-size: 16px; font-weight: 600; color: #fff; margin: 0 0 14px; }
         .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
         .asset-card { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 12px; padding: 14px 12px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
@@ -245,12 +298,16 @@ export default function Dashboard() {
         .live-preview-title { font-size: 12px; color: #7a7a8a; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff2340; animation: pulse 1.5s ease-in-out infinite; }
         @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+        @keyframes glitch { 0%,100%{text-shadow:2px 0 #ff0000,-2px 0 #0000ff} 25%{text-shadow:-2px 0 #ff0000,2px 0 #0000ff} 50%{text-shadow:2px 2px #ff0000,-2px -2px #0000ff} 75%{text-shadow:-2px 2px #ff0000,2px -2px #0000ff} }
         .profile-preview { background: #09090d; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 140px; position: relative; overflow: hidden; transition: all .3s; }
         .prev-avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 0%,#ff4d5f,#c4001d 50%,#5a000c); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; transition: all .3s; overflow: hidden; }
         .prev-name { font-size: 15px; font-weight: 700; transition: all .3s; }
         .prev-desc { font-size: 12px; color: #b8b8c4; text-align: center; max-width: 200px; }
         .prev-bg-overlay { position: absolute; inset: 0; pointer-events: none; transition: all .3s; }
+        .prev-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; z-index: 0; }
+        .prev-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
         .app-save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+        .uploading-indicator { font-size: 11px; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
       `}</style>
 
       {/* Sidebar */}
@@ -290,7 +347,7 @@ export default function Dashboard() {
               <div className="page-title">Account Overview</div>
             </div>
             <div className="stats-grid" style={{ marginBottom: 22 }}>
-              <div className="stat-card" style={{ position: 'relative' }}>
+              <div className="stat-card">
                 <div className="stat-label">Username</div>
                 <div className="stat-value">{username || '—'}</div>
                 <div className="stat-sub">Primary Handle</div>
@@ -316,7 +373,7 @@ export default function Dashboard() {
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 14 }}>Account Statistics</div>
                 <div className="panel">
                   {(() => {
-                    const steps = [!!bio, links.length > 0]
+                    const steps = [!!bio, links.length > 0, !!avatarPreview]
                     const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
                     return (
                       <>
@@ -334,7 +391,7 @@ export default function Dashboard() {
                           <div style={{ fontSize: 12, color: '#7a7a8a' }}>Complete your profile to make it more discoverable.</div>
                         </div>
                         {[
-                          { label: 'Upload An Avatar', done: false, onClick: () => setActivePage('customize') },
+                          { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => setActivePage('customize') },
                           { label: 'Add A Description', done: !!bio, onClick: () => setActivePage('customize') },
                           { label: 'Add Links', done: links.length > 0, onClick: () => setActivePage('links') },
                           { label: 'Reach 10 Profile Views', done: false, onClick: null },
@@ -442,17 +499,22 @@ export default function Dashboard() {
 
             {/* Assets Uploader */}
             <div className="section-title">Assets Uploader</div>
+            {uploadingType && (
+              <div className="uploading-indicator" style={{ marginBottom: 12 }}>
+                ⏳ Uploading {uploadingType}...
+              </div>
+            )}
             <div className="assets-grid">
               {/* Background */}
               <div className="asset-card" onClick={() => fileBgRef.current.click()}>
                 <div className="asset-label">Background</div>
                 <div className={`asset-drop ${bgPreview ? 'has-preview' : ''}`}>
                   {!bgPreview && <>
-                    <svg className="asset-drop-icon" style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">Click to upload</div>
+                    <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                    <div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
                   {bgPreview && <img src={bgPreview} className="asset-preview-img" alt="bg" />}
-                  {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); setBgPreview(null) }}>✕</button>}
+                  {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('bg') }}>✕</button>}
                 </div>
               </div>
 
@@ -461,8 +523,8 @@ export default function Dashboard() {
                 <div className="asset-label">Audio</div>
                 <div className={`asset-drop ${audioName ? 'has-preview' : ''}`}>
                   <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><path d="M3 6h4l3-3v18l-3-3H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M19.5 5a10 10 0 0 1 0 14"/></svg>
-                  <div className="asset-drop-text">{audioName ? `🎵 ${audioName}` : 'Click to upload audio'}</div>
-                  {audioName && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); setAudioName(null) }}>✕</button>}
+                  <div className="asset-drop-text">{uploadingType === 'audio' ? 'Uploading...' : audioName ? `🎵 ${audioName}` : 'Click to upload audio'}</div>
+                  {audioName && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('audio') }}>✕</button>}
                 </div>
               </div>
 
@@ -472,10 +534,10 @@ export default function Dashboard() {
                 <div className={`asset-drop ${avatarPreview ? 'has-preview' : ''}`}>
                   {!avatarPreview && <>
                     <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">Click to upload</div>
+                    <div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
                   {avatarPreview && <img src={avatarPreview} className="asset-preview-img" alt="avatar" />}
-                  {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); setAvatarPreview(null) }}>✕</button>}
+                  {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('avatar') }}>✕</button>}
                 </div>
               </div>
 
@@ -485,10 +547,10 @@ export default function Dashboard() {
                 <div className={`asset-drop ${cursorPreview ? 'has-preview' : ''}`}>
                   {!cursorPreview && <>
                     <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">Click to upload</div>
+                    <div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
                   {cursorPreview && <img src={cursorPreview} className="asset-preview-img" alt="cursor" />}
-                  {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); setCursorPreview(null) }}>✕</button>}
+                  {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('cursor') }}>✕</button>}
                 </div>
               </div>
             </div>
@@ -505,14 +567,11 @@ export default function Dashboard() {
             {/* General Customization */}
             <div className="section-title">General Customization</div>
             <div className="customization-grid">
-
-              {/* Col 1: Description */}
               <div className="custom-group">
                 <div className="custom-label">Description</div>
                 <textarea className="custom-input" rows={3} placeholder="this is my description" value={appBio} onChange={e => setAppBio(e.target.value)} />
               </div>
 
-              {/* Col 2: Discord Presence + Username Effects */}
               <div className="custom-group">
                 <div className="custom-label">Discord Presence</div>
                 <select className="custom-select" value={discordPresence} onChange={e => setDiscordPresence(e.target.value)}>
@@ -530,7 +589,6 @@ export default function Dashboard() {
                 </select>
               </div>
 
-              {/* Col 3: Opacity + Background Effects */}
               <div>
                 <div className="custom-group" style={{ marginBottom: 12 }}>
                   <div className="custom-label">Profile Opacity <span className="info">?</span></div>
@@ -556,7 +614,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Col 4: Blur + Location + Glow */}
               <div>
                 <div className="custom-group" style={{ marginBottom: 12 }}>
                   <div className="custom-label">Profile Blur <span className="info">?</span></div>
@@ -585,22 +642,25 @@ export default function Dashboard() {
             {/* Live Preview */}
             <div className="live-preview-box">
               <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
-              <div className="profile-preview" style={{ opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur / 12)}px)` : '' }}>
+              <div className="profile-preview" style={{ opacity: opacity / 100 }}>
+                {bgPreview && <img src={bgPreview} className="prev-bg-img" alt="bg" style={{ filter: blur > 0 ? `blur(${Math.round(blur / 12)}px)` : 'none' }} />}
                 <div className="prev-bg-overlay" style={previewOverlayStyle} />
-                <div className="prev-avatar">
-                  {avatarPreview
-                    ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" />
-                    : initial
-                  }
-                </div>
-                <div className="prev-name" style={previewNameStyle}>@{username}</div>
-                {appBio && <div className="prev-desc">{appBio}</div>}
-                {location && (
-                  <div style={{ fontSize: 11, color: '#7a7a8a', display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                    {location}
+                <div className="prev-content">
+                  <div className="prev-avatar">
+                    {avatarPreview
+                      ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" />
+                      : initial
+                    }
                   </div>
-                )}
+                  <div className="prev-name" style={previewNameStyle}>@{username}</div>
+                  {appBio && <div className="prev-desc">{appBio}</div>}
+                  {location && (
+                    <div style={{ fontSize: 11, color: '#7a7a8a', display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                      {location}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
