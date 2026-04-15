@@ -492,7 +492,7 @@ export default function Dashboard() {
             </div>
 
             {/* Hidden file inputs */}
-            <input type="file" ref={fileBgRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
+            <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
             <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
             <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
             <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
