@@ -97,10 +97,11 @@ export default function Dashboard() {
     setTimeout(() => setAppSaveMsg(''), 2000)
   }
 
-  const handleFileUpload = async (type, file) => {
-    if (!file) return
-    setUploadingType(type)
-    const ext = file.name.split('.').pop()
+const handleFileUpload = async (type, file) => {
+  if (!file) return
+  const { data: { session } } = await supabase.auth.getSession()
+  console.log('Session:', session)
+  setUploadingType(type)
     const bucket = type === 'audio' ? 'audio' : 'images'
     const path = `${username}/${type}-${Date.now()}.${ext}`
 
