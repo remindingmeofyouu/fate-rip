@@ -12,6 +12,14 @@ export default function Home() {
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{--red:#CC0000;--red-bright:#FF2222;--black:#0A0A0A;--white:#F0F0F0;}
 body{background:var(--black);color:var(--white);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* INTRO ANIMATION */
+.fate-intro{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0A0A0A;z-index:9999;animation:fateIntroFadeOut 1.4s ease forwards;animation-delay:2.8s;pointer-events:none;}
+.fate-intro-title{font-size:64px;font-weight:800;letter-spacing:4px;color:#ff2340;opacity:0;animation:fateIntroFadeIn 1.4s ease forwards;}
+.fate-intro-sub{margin-top:10px;font-size:18px;color:#b8b8c4;opacity:0;animation:fateIntroFadeIn 1.4s ease forwards;animation-delay:0.8s;}
+@keyframes fateIntroFadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fateIntroFadeOut{to{opacity:0;pointer-events:none;}}
+
 nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 52px;height:96px;background:rgba(10,10,10,0.94);backdrop-filter:blur(20px);border-bottom:1px solid #1e1e1e;z-index:100;}
 .logo{font-size:22px;font-weight:800;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:13px;}
 .logo img{width:36px;height:36px;object-fit:contain;}
@@ -50,6 +58,13 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
 </style>
 </head>
 <body>
+
+<!-- INTRO OVERLAY -->
+<div class="fate-intro">
+  <div class="fate-intro-title">FATE.RIP</div>
+  <div class="fate-intro-sub">Created by Alex & Ori</div>
+</div>
+
 <nav>
   <a href="#" class="logo">
     <img src="https://media.discordapp.net/attachments/1492245469785755840/1492688630685106347/scythe.png?ex=69dc3e1e&is=69daec9e&hm=ff8a4b2ed25f7a8b663564ff4c1526d69b7469e999a7e8ea4722dfae6b2c640e&=&format=webp&quality=lossless" alt="scythe" onerror="this.style.display='none'"/>

@@ -3,52 +3,44 @@
   "WorkspaceRootPath": "C:\\Users\\ualex\\fate-rip\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\page.js||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\signup\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\signup\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\pricing\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\[username]\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\[username]\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\signup\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\signup\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\login\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\login\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\globals.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\globals.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\page.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\page.module.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\pricing\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\lib\\supabase.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:lib\\supabase.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\[username]\\layout.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\globals.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\globals.css||{A5401142-F49D-43DB-90B1-F57BA349E55C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -58,83 +50,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 9,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "layout.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js",
-              "RelativeDocumentMoniker": "app\\[username]\\layout.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js",
-              "RelativeToolTip": "app\\[username]\\layout.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T21:15:52.848Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
-              "RelativeDocumentMoniker": "app\\[username]\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
-              "RelativeToolTip": "app\\[username]\\page.js",
-              "ViewState": "AgIAACEAAAAAAAAAAAASwDoAAAAtAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T20:15:07.058Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "layout.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\signup\\layout.js",
-              "RelativeDocumentMoniker": "app\\signup\\layout.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\signup\\layout.js",
-              "RelativeToolTip": "app\\signup\\layout.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T04:35:11.382Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\login\\page.js",
-              "RelativeDocumentMoniker": "app\\login\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\login\\page.js",
-              "RelativeToolTip": "app\\login\\page.js",
-              "ViewState": "AgIAADsAAAAAAAAAAAAkwFoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T03:18:06.534Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "layout.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js",
-              "RelativeDocumentMoniker": "app\\dashboard\\layout.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js",
-              "RelativeToolTip": "app\\dashboard\\layout.js",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T03:13:18.869Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\signup\\page.js",
-              "RelativeDocumentMoniker": "app\\signup\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\signup\\page.js",
-              "RelativeToolTip": "app\\signup\\page.js",
-              "ViewState": "AgIAAHEAAAAAAAAAAAAiwJoAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T02:21:04.61Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 9,
               "Title": "globals.css",
               "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\globals.css",
               "RelativeDocumentMoniker": "app\\globals.css",
@@ -142,23 +62,26 @@
               "RelativeToolTip": "app\\globals.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAABeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-04-12T23:25:31.669Z"
+              "WhenOpened": "2026-04-12T23:25:31.669Z",
+              "IsPinned": true,
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js",
-              "RelativeDocumentMoniker": "app\\pricing\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js",
-              "RelativeToolTip": "app\\pricing\\page.js",
-              "ViewState": "AgIAAAUAAAAAAAAAAAASwCsAAAAkAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T23:24:24.225Z"
+              "DocumentIndex": 4,
+              "Title": "page.module.css",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\page.module.css",
+              "RelativeDocumentMoniker": "app\\page.module.css",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\page.module.css",
+              "RelativeToolTip": "app\\page.module.css",
+              "ViewState": "AgIAAFoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
+              "WhenOpened": "2026-04-15T23:53:29.38Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 7,
               "Title": "supabase.js",
               "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\lib\\supabase.js",
               "RelativeDocumentMoniker": "lib\\supabase.js",
@@ -166,24 +89,51 @@
               "RelativeToolTip": "lib\\supabase.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T16:33:03.939Z"
+              "WhenOpened": "2026-04-15T22:20:26.28Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
-              "RelativeDocumentMoniker": "app\\dashboard\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
-              "RelativeToolTip": "app\\dashboard\\page.js",
-              "ViewState": "AgIAAEYCAAAAAAAAAADwv2MCAAAQAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
+              "RelativeDocumentMoniker": "app\\[username]\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
+              "RelativeToolTip": "app\\[username]\\page.js",
+              "ViewState": "AgIAAPsAAAAAAAAAAAAUwCIBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T16:32:13.84Z",
+              "WhenOpened": "2026-04-15T21:47:14.339Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 8,
+              "Title": "layout.js",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js",
+              "RelativeDocumentMoniker": "app\\[username]\\layout.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\layout.js",
+              "RelativeToolTip": "app\\[username]\\layout.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-04-15T21:47:13.355Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "page.js",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\page.js",
+              "RelativeDocumentMoniker": "app\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\page.js",
+              "RelativeToolTip": "app\\page.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFIAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-04-15T20:50:43.19Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "layout.js",
               "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\layout.js",
               "RelativeDocumentMoniker": "app\\layout.js",
@@ -191,19 +141,47 @@
               "RelativeToolTip": "app\\layout.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T12:31:36.644Z"
+              "WhenOpened": "2026-04-15T20:50:40.915Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "page.js",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js",
+              "RelativeDocumentMoniker": "app\\pricing\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\pricing\\page.js",
+              "RelativeToolTip": "app\\pricing\\page.js",
+              "ViewState": "AgIAACoAAAAAAAAAAAAUwFcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-04-15T20:50:37.168Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\page.js",
-              "RelativeDocumentMoniker": "app\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\page.js",
-              "RelativeToolTip": "app\\page.js",
-              "ViewState": "AgIAAGEAAAAAAAAAAAAiwIoAAAABAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
+              "RelativeDocumentMoniker": "app\\dashboard\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
+              "RelativeToolTip": "app\\dashboard\\page.js",
+              "ViewState": "AgIAAM4CAAAAAAAAAAAUwO0CAAA1AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T12:31:15.802Z"
+              "WhenOpened": "2026-04-15T20:50:31.939Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "layout.js",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js",
+              "RelativeDocumentMoniker": "app\\dashboard\\layout.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\layout.js",
+              "RelativeToolTip": "app\\dashboard\\layout.js",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2026-04-15T20:50:29.24Z",
+              "EditorCaption": ""
             }
           ]
         }
