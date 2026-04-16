@@ -16,6 +16,9 @@ export default function Dashboard() {
   const [newLinkTitle, setNewLinkTitle] = useState('')
   const [newLinkUrl, setNewLinkUrl] = useState('')
   const [uploadingType, setUploadingType] = useState(null)
+  const [displayName, setDisplayName] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   // Appearance state
   const [appBio, setAppBio] = useState('')
@@ -57,6 +60,7 @@ export default function Dashboard() {
         setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
         setDiscordPresence(data.discord_presence || 'Enabled')
         if (data.avatar_url) setAvatarPreview(data.avatar_url)
+        setDisplayName(data.display_name || '')
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
@@ -461,27 +465,79 @@ export default function Dashboard() {
 
         {/* SETTINGS */}
         {activePage === 'settings' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">ACCOUNT • SETTINGS</div><div className="page-title">Settings</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Account Settings</h2></div>
-              <div className="panel-body">
-                <div className="field"><label>Email</label><input className="input" value={user?.email || ''} disabled /></div>
-                <div className="settings-row">
-                  <div className="settings-pill">Two-Factor Authentication</div>
-                  <div className="settings-pill">Session Management</div>
-                  <div className="settings-pill">Export Data</div>
-                </div>
-                <div className="save-bar" style={{ marginTop: 16 }}>
-                  <button className="button-secondary" onClick={handleLogout}>Log Out</button>
-                </div>
-              </div>
-            </div>
+  <div>
+    <div className="page-title-row">
+      <div><div className="page-breadcrumb">ACCOUNT • SETTINGS</div><div className="page-title">Settings</div></div>
+      <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+    </div>
+    <div className="panel">
+      <div className="panel-header"><h2>General Information</h2></div>
+      <div className="panel-body">
+
+        <div className="field">
+          <label>Username
+            {(() => {
+              const lastChanged = user?.username_changed_at ? new Date(user.username_changed_at) : null
+              if (lastChanged) {
+                const remaining = 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
+                if (remaining > 0) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in {remaining} day{remaining !== 1 ? 's' : ''}</span>
+              }
+              return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
+            })()}
+          </label>
+          <input className="input" value={username} disabled />
+        </div>
+
+        <div className="field">
+          <label>Display Name <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Can always change</span></label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
+            <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
+              const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('username', username)
+              if (!error) setSaveMsg('Display name saved!')
+              setTimeout(() => setSaveMsg(''), 2000)
+            }}>Save</button>
           </div>
-        )}
+        </div>
+
+        <div className="field">
+          <label>Email
+            {(() => {
+              const lastChanged = user?.email_changed_at ? new Date(user.email_changed_at) : null
+              if (lastChanged) {
+                const diffDays = Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
+                if (diffDays < 1) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in 1 day</span>
+              }
+              return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
+            })()}
+          </label>
+          <input className="input" value={user?.email || ''} disabled />
+        </div>
+
+        <div className="field">
+          <label>Password</label>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input className="input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+            <button className="button-secondary" style={{ flexShrink: 0 }} onClick={() => setShowPassword(p => !p)}>{showPassword ? 'Hide' : 'Show'}</button>
+            <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
+              if (!newPassword || newPassword.length < 6) { setSaveMsg('Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
+              const { error } = await supabase.auth.updateUser({ password: newPassword })
+              if (!error) { setNewPassword(''); setSaveMsg('Password updated!') }
+              else setSaveMsg('Failed to update password.')
+              setTimeout(() => setSaveMsg(''), 2000)
+            }}>Update</button>
+          </div>
+        </div>
+
+        <div className="save-bar">
+          {saveMsg && <span className="save-msg">{saveMsg}</span>}
+          <button className="button-secondary" onClick={handleLogout}>Log Out</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+)}
 
         {/* CUSTOMIZE / APPEARANCE */}
         {activePage === 'customize' && (

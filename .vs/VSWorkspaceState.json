@@ -3,11 +3,9 @@
     "",
     "\\app",
     "\\app\\dashboard",
-    "\\app\\login",
-    "\\app\\pricing",
-    "\\app\\signup",
+    "\\app\\[username]",
     "\\public"
   ],
-  "SelectedNode": "\\app\\dashboard\\page.js",
+  "SelectedNode": "\\app\\[username]\\page.js",
   "PreviewInSolutionExplorer": false
 }

@@ -70,8 +70,7 @@
               "RelativeToolTip": "app\\[username]\\layout.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T21:15:52.848Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T21:15:52.848Z"
             },
             {
               "$type": "Document",
@@ -83,8 +82,7 @@
               "RelativeToolTip": "app\\[username]\\page.js",
               "ViewState": "AgIAACEAAAAAAAAAAAASwDoAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T20:15:07.058Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T20:15:07.058Z"
             },
             {
               "$type": "Document",
@@ -96,8 +94,7 @@
               "RelativeToolTip": "app\\signup\\layout.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T04:35:11.382Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T04:35:11.382Z"
             },
             {
               "$type": "Document",
@@ -109,8 +106,7 @@
               "RelativeToolTip": "app\\login\\page.js",
               "ViewState": "AgIAADsAAAAAAAAAAAAkwFoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T03:18:06.534Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T03:18:06.534Z"
             },
             {
               "$type": "Document",
@@ -122,8 +118,7 @@
               "RelativeToolTip": "app\\dashboard\\layout.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T03:13:18.869Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T03:13:18.869Z"
             },
             {
               "$type": "Document",
@@ -135,8 +130,7 @@
               "RelativeToolTip": "app\\signup\\page.js",
               "ViewState": "AgIAAHEAAAAAAAAAAAAiwJoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-13T02:21:04.61Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-13T02:21:04.61Z"
             },
             {
               "$type": "Document",
@@ -148,8 +142,7 @@
               "RelativeToolTip": "app\\globals.css",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAABeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003000|",
-              "WhenOpened": "2026-04-12T23:25:31.669Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-12T23:25:31.669Z"
             },
             {
               "$type": "Document",
@@ -161,8 +154,7 @@
               "RelativeToolTip": "app\\pricing\\page.js",
               "ViewState": "AgIAAAUAAAAAAAAAAAASwCsAAAAkAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T23:24:24.225Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-12T23:24:24.225Z"
             },
             {
               "$type": "Document",
@@ -174,8 +166,7 @@
               "RelativeToolTip": "lib\\supabase.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T16:33:03.939Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-12T16:33:03.939Z"
             },
             {
               "$type": "Document",
@@ -185,7 +176,7 @@
               "RelativeDocumentMoniker": "app\\dashboard\\page.js",
               "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
               "RelativeToolTip": "app\\dashboard\\page.js",
-              "ViewState": "AgIAAIQBAAAAAAAAAAAiwK0BAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAEYCAAAAAAAAAADwv2MCAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2026-04-12T16:32:13.84Z",
               "EditorCaption": ""
@@ -200,8 +191,7 @@
               "RelativeToolTip": "app\\layout.js",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T12:31:36.644Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-12T12:31:36.644Z"
             },
             {
               "$type": "Document",
@@ -213,8 +203,7 @@
               "RelativeToolTip": "app\\page.js",
               "ViewState": "AgIAAGEAAAAAAAAAAAAiwIoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-12T12:31:15.802Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-04-12T12:31:15.802Z"
             }
           ]
         }
