@@ -22,7 +22,7 @@ export default function Dashboard() {
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
   const [opacity, setOpacity] = useState(100)
-  const [bgFx, setBgFx] = useState('nighttime')
+  const [bgFx, setBgFx] = useState('none') // FIX: was 'nighttime'
   const [blur, setBlur] = useState(0)
   const [location, setLocation] = useState('')
   const [glowState, setGlowState] = useState({ username: true, socials: true, badges: false })
@@ -52,7 +52,7 @@ export default function Dashboard() {
         setOpacity(data.opacity ?? 100)
         setBlur(data.blur ?? 0)
         setUsernameFx(data.username_fx || '')
-        setBgFx(data.bg_fx || 'nighttime')
+        setBgFx(data.bg_fx || 'none') // FIX: was 'nighttime'
         setLocation(data.location || '')
         setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
         setDiscordPresence(data.discord_presence || 'Enabled')
@@ -267,11 +267,11 @@ export default function Dashboard() {
         .asset-card { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 12px; padding: 14px 12px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
         .asset-card:hover { border-color: #ff2340; background: #16161c; }
         .asset-label { font-size: 12px; color: #b8b8c4; margin-bottom: 10px; font-weight: 500; }
-        .asset-drop { border: 1px dashed rgba(196,0,29,0.4); border-radius: 10px; padding: 24px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s, background .15s; min-height: 90px; justify-content: center; position: relative; overflow: hidden; }
+        .asset-drop { border: 1px dashed rgba(196,0,29,0.4); border-radius: 10px; padding: 24px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s, background .15s; min-height: 90px; height: 90px; justify-content: center; position: relative; overflow: hidden; }
         .asset-drop:hover { border-color: #ff2340; background: rgba(196,0,29,0.05); }
-        .asset-drop.has-preview { border-style: solid; border-color: rgba(196,0,29,0.5); }
+        .asset-drop.has-preview { border-style: solid; border-color: rgba(196,0,29,0.5); padding: 0; }
         .asset-drop-text { font-size: 11px; color: #7a7a8a; text-align: center; line-height: 1.4; }
-        .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; }
+        .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; display: block; }
         .asset-remove-btn { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: rgba(196,0,29,0.8); border: none; border-radius: 50%; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
         .premium-banner { background: linear-gradient(135deg,#1a0a2e 0%,#0d0516 50%,#120818 100%); border: 1px solid rgba(130,60,255,0.3); border-radius: 999px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 22px; cursor: pointer; transition: border-color .15s; }
         .premium-banner:hover { border-color: rgba(160,100,255,0.6); }
@@ -513,7 +513,15 @@ export default function Dashboard() {
                     <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                     <div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
-                  {bgPreview && <img src={bgPreview} className="asset-preview-img" alt="bg" />}
+                  {bgPreview && (
+                    <img
+                      src={bgPreview}
+                      crossOrigin="anonymous"
+                      className="asset-preview-img"
+                      alt="bg"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  )}
                   {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('bg') }}>✕</button>}
                 </div>
               </div>
@@ -536,7 +544,15 @@ export default function Dashboard() {
                     <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                     <div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
-                  {avatarPreview && <img src={avatarPreview} className="asset-preview-img" alt="avatar" />}
+                  {avatarPreview && (
+                    <img
+                      src={avatarPreview}
+                      crossOrigin="anonymous"
+                      className="asset-preview-img"
+                      alt="avatar"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  )}
                   {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('avatar') }}>✕</button>}
                 </div>
               </div>
@@ -549,7 +565,15 @@ export default function Dashboard() {
                     <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                     <div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div>
                   </>}
-                  {cursorPreview && <img src={cursorPreview} className="asset-preview-img" alt="cursor" />}
+                  {cursorPreview && (
+                    <img
+                      src={cursorPreview}
+                      crossOrigin="anonymous"
+                      className="asset-preview-img"
+                      alt="cursor"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                  )}
                   {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('cursor') }}>✕</button>}
                 </div>
               </div>
@@ -598,11 +622,12 @@ export default function Dashboard() {
                       <span className="slider-value">{opacity}%</span>
                     </div>
                     <input type="range" min="20" max="100" value={opacity} step="1" onChange={e => setOpacity(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>20%</span><span>50%</span><span>80%</span></div>
+                    <div className="slider-ticks"><span>20%</span><span>60%</span><span>100%</span></div>
                   </div>
                 </div>
                 <div className="custom-group">
                   <div className="custom-label">Background Effects</div>
+                  {/* FIX: default option is now 'none' not 'nighttime' */}
                   <select className="custom-select" value={bgFx} onChange={e => setBgFx(e.target.value)}>
                     <option value="none">None</option>
                     <option value="nighttime">Night Time</option>
@@ -623,7 +648,8 @@ export default function Dashboard() {
                       <span className="slider-value">{blur}px</span>
                     </div>
                     <input type="range" min="0" max="80" value={blur} step="1" onChange={e => setBlur(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>20px</span><span>50px</span><span>80px</span></div>
+                    {/* FIX: ticks now correctly start at 0 */}
+                    <div className="slider-ticks"><span>0px</span><span>40px</span><span>80px</span></div>
                   </div>
                 </div>
                 <div className="custom-group" style={{ marginBottom: 10 }}>
@@ -643,12 +669,28 @@ export default function Dashboard() {
             <div className="live-preview-box">
               <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
               <div className="profile-preview" style={{ opacity: opacity / 100 }}>
-                {bgPreview && <img src={bgPreview} className="prev-bg-img" alt="bg" style={{ filter: blur > 0 ? `blur(${Math.round(blur / 12)}px)` : 'none' }} />}
+                {/* FIX: crossOrigin + onError on all preview images */}
+                {bgPreview && (
+                  <img
+                    src={bgPreview}
+                    crossOrigin="anonymous"
+                    className="prev-bg-img"
+                    alt="bg"
+                    style={{ filter: blur > 0 ? `blur(${Math.round(blur / 10)}px)` : 'none' }}
+                    onError={e => { e.target.style.display = 'none' }}
+                  />
+                )}
                 <div className="prev-bg-overlay" style={previewOverlayStyle} />
                 <div className="prev-content">
                   <div className="prev-avatar">
                     {avatarPreview
-                      ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" />
+                      ? <img
+                          src={avatarPreview}
+                          crossOrigin="anonymous"
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                          alt="avatar"
+                          onError={e => { e.target.style.display = 'none' }}
+                        />
                       : initial
                     }
                   </div>
@@ -665,9 +707,10 @@ export default function Dashboard() {
             </div>
 
             {/* Save row */}
+            {/* FIX: Reset now sets bgFx to 'none' not 'nighttime' */}
             <div className="app-save-row">
               {appSaveMsg && <span className="save-msg">{appSaveMsg}</span>}
-              <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('nighttime'); setLocation('') }}>Reset</button>
+              <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('none'); setLocation('') }}>Reset</button>
               <button className="button" onClick={saveAppearance} disabled={saving}>{saving ? 'Saving...' : 'Save Appearance'}</button>
             </div>
           </div>
