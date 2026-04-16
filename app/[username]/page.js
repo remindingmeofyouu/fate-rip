@@ -30,7 +30,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!profile) return
-
     let link = document.querySelector("link[rel~='icon']")
     if (!link) {
       link = document.createElement('link')
@@ -38,18 +37,13 @@ export default function ProfilePage() {
       document.head.appendChild(link)
     }
     link.href = '/scythe.png'
-
-    // Apply custom cursor if set
     if (profile.cursor_url) {
       document.body.style.cursor = `url('${profile.cursor_url}'), auto`
     }
-
-    // Typewriter on title
     const fullText = `@${profile.username}`
     let i = 0
     let deleting = false
     let timeout
-
     const tick = () => {
       if (!deleting) {
         i++
@@ -70,7 +64,6 @@ export default function ProfilePage() {
         }
       }
     }
-
     timeout = setTimeout(tick, 1200)
     return () => {
       clearTimeout(timeout)
@@ -78,7 +71,6 @@ export default function ProfilePage() {
     }
   }, [profile])
 
-  // Try audio autoplay on first interaction
   useEffect(() => {
     if (!profile?.audio_url) return
     const tryPlay = () => {
@@ -89,7 +81,6 @@ export default function ProfilePage() {
       document.removeEventListener('click', tryPlay)
     }
     document.addEventListener('click', tryPlay)
-    // Also try immediately (works in some browsers)
     if (audioRef.current) {
       audioRef.current.volume = 0.4
       audioRef.current.play().catch(() => {})
@@ -131,7 +122,6 @@ export default function ProfilePage() {
   const bgUrl = profile.bg_url || null
   const audioUrl = profile.audio_url || null
 
-  // Username style
   const nameStyle = (() => {
     if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
     if (usernameFx === 'gold') return { background: 'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
@@ -141,7 +131,6 @@ export default function ProfilePage() {
     return { color: '#fff' }
   })()
 
-  // Background overlay
   const overlayStyle = (() => {
     if (bgFx === 'nighttime') return { background: 'linear-gradient(180deg, rgba(5,5,12,0.5) 0%, rgba(20,0,40,0.6) 100%)' }
     if (bgFx === 'particles') return { background: 'radial-gradient(circle at 20% 80%, rgba(196,0,29,0.2) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(196,0,29,0.1) 0%, transparent 40%)' }
@@ -155,7 +144,6 @@ export default function ProfilePage() {
     <div style={{ background: '#080808', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'Nunito, sans-serif', padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
       <link rel="icon" href="/scythe.png" />
 
-      {/* Audio player */}
       {audioUrl && (
         <audio ref={audioRef} src={audioUrl} loop style={{ display: 'none' }} />
       )}
@@ -163,40 +151,34 @@ export default function ProfilePage() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
         @keyframes glitch {
           0%, 100% { text-shadow: 2px 0 #ff0000, -2px 0 #0000ff; }
           25% { text-shadow: -2px 0 #ff0000, 2px 0 #0000ff; }
           50% { text-shadow: 2px 2px #ff0000, -2px -2px #0000ff; }
           75% { text-shadow: -2px 2px #ff0000, 2px -2px #0000ff; }
         }
-
         @keyframes floatParticle {
           0% { transform: translateY(100vh) scale(0); opacity: 0; }
           10% { opacity: 1; }
           90% { opacity: 1; }
           100% { transform: translateY(-10vh) scale(1); opacity: 0; }
         }
-
         @keyframes rainDrop {
           0% { transform: translateY(-10px); opacity: 0; }
           10% { opacity: 0.6; }
           100% { transform: translateY(100vh); opacity: 0; }
         }
-
         @keyframes snowFlake {
           0% { transform: translateY(-10px) translateX(0); opacity: 0; }
           10% { opacity: 0.8; }
           50% { transform: translateY(50vh) translateX(20px); }
           100% { transform: translateY(100vh) translateX(-10px); opacity: 0; }
         }
-
         @keyframes matrixChar {
           0% { opacity: 0; transform: translateY(-20px); }
           50% { opacity: 1; }
           100% { opacity: 0; transform: translateY(20px); }
         }
-
         .profile-wrap { width: 100%; max-width: 480px; display: flex; flex-direction: column; align-items: center; gap: 0; position: relative; z-index: 2; }
         .avatar-ring { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #CC0000, #ff4444); padding: 2px; margin-bottom: 16px; flex-shrink: 0; }
         .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #0f0f0f; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; color: #fff; overflow: hidden; }
@@ -213,7 +195,6 @@ export default function ProfilePage() {
         .footer { margin-top: 36px; font-size: 12px; color: #252525; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
         .footer a { color: #CC0000; text-decoration: none; opacity: 0.7; transition: opacity 0.15s; }
         .footer a:hover { opacity: 1; }
-        .bg-layer { position: fixed; inset: 0; z-index: 0; }
         .bg-img { position: fixed; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
         .bg-overlay { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
         .fx-layer { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
@@ -221,30 +202,18 @@ export default function ProfilePage() {
         .audio-btn:hover { background: rgba(196,0,29,0.2); transform: scale(1.1); }
       `}</style>
 
-      {/* Background image */}
       {bgUrl && (
-  bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
-    ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
-    : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }}
-)}
+        bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
+          ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+          : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+      )}
 
-      {/* Background overlay tint */}
       <div className="bg-overlay" style={overlayStyle} />
 
-      {/* Background FX particles/rain/snow/matrix */}
       {bgFx === 'particles' && (
         <div className="fx-layer">
           {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              width: `${2 + Math.random() * 4}px`,
-              height: `${2 + Math.random() * 4}px`,
-              borderRadius: '50%',
-              background: `rgba(196,0,29,${0.3 + Math.random() * 0.5})`,
-              animation: `floatParticle ${4 + Math.random() * 6}s linear ${Math.random() * 5}s infinite`,
-              bottom: '-10px',
-            }} />
+            <div key={i} style={{ position: 'absolute', left: `${Math.random() * 100}%`, width: `${2 + Math.random() * 4}px`, height: `${2 + Math.random() * 4}px`, borderRadius: '50%', background: `rgba(196,0,29,${0.3 + Math.random() * 0.5})`, animation: `floatParticle ${4 + Math.random() * 6}s linear ${Math.random() * 5}s infinite`, bottom: '-10px' }} />
           ))}
         </div>
       )}
@@ -252,15 +221,7 @@ export default function ProfilePage() {
       {bgFx === 'rain' && (
         <div className="fx-layer">
           {Array.from({ length: 40 }).map((_, i) => (
-            <div key={i} style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              top: 0,
-              width: '1px',
-              height: `${15 + Math.random() * 25}px`,
-              background: 'linear-gradient(180deg, transparent, rgba(130,170,255,0.5))',
-              animation: `rainDrop ${0.5 + Math.random() * 1}s linear ${Math.random() * 2}s infinite`,
-            }} />
+            <div key={i} style={{ position: 'absolute', left: `${Math.random() * 100}%`, top: 0, width: '1px', height: `${15 + Math.random() * 25}px`, background: 'linear-gradient(180deg, transparent, rgba(130,170,255,0.5))', animation: `rainDrop ${0.5 + Math.random() * 1}s linear ${Math.random() * 2}s infinite` }} />
           ))}
         </div>
       )}
@@ -268,16 +229,7 @@ export default function ProfilePage() {
       {bgFx === 'snow' && (
         <div className="fx-layer">
           {Array.from({ length: 30 }).map((_, i) => (
-            <div key={i} style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              top: '-10px',
-              width: `${3 + Math.random() * 5}px`,
-              height: `${3 + Math.random() * 5}px`,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.8)',
-              animation: `snowFlake ${3 + Math.random() * 5}s linear ${Math.random() * 4}s infinite`,
-            }} />
+            <div key={i} style={{ position: 'absolute', left: `${Math.random() * 100}%`, top: '-10px', width: `${3 + Math.random() * 5}px`, height: `${3 + Math.random() * 5}px`, borderRadius: '50%', background: 'rgba(255,255,255,0.8)', animation: `snowFlake ${3 + Math.random() * 5}s linear ${Math.random() * 4}s infinite` }} />
           ))}
         </div>
       )}
@@ -285,52 +237,29 @@ export default function ProfilePage() {
       {bgFx === 'matrix' && (
         <div className="fx-layer" style={{ fontFamily: 'monospace', fontSize: 14 }}>
           {Array.from({ length: 15 }).map((_, i) => (
-            <div key={i} style={{
-              position: 'absolute',
-              left: `${(i / 15) * 100}%`,
-              top: `${Math.random() * 100}%`,
-              color: '#00ff41',
-              opacity: 0.3,
-              animation: `matrixChar ${1 + Math.random() * 2}s ease-in-out ${Math.random() * 2}s infinite`,
-            }}>
+            <div key={i} style={{ position: 'absolute', left: `${(i / 15) * 100}%`, top: `${Math.random() * 100}%`, color: '#00ff41', opacity: 0.3, animation: `matrixChar ${1 + Math.random() * 2}s ease-in-out ${Math.random() * 2}s infinite` }}>
               {String.fromCharCode(0x30A0 + Math.floor(Math.random() * 96))}
             </div>
           ))}
         </div>
       )}
 
-      {/* Audio toggle button */}
       {audioUrl && (
-        <button
-          className="audio-btn"
-          onClick={() => {
-            if (audioRef.current) {
-              if (audioRef.current.paused) audioRef.current.play()
-              else audioRef.current.pause()
-            }
-          }}
-          title="Toggle music"
-        >
+        <button className="audio-btn" onClick={() => { if (audioRef.current) { if (audioRef.current.paused) audioRef.current.play(); else audioRef.current.pause() } }} title="Toggle music">
           🎵
         </button>
       )}
 
-      {/* Profile card */}
       <div className="profile-wrap" style={{ opacity: opacity / 100 }}>
         <div className="avatar-ring">
           <div className="avatar-inner">
-            {avatarUrl
-              ? <img src={avatarUrl} alt={profile.username} />
-              : initial
-            }
+            {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
           </div>
         </div>
 
         <div className="profile-name" style={nameStyle}>@{profile.username}</div>
 
-        {profile.bio && (
-          <div className="profile-bio">{profile.bio}</div>
-        )}
+        {profile.bio && <div className="profile-bio">{profile.bio}</div>}
 
         {location && (
           <div className="profile-location">
@@ -345,13 +274,7 @@ export default function ProfilePage() {
         {links.length > 0 && (
           <div className="links">
             {links.map((link, i) => (
-              <a
-                key={i}
-                href={link.url}
-                className="link-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a key={i} href={link.url} className="link-btn" target="_blank" rel="noopener noreferrer">
                 {link.title}
                 <span className="link-arrow">↗</span>
               </a>
@@ -359,9 +282,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {links.length === 0 && (
-          <div style={{ fontSize: 13, color: '#333', fontWeight: 600, marginTop: 10 }}>No links yet.</div>
-        )}
+        {links.length === 0 && <div style={{ fontSize: 13, color: '#333', fontWeight: 600, marginTop: 10 }}>No links yet.</div>}
 
         <div className="footer">powered by <a href="/">fate.rip</a></div>
       </div>
