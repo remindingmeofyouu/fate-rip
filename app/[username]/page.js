@@ -1,6 +1,6 @@
 // app/[username]/page.js  ← SERVER COMPONENT (no 'use client')
 import { createClient } from '@supabase/supabase-js'
-import ProfileClient from './ProfileClient'
+import ProfileClient from './ProfileClient.js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
