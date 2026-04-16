@@ -19,8 +19,8 @@ export default function Dashboard() {
   const [displayName, setDisplayName] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // Appearance state
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
@@ -86,14 +86,8 @@ export default function Dashboard() {
   const saveAppearance = async () => {
     setSaving(true); setAppSaveMsg('')
     const { error } = await supabase.from('users').update({
-      bio: appBio,
-      opacity,
-      blur,
-      username_fx: usernameFx,
-      bg_fx: bgFx,
-      location,
-      glow_settings: glowState,
-      discord_presence: discordPresence,
+      bio: appBio, opacity, blur, username_fx: usernameFx,
+      bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence,
     }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
@@ -107,28 +101,16 @@ export default function Dashboard() {
     const ext = file.name.split('.').pop()
     const bucket = type === 'audio' ? 'audio' : 'images'
     const path = `${username}/${type}-${Date.now()}.${ext}`
-
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { upsert: true })
-
-    if (uploadError) {
-      console.error('Upload error:', uploadError)
-      setUploadingType(null)
-      return
-    }
-
+    const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
+    if (uploadError) { console.error('Upload error:', uploadError); setUploadingType(null); return }
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path)
     const url = urlData.publicUrl
-
     const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
     await supabase.from('users').update({ [colMap[type]]: url }).eq('username', username)
-
     if (type === 'bg') setBgPreview(url)
     else if (type === 'avatar') setAvatarPreview(url)
     else if (type === 'cursor') setCursorPreview(url)
     else if (type === 'audio') setAudioName(file.name)
-
     setUploadingType(null)
   }
 
@@ -153,8 +135,9 @@ export default function Dashboard() {
     if (swap < 0 || swap >= arr.length) return
     ;[arr[i], arr[swap]] = [arr[swap], arr[i]]; setLinks(arr)
   }
-
   const toggleGlow = (key) => setGlowState(prev => ({ ...prev, [key]: !prev[key] }))
+
+  const navTo = (page) => { setActivePage(page); setSidebarOpen(false) }
 
   const previewNameStyle = (() => {
     if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
@@ -205,7 +188,20 @@ export default function Dashboard() {
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(196,0,29,0.3); border-radius: 4px; }
-        .sidebar { width: 250px; background: linear-gradient(180deg,#050506 0%,#09090d 40%,#050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; }
+
+        /* MOBILE TOPBAR */
+        .mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #050506; border-bottom: 1px solid rgba(196,0,29,0.35); z-index: 200; align-items: center; justify-content: space-between; padding: 0 16px; }
+        .mobile-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
+        .mobile-logo .fate { color: #ff2340; } .mobile-logo .rip { color: #fff; }
+        .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
+        .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .2s; }
+
+        /* OVERLAY */
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 149; }
+        .sidebar-overlay.open { display: block; }
+
+        /* SIDEBAR */
+        .sidebar { width: 250px; background: linear-gradient(180deg,#050506 0%,#09090d 40%,#050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; transition: transform .25s ease; }
         .logo { font-size: 26px; font-weight: 800; letter-spacing: 1.2px; text-decoration: none; display: block; }
         .logo .fate { color: #ff2340; } .logo .rip { color: #fff; }
         .logo-sub { font-size: 11px; color: #b8b8c4; margin-top: 4px; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -217,23 +213,26 @@ export default function Dashboard() {
         .sidebar-footer { margin-top: auto; font-size: 11px; color: #7a7a8a; border-top: 1px solid rgba(196,0,29,0.25); padding-top: 12px; }
         .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; margin-top: 8px; transition: color .15s; display: block; }
         .logout-link:hover { color: #ff2340; }
+
+        /* MAIN */
         .main { flex: 1; padding: 32px 40px; overflow-y: auto; }
-        .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+        .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
         .page-breadcrumb { font-size: 11px; color: #7a7a8a; letter-spacing: 0.16em; text-transform: uppercase; }
         .page-title { font-size: 24px; font-weight: 600; color: #ff2340; letter-spacing: 0.4px; margin: 2px 0; }
         .page-subtitle { font-size: 12px; color: #b8b8c4; }
         .back-button { border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); background: rgba(10,10,13,0.9); color: #b8b8c4; font-size: 11px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; flex-shrink: 0; margin-top: 4px; }
         .back-button:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
         .panel { background: #111114; border: 1px solid rgba(196,0,29,0.35); border-radius: 16px; padding: 20px; margin-bottom: 22px; }
-        .panel-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .panel-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
         .panel h2 { margin: 0; font-size: 17px; color: #ff2340; }
         .panel-note { font-size: 11px; color: #7a7a8a; }
         .panel-body { font-size: 13px; color: #b8b8c4; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
         .stat-card { background: #141419; border-radius: 12px; border: 1px solid rgba(196,0,29,0.35); padding: 10px 12px; font-size: 12px; }
         .stat-label { color: #7a7a8a; margin-bottom: 4px; }
         .stat-value { font-size: 16px; font-weight: 600; color: #fff; }
         .stat-sub { font-size: 11px; color: #b8b8c4; margin-top: 2px; }
+        .overview-grid { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
         .progress-bar-bg { width: 100%; height: 8px; border-radius: 999px; background: #15151c; overflow: hidden; border: 1px solid rgba(196,0,29,0.35); margin: 8px 0 4px; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#c4001d,#ff2340); transition: width 0.5s; }
         .progress-label { font-size: 11px; color: #7a7a8a; }
@@ -249,7 +248,7 @@ export default function Dashboard() {
         .button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
         .button-secondary { background: transparent; border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); color: #b8b8c4; padding: 8px 14px; font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
         .button-secondary:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
-        .save-bar { margin-top: 10px; display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+        .save-bar { margin-top: 10px; display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
         .save-msg { font-size: 12px; color: #22c55e; font-weight: 500; }
         .link-item { display: flex; align-items: center; gap: 10px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
         .link-item-title { font-size: 13px; color: #ddd; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -277,7 +276,7 @@ export default function Dashboard() {
         .asset-drop-text { font-size: 11px; color: #7a7a8a; text-align: center; line-height: 1.4; }
         .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; }
         .asset-remove-btn { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: rgba(196,0,29,0.8); border: none; border-radius: 50%; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        .premium-banner { background: linear-gradient(135deg,#1a0a2e 0%,#0d0516 50%,#120818 100%); border: 1px solid rgba(130,60,255,0.3); border-radius: 999px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 22px; cursor: pointer; transition: border-color .15s; }
+        .premium-banner { background: linear-gradient(135deg,#1a0a2e 0%,#0d0516 50%,#120818 100%); border: 1px solid rgba(130,60,255,0.3); border-radius: 999px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 22px; cursor: pointer; transition: border-color .15s; flex-wrap: wrap; }
         .premium-banner:hover { border-color: rgba(160,100,255,0.6); }
         .premium-banner span { font-size: 14px; color: #ccc; }
         .premium-banner .prem { color: #b06aff; font-weight: 600; display: flex; align-items: center; gap: 5px; }
@@ -310,12 +309,49 @@ export default function Dashboard() {
         .prev-bg-overlay { position: absolute; inset: 0; pointer-events: none; transition: all .3s; }
         .prev-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; z-index: 0; }
         .prev-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-        .app-save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+        .app-save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
         .uploading-indicator { font-size: 11px; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
+        .settings-field-row { display: flex; gap: 8px; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+          .mobile-topbar { display: flex; }
+          .sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 150; transform: translateX(-100%); }
+          .sidebar.open { transform: translateX(0); }
+          .main { padding: 80px 16px 24px; }
+          .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .overview-grid { grid-template-columns: 1fr; }
+          .assets-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+          .customization-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+          .badge-grid { grid-template-columns: repeat(2, 1fr); }
+          .premium-banner { border-radius: 14px; padding: 12px 16px; text-align: center; }
+          .page-title { font-size: 20px; }
+          .settings-field-row { flex-direction: column; }
+          .save-bar { justify-content: flex-start; }
+          .app-save-row { justify-content: flex-start; }
+          .panel { padding: 14px; }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid { grid-template-columns: 1fr 1fr; }
+          .customization-grid { grid-template-columns: 1fr; }
+          .assets-grid { grid-template-columns: 1fr 1fr; }
+        }
       `}</style>
 
+      {/* Mobile Top Bar */}
+      <div className="mobile-topbar">
+        <div className="mobile-logo"><span className="fate">FATE.</span><span className="rip">RIP</span></div>
+        <button className="hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Menu">
+          <span /><span /><span />
+        </button>
+      </div>
+
+      {/* Overlay */}
+      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
+
       {/* Sidebar */}
-      <nav className="sidebar">
+      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div>
           <a href="/" className="logo"><span className="fate">FATE.</span><span className="rip">RIP</span></a>
           <div className="logo-sub">Profile Control Surface</div>
@@ -324,7 +360,7 @@ export default function Dashboard() {
           <div className="nav-section" key={section}>
             <div className="nav-title">{section}</div>
             {items.map(item => (
-              <button key={item.id} className={`nav-item ${activePage === item.id ? 'active' : ''}`} onClick={() => setActivePage(item.id)}>
+              <button key={item.id} className={`nav-item ${activePage === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
                 <span>{item.label}</span><span className="chevron">›</span>
               </button>
             ))}
@@ -350,29 +386,13 @@ export default function Dashboard() {
               <div className="page-breadcrumb">ACCOUNT • OVERVIEW</div>
               <div className="page-title">Account Overview</div>
             </div>
-            <div className="stats-grid" style={{ marginBottom: 22 }}>
-              <div className="stat-card">
-                <div className="stat-label">Username</div>
-                <div className="stat-value">{username || '—'}</div>
-                <div className="stat-sub">Primary Handle</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Alias</div>
-                <div className="stat-value">0 Used</div>
-                <div className="stat-sub">1 Slot Remaining</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Links</div>
-                <div className="stat-value">{links.length}</div>
-                <div className="stat-sub">Active Links</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Profile Views</div>
-                <div className="stat-value">0</div>
-                <div className="stat-sub">Last 7 Days</div>
-              </div>
+            <div className="stats-grid">
+              <div className="stat-card"><div className="stat-label">Username</div><div className="stat-value">{username || '—'}</div><div className="stat-sub">Primary Handle</div></div>
+              <div className="stat-card"><div className="stat-label">Alias</div><div className="stat-value">0 Used</div><div className="stat-sub">1 Slot Remaining</div></div>
+              <div className="stat-card"><div className="stat-label">Links</div><div className="stat-value">{links.length}</div><div className="stat-sub">Active Links</div></div>
+              <div className="stat-card"><div className="stat-label">Profile Views</div><div className="stat-value">0</div><div className="stat-sub">Last 7 Days</div></div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 280px', gap: 18, alignItems: 'start' }}>
+            <div className="overview-grid">
               <div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 14 }}>Account Statistics</div>
                 <div className="panel">
@@ -395,9 +415,9 @@ export default function Dashboard() {
                           <div style={{ fontSize: 12, color: '#7a7a8a' }}>Complete your profile to make it more discoverable.</div>
                         </div>
                         {[
-                          { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => setActivePage('customize') },
-                          { label: 'Add A Description', done: !!bio, onClick: () => setActivePage('customize') },
-                          { label: 'Add Links', done: links.length > 0, onClick: () => setActivePage('links') },
+                          { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => navTo('customize') },
+                          { label: 'Add A Description', done: !!bio, onClick: () => navTo('customize') },
+                          { label: 'Add Links', done: links.length > 0, onClick: () => navTo('links') },
                           { label: 'Reach 10 Profile Views', done: false, onClick: null },
                         ].map((step, i) => (
                           <div key={i} onClick={step.onClick || undefined} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.15)', borderRadius: 10, padding: '10px 14px', marginBottom: 8, cursor: step.onClick ? 'pointer' : 'default' }}>
@@ -418,7 +438,7 @@ export default function Dashboard() {
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Manage your account</div>
                   <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 14 }}>Change your email, username and more.</div>
                   {[{ label: 'Change Username', page: 'settings' }, { label: 'Change Display Name', page: 'customize' }, { label: 'Account Settings', page: 'settings' }].map((item, i) => (
-                    <button key={i} onClick={() => setActivePage(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 6, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.2)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', color: '#b8b8c4', fontSize: 12, textAlign: 'left' }}>
+                    <button key={i} onClick={() => navTo(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 6, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.2)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', color: '#b8b8c4', fontSize: 12, textAlign: 'left' }}>
                       ✎ {item.label}
                     </button>
                   ))}
@@ -433,7 +453,7 @@ export default function Dashboard() {
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">ACCOUNT • ANALYTICS</div><div className="page-title">Analytics</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
               <div className="panel-header"><h2>Profile Views (Last 7 Days)</h2><div className="panel-note">Coming Soon</div></div>
@@ -450,7 +470,7 @@ export default function Dashboard() {
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">ACCOUNT • BADGES</div><div className="page-title">Badges</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
               <div className="panel-header"><h2>Your Badges</h2><div className="panel-note">None unlocked yet</div></div>
@@ -465,116 +485,98 @@ export default function Dashboard() {
 
         {/* SETTINGS */}
         {activePage === 'settings' && (
-  <div>
-    <div className="page-title-row">
-      <div><div className="page-breadcrumb">ACCOUNT • SETTINGS</div><div className="page-title">Settings</div></div>
-      <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
-    </div>
-    <div className="panel">
-      <div className="panel-header"><h2>General Information</h2></div>
-      <div className="panel-body">
-
-        <div className="field">
-          <label>Username
-            {(() => {
-              const lastChanged = user?.username_changed_at ? new Date(user.username_changed_at) : null
-              if (lastChanged) {
-                const remaining = 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
-                if (remaining > 0) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in {remaining} day{remaining !== 1 ? 's' : ''}</span>
-              }
-              return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
-            })()}
-          </label>
-          <input className="input" value={username} disabled />
-        </div>
-
-        <div className="field">
-          <label>Display Name <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Can always change</span></label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input className="input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
-            <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
-              const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('username', username)
-              if (!error) setSaveMsg('Display name saved!')
-              setTimeout(() => setSaveMsg(''), 2000)
-            }}>Save</button>
+          <div>
+            <div className="page-title-row">
+              <div><div className="page-breadcrumb">ACCOUNT • SETTINGS</div><div className="page-title">Settings</div></div>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
+            </div>
+            <div className="panel">
+              <div className="panel-header"><h2>General Information</h2></div>
+              <div className="panel-body">
+                <div className="field">
+                  <label>Username
+                    {(() => {
+                      const lastChanged = user?.username_changed_at ? new Date(user.username_changed_at) : null
+                      if (lastChanged) {
+                        const remaining = 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
+                        if (remaining > 0) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in {remaining} day{remaining !== 1 ? 's' : ''}</span>
+                      }
+                      return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
+                    })()}
+                  </label>
+                  <input className="input" value={username} disabled />
+                </div>
+                <div className="field">
+                  <label>Display Name <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Can always change</span></label>
+                  <div className="settings-field-row">
+                    <input className="input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
+                    <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
+                      const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('username', username)
+                      if (!error) setSaveMsg('Display name saved!')
+                      setTimeout(() => setSaveMsg(''), 2000)
+                    }}>Save</button>
+                  </div>
+                </div>
+                <div className="field">
+                  <label>Email
+                    {(() => {
+                      const lastChanged = user?.email_changed_at ? new Date(user.email_changed_at) : null
+                      if (lastChanged) {
+                        const diffDays = Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
+                        if (diffDays < 1) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in 1 day</span>
+                      }
+                      return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
+                    })()}
+                  </label>
+                  <input className="input" value={user?.email || ''} disabled />
+                </div>
+                <div className="field">
+                  <label>Password</label>
+                  <div className="settings-field-row">
+                    <input className="input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+                    <button className="button-secondary" style={{ flexShrink: 0 }} onClick={() => setShowPassword(p => !p)}>{showPassword ? 'Hide' : 'Show'}</button>
+                    <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
+                      if (!newPassword || newPassword.length < 6) { setSaveMsg('Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
+                      const { error } = await supabase.auth.updateUser({ password: newPassword })
+                      if (!error) { setNewPassword(''); setSaveMsg('Password updated!') }
+                      else setSaveMsg('Failed to update password.')
+                      setTimeout(() => setSaveMsg(''), 2000)
+                    }}>Update</button>
+                  </div>
+                </div>
+                <div className="save-bar">
+                  {saveMsg && <span className="save-msg">{saveMsg}</span>}
+                  <button className="button-secondary" onClick={handleLogout}>Log Out</button>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="field">
-          <label>Email
-            {(() => {
-              const lastChanged = user?.email_changed_at ? new Date(user.email_changed_at) : null
-              if (lastChanged) {
-                const diffDays = Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
-                if (diffDays < 1) return <span style={{ fontSize: 11, color: '#f59e0b', marginLeft: 8 }}>Can change in 1 day</span>
-              }
-              return <span style={{ fontSize: 11, color: '#22c55e', marginLeft: 8 }}>Available to change</span>
-            })()}
-          </label>
-          <input className="input" value={user?.email || ''} disabled />
-        </div>
-
-        <div className="field">
-          <label>Password</label>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input className="input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-            <button className="button-secondary" style={{ flexShrink: 0 }} onClick={() => setShowPassword(p => !p)}>{showPassword ? 'Hide' : 'Show'}</button>
-            <button className="button" style={{ flexShrink: 0 }} onClick={async () => {
-              if (!newPassword || newPassword.length < 6) { setSaveMsg('Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
-              const { error } = await supabase.auth.updateUser({ password: newPassword })
-              if (!error) { setNewPassword(''); setSaveMsg('Password updated!') }
-              else setSaveMsg('Failed to update password.')
-              setTimeout(() => setSaveMsg(''), 2000)
-            }}>Update</button>
-          </div>
-        </div>
-
-        <div className="save-bar">
-          {saveMsg && <span className="save-msg">{saveMsg}</span>}
-          <button className="button-secondary" onClick={handleLogout}>Log Out</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-)}
+        )}
 
         {/* CUSTOMIZE / APPEARANCE */}
         {activePage === 'customize' && (
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">CUSTOMIZE • APPEARANCE</div><div className="page-title">Appearance</div><div className="page-subtitle">Customize how your public profile looks and feels.</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
 
-            {/* Hidden file inputs */}
             <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
             <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
             <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
             <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
 
-            {/* Assets Uploader */}
             <div className="section-title">Assets Uploader</div>
-            {uploadingType && (
-              <div className="uploading-indicator" style={{ marginBottom: 12 }}>
-                ⏳ Uploading {uploadingType}...
-              </div>
-            )}
+            {uploadingType && <div className="uploading-indicator" style={{ marginBottom: 12 }}>⏳ Uploading {uploadingType}...</div>}
             <div className="assets-grid">
-              {/* Background */}
               <div className="asset-card" onClick={() => fileBgRef.current.click()}>
                 <div className="asset-label">Background</div>
                 <div className={`asset-drop ${bgPreview ? 'has-preview' : ''}`}>
-                  {!bgPreview && <>
-                    <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div>
-                  </>}
+                  {!bgPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div></>}
                   {bgPreview && <img src={bgPreview} className="asset-preview-img" alt="bg" />}
                   {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('bg') }}>✕</button>}
                 </div>
               </div>
-
-              {/* Audio */}
               <div className="asset-card" onClick={() => fileAudioRef.current.click()}>
                 <div className="asset-label">Audio</div>
                 <div className={`asset-drop ${audioName ? 'has-preview' : ''}`}>
@@ -583,68 +585,45 @@ export default function Dashboard() {
                   {audioName && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('audio') }}>✕</button>}
                 </div>
               </div>
-
-              {/* Avatar */}
               <div className="asset-card" onClick={() => fileAvatarRef.current.click()}>
                 <div className="asset-label">Profile Avatar</div>
                 <div className={`asset-drop ${avatarPreview ? 'has-preview' : ''}`}>
-                  {!avatarPreview && <>
-                    <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div>
-                  </>}
+                  {!avatarPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div></>}
                   {avatarPreview && <img src={avatarPreview} className="asset-preview-img" alt="avatar" />}
                   {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('avatar') }}>✕</button>}
                 </div>
               </div>
-
-              {/* Cursor */}
               <div className="asset-card" onClick={() => fileCursorRef.current.click()}>
                 <div className="asset-label">Custom Cursor</div>
                 <div className={`asset-drop ${cursorPreview ? 'has-preview' : ''}`}>
-                  {!cursorPreview && <>
-                    <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-                    <div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div>
-                  </>}
+                  {!cursorPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div></>}
                   {cursorPreview && <img src={cursorPreview} className="asset-preview-img" alt="cursor" />}
                   {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('cursor') }}>✕</button>}
                 </div>
               </div>
             </div>
 
-            {/* Premium Banner */}
-            <div className="premium-banner" onClick={() => setActivePage('premium')}>
+            <div className="premium-banner" onClick={() => navTo('premium')}>
               <span>Want exclusive features? Unlock more with</span>
-              <span className="prem">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="#b06aff"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
-                Premium
-              </span>
+              <span className="prem"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b06aff"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>Premium</span>
             </div>
 
-            {/* General Customization */}
             <div className="section-title">General Customization</div>
             <div className="customization-grid">
               <div className="custom-group">
                 <div className="custom-label">Description</div>
                 <textarea className="custom-input" rows={3} placeholder="this is my description" value={appBio} onChange={e => setAppBio(e.target.value)} />
               </div>
-
               <div className="custom-group">
                 <div className="custom-label">Discord Presence</div>
                 <select className="custom-select" value={discordPresence} onChange={e => setDiscordPresence(e.target.value)}>
-                  <option>Enabled</option>
-                  <option>Disabled</option>
-                  <option>Only when online</option>
+                  <option>Enabled</option><option>Disabled</option><option>Only when online</option>
                 </select>
                 <div className="custom-label" style={{ marginTop: 8 }}>Username Effects</div>
                 <select className="custom-select" value={usernameFx} onChange={e => setUsernameFx(e.target.value)}>
-                  <option value="">None</option>
-                  <option value="rainbow">🌈 Rainbow</option>
-                  <option value="glitch">⚡ Glitch</option>
-                  <option value="neon">✨ Neon</option>
-                  <option value="gold">🏆 Gold</option>
+                  <option value="">None</option><option value="rainbow">🌈 Rainbow</option><option value="glitch">⚡ Glitch</option><option value="neon">✨ Neon</option><option value="gold">🏆 Gold</option>
                 </select>
               </div>
-
               <div>
                 <div className="custom-group" style={{ marginBottom: 12 }}>
                   <div className="custom-label">Profile Opacity <span className="info">?</span></div>
@@ -660,16 +639,10 @@ export default function Dashboard() {
                 <div className="custom-group">
                   <div className="custom-label">Background Effects</div>
                   <select className="custom-select" value={bgFx} onChange={e => setBgFx(e.target.value)}>
-                    <option value="none">None</option>
-                    <option value="nighttime">Night Time</option>
-                    <option value="particles">Particles</option>
-                    <option value="rain">Rain</option>
-                    <option value="snow">Snow</option>
-                    <option value="matrix">Matrix</option>
+                    <option value="none">None</option><option value="nighttime">Night Time</option><option value="particles">Particles</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="matrix">Matrix</option>
                   </select>
                 </div>
               </div>
-
               <div>
                 <div className="custom-group" style={{ marginBottom: 12 }}>
                   <div className="custom-label">Profile Blur <span className="info">?</span></div>
@@ -695,7 +668,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Live Preview */}
             <div className="live-preview-box">
               <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
               <div className="profile-preview" style={{ opacity: opacity / 100 }}>
@@ -703,10 +675,7 @@ export default function Dashboard() {
                 <div className="prev-bg-overlay" style={previewOverlayStyle} />
                 <div className="prev-content">
                   <div className="prev-avatar">
-                    {avatarPreview
-                      ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" />
-                      : initial
-                    }
+                    {avatarPreview ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" /> : initial}
                   </div>
                   <div className="prev-name" style={previewNameStyle}>@{username}</div>
                   {appBio && <div className="prev-desc">{appBio}</div>}
@@ -720,7 +689,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Save row */}
             <div className="app-save-row">
               {appSaveMsg && <span className="save-msg">{appSaveMsg}</span>}
               <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('nighttime'); setLocation('') }}>Reset</button>
@@ -734,7 +702,7 @@ export default function Dashboard() {
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">CUSTOMIZE • LINKS</div><div className="page-title">Links</div><div className="page-subtitle">Configure links on your public profile.</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
               <div className="panel-header"><h2>Your Links</h2><div className="panel-note">{links.length} link{links.length !== 1 ? 's' : ''}</div></div>
@@ -775,7 +743,7 @@ export default function Dashboard() {
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">CUSTOMIZE • THEMES</div><div className="page-title">Themes</div><div className="page-subtitle">Choose your profile theme.</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
               <div className="panel-header"><h2>Theme Presets</h2><div className="panel-note">Coming Soon</div></div>
@@ -796,7 +764,7 @@ export default function Dashboard() {
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">PREMIUM</div><div className="page-title">Premium</div><div className="page-subtitle">Unlock extended features.</div></div>
-              <button className="back-button" onClick={() => setActivePage('overview')}>← Back To Overview</button>
+              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
               <div className="panel-header"><h2>Upgrade</h2><div className="panel-note">Coming Soon</div></div>
