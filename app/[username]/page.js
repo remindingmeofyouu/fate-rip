@@ -224,8 +224,8 @@ export default function ProfilePage() {
       {/* Background image */}
       {bgUrl && (
   bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
-    ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur * 0.3}px)` : 'none' }} />
-    : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur * 0.3}px)` : 'none' }} />
+    ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+    : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }}
 )}
 
       {/* Background overlay tint */}
