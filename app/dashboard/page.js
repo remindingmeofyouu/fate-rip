@@ -28,7 +28,7 @@ export default function Dashboard() {
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
   const [opacity, setOpacity] = useState(100)
-  const [bgFx, setBgFx] = useState('nighttime')
+  const [bgFx, setBgFx] = useState('none')
   const [blur, setBlur] = useState(0)
   const [location, setLocation] = useState('')
   const [glowState, setGlowState] = useState({ username: true, socials: true, badges: false })
@@ -48,8 +48,7 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
       setUser(session.user)
-      // Use the auth user id as UID
-      setUid(session.user.id ? session.user.id.split('-')[0].toUpperCase() : '')
+      // UID is now pulled from the DB row id (auto-increment), not auth UUID
       const { data } = await supabase
         .from('users').select('*').eq('email', session.user.email).single()
       if (data) {
@@ -60,7 +59,7 @@ export default function Dashboard() {
         setOpacity(data.opacity ?? 100)
         setBlur(data.blur ?? 0)
         setUsernameFx(data.username_fx || '')
-        setBgFx(data.bg_fx || 'nighttime')
+        setBgFx(data.bg_fx || 'none')
         setLocation(data.location || '')
         setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
         setDiscordPresence(data.discord_presence || 'Enabled')
@@ -69,8 +68,8 @@ export default function Dashboard() {
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
-        // If there's a uid field in the DB, use that instead
-        if (data.uid) setUid(data.uid)
+        // FIX: use the table's auto-increment id as UID
+        setUid(data.id ? String(data.id) : '')
       }
       setLoading(false)
     }
@@ -217,18 +216,15 @@ export default function Dashboard() {
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(196,0,29,0.3); border-radius: 4px; }
 
-        /* MOBILE TOPBAR */
         .mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #050506; border-bottom: 1px solid rgba(196,0,29,0.35); z-index: 200; align-items: center; justify-content: space-between; padding: 0 16px; }
         .mobile-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
         .mobile-logo .fate { color: #ff2340; } .mobile-logo .rip { color: #fff; }
         .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
         .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .2s; }
 
-        /* OVERLAY */
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 149; }
         .sidebar-overlay.open { display: block; }
 
-        /* SIDEBAR */
         .sidebar { width: 250px; background: linear-gradient(180deg,#050506 0%,#09090d 40%,#050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; transition: transform .25s ease; }
         .logo { font-size: 26px; font-weight: 800; letter-spacing: 1.2px; text-decoration: none; display: block; }
         .logo .fate { color: #ff2340; } .logo .rip { color: #fff; }
@@ -239,10 +235,8 @@ export default function Dashboard() {
         .nav-item:hover, .nav-item.active { border-color: #c4001d; background: rgba(196,0,29,0.08); color: #fff; }
         .nav-item .chevron { font-size: 11px; opacity: 0.7; }
 
-        /* SIDEBAR FOOTER BOTTOM PANEL */
         .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 0; }
         .sidebar-support-panel { border: 1px solid rgba(196,0,29,0.3); border-radius: 14px; background: rgba(196,0,29,0.04); padding: 14px 14px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .support-row { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
         .support-label { font-size: 11px; color: #7a7a8a; }
         .support-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(196,0,29,0.3); background: rgba(196,0,29,0.06); color: #b8b8c4; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .15s; text-decoration: none; }
         .support-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.15); color: #fff; transform: translateY(-1px); }
@@ -251,11 +245,9 @@ export default function Dashboard() {
         .share-profile-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #c4001d, #ff2340); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; margin-bottom: 10px; }
         .share-profile-btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        /* UID / USER ROW */
         .sidebar-user-row { border-top: 1px solid rgba(196,0,29,0.2); padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sidebar-user-info { position: relative; cursor: pointer; flex: 1; min-width: 0; }
         .sidebar-username { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
-        .sidebar-username:hover .uid-underline { text-decoration: underline; text-decoration-color: rgba(196,0,29,0.5); text-decoration-style: dashed; }
         .sidebar-uid { font-size: 11px; color: #7a7a8a; }
         .uid-tooltip { position: absolute; bottom: calc(100% + 8px); left: 0; background: #111114; border: 1px solid rgba(196,0,29,0.5); border-radius: 10px; padding: 8px 12px; font-size: 11px; color: #b8b8c4; white-space: nowrap; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.6); animation: fadeInUp .15s ease; pointer-events: none; }
         .uid-tooltip .uid-val { color: #ff2340; font-weight: 600; font-family: monospace; font-size: 12px; }
@@ -264,7 +256,6 @@ export default function Dashboard() {
         .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; transition: color .15s; flex-shrink: 0; }
         .logout-link:hover { color: #ff2340; }
 
-        /* MAIN */
         .main { flex: 1; padding: 32px 40px; overflow-y: auto; }
         .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
         .page-breadcrumb { font-size: 11px; color: #7a7a8a; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -320,11 +311,11 @@ export default function Dashboard() {
         .asset-card { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 12px; padding: 14px 12px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
         .asset-card:hover { border-color: #ff2340; background: #16161c; }
         .asset-label { font-size: 12px; color: #b8b8c4; margin-bottom: 10px; font-weight: 500; }
-        .asset-drop { border: 1px dashed rgba(196,0,29,0.4); border-radius: 10px; padding: 24px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s, background .15s; min-height: 90px; justify-content: center; position: relative; overflow: hidden; }
+        .asset-drop { border: 1px dashed rgba(196,0,29,0.4); border-radius: 10px; padding: 24px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s, background .15s; min-height: 90px; height: 90px; justify-content: center; position: relative; overflow: hidden; }
         .asset-drop:hover { border-color: #ff2340; background: rgba(196,0,29,0.05); }
-        .asset-drop.has-preview { border-style: solid; border-color: rgba(196,0,29,0.5); }
+        .asset-drop.has-preview { border-style: solid; border-color: rgba(196,0,29,0.5); padding: 0; }
         .asset-drop-text { font-size: 11px; color: #7a7a8a; text-align: center; line-height: 1.4; }
-        .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; }
+        .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; display: block; }
         .asset-remove-btn { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: rgba(196,0,29,0.8); border: none; border-radius: 50%; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
         .premium-banner { background: linear-gradient(135deg,#1a0a2e 0%,#0d0516 50%,#120818 100%); border: 1px solid rgba(130,60,255,0.3); border-radius: 999px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 22px; cursor: pointer; transition: border-color .15s; flex-wrap: wrap; }
         .premium-banner:hover { border-color: rgba(160,100,255,0.6); }
@@ -363,7 +354,6 @@ export default function Dashboard() {
         .uploading-indicator { font-size: 11px; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
         .settings-field-row { display: flex; gap: 8px; }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) {
           .mobile-topbar { display: flex; }
           .sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 150; transform: translateX(-100%); }
@@ -381,7 +371,6 @@ export default function Dashboard() {
           .app-save-row { justify-content: flex-start; }
           .panel { padding: 14px; }
         }
-
         @media (max-width: 480px) {
           .stats-grid { grid-template-columns: 1fr 1fr; }
           .customization-grid { grid-template-columns: 1fr; }
@@ -419,18 +408,11 @@ export default function Dashboard() {
 
         {/* Bottom Panel */}
         <div className="sidebar-bottom">
-          {/* Support Panel */}
           <div className="sidebar-support-panel">
             <div>
               <div className="support-label" style={{ marginBottom: 6 }}>Have a question or need support?</div>
-              <a
-                href="https://discord.gg/faterip"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="support-btn"
-              >
+              <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer" className="support-btn">
                 <div className="support-btn-icon">
-                  {/* Discord icon */}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8b8c4">
                     <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
                   </svg>
@@ -440,12 +422,7 @@ export default function Dashboard() {
             </div>
             <div>
               <div className="support-label" style={{ marginBottom: 6 }}>Check out your page</div>
-              <a
-                href={username ? `/${username}` : '/'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="support-btn"
-              >
+              <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" className="support-btn">
                 <div className="support-btn-icon">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8b8c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
@@ -458,7 +435,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Share Profile Button */}
           <button className="share-profile-btn" onClick={handleShareProfile}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -467,7 +443,6 @@ export default function Dashboard() {
             Share Your Profile
           </button>
 
-          {/* User Row with UID Tooltip */}
           <div className="sidebar-user-row">
             <div
               className="sidebar-user-info"
@@ -482,7 +457,7 @@ export default function Dashboard() {
                 </div>
               )}
               <div className="sidebar-username">
-                <span className="uid-underline">{username || 'User'}</span>
+                <span>{username || 'User'}</span>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
               </div>
               <div className="sidebar-uid">UID {uid || '—'}</div>
@@ -689,7 +664,7 @@ export default function Dashboard() {
                 <div className="asset-label">Background</div>
                 <div className={`asset-drop ${bgPreview ? 'has-preview' : ''}`}>
                   {!bgPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {bgPreview && <img src={bgPreview} className="asset-preview-img" alt="bg" />}
+                  {bgPreview && <img src={bgPreview} crossOrigin="anonymous" className="asset-preview-img" alt="bg" onError={e => { e.target.style.display = 'none' }} />}
                   {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('bg') }}>✕</button>}
                 </div>
               </div>
@@ -705,7 +680,7 @@ export default function Dashboard() {
                 <div className="asset-label">Profile Avatar</div>
                 <div className={`asset-drop ${avatarPreview ? 'has-preview' : ''}`}>
                   {!avatarPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {avatarPreview && <img src={avatarPreview} className="asset-preview-img" alt="avatar" />}
+                  {avatarPreview && <img src={avatarPreview} crossOrigin="anonymous" className="asset-preview-img" alt="avatar" onError={e => { e.target.style.display = 'none' }} />}
                   {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('avatar') }}>✕</button>}
                 </div>
               </div>
@@ -713,7 +688,7 @@ export default function Dashboard() {
                 <div className="asset-label">Custom Cursor</div>
                 <div className={`asset-drop ${cursorPreview ? 'has-preview' : ''}`}>
                   {!cursorPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {cursorPreview && <img src={cursorPreview} className="asset-preview-img" alt="cursor" />}
+                  {cursorPreview && <img src={cursorPreview} crossOrigin="anonymous" className="asset-preview-img" alt="cursor" onError={e => { e.target.style.display = 'none' }} />}
                   {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('cursor') }}>✕</button>}
                 </div>
               </div>
@@ -749,7 +724,7 @@ export default function Dashboard() {
                       <span className="slider-value">{opacity}%</span>
                     </div>
                     <input type="range" min="20" max="100" value={opacity} step="1" onChange={e => setOpacity(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>20%</span><span>50%</span><span>80%</span></div>
+                    <div className="slider-ticks"><span>20%</span><span>60%</span><span>100%</span></div>
                   </div>
                 </div>
                 <div className="custom-group">
@@ -768,7 +743,7 @@ export default function Dashboard() {
                       <span className="slider-value">{blur}px</span>
                     </div>
                     <input type="range" min="0" max="80" value={blur} step="1" onChange={e => setBlur(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>20px</span><span>50px</span><span>80px</span></div>
+                    <div className="slider-ticks"><span>0px</span><span>40px</span><span>80px</span></div>
                   </div>
                 </div>
                 <div className="custom-group" style={{ marginBottom: 10 }}>
@@ -787,11 +762,13 @@ export default function Dashboard() {
             <div className="live-preview-box">
               <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
               <div className="profile-preview" style={{ opacity: opacity / 100 }}>
-                {bgPreview && <img src={bgPreview} className="prev-bg-img" alt="bg" style={{ filter: blur > 0 ? `blur(${Math.round(blur / 12)}px)` : 'none' }} />}
+                {bgPreview && <img src={bgPreview} crossOrigin="anonymous" className="prev-bg-img" alt="bg" style={{ filter: blur > 0 ? `blur(${Math.round(blur / 10)}px)` : 'none' }} onError={e => { e.target.style.display = 'none' }} />}
                 <div className="prev-bg-overlay" style={previewOverlayStyle} />
                 <div className="prev-content">
                   <div className="prev-avatar">
-                    {avatarPreview ? <img src={avatarPreview} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" /> : initial}
+                    {avatarPreview
+                      ? <img src={avatarPreview} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" onError={e => { e.target.style.display = 'none' }} />
+                      : initial}
                   </div>
                   <div className="prev-name" style={previewNameStyle}>@{username}</div>
                   {appBio && <div className="prev-desc">{appBio}</div>}
@@ -807,7 +784,7 @@ export default function Dashboard() {
 
             <div className="app-save-row">
               {appSaveMsg && <span className="save-msg">{appSaveMsg}</span>}
-              <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('nighttime'); setLocation('') }}>Reset</button>
+              <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('none'); setLocation('') }}>Reset</button>
               <button className="button" onClick={saveAppearance} disabled={saving}>{saving ? 'Saving...' : 'Save Appearance'}</button>
             </div>
           </div>
@@ -854,7 +831,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* TEMPLATES (renamed from Themes) */}
+        {/* TEMPLATES */}
         {activePage === 'templates' && (
           <div>
             <div className="page-title-row">
