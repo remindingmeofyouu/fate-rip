@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
+import { trackView } from '../../lib/trackView'
 
 export default function ProfilePage() {
   const params = useParams()
@@ -25,7 +26,11 @@ export default function ProfilePage() {
       }
       setLoading(false)
     }
-    fetchProfile()
+fetchProfile()
+  }, [username])
+
+  useEffect(() => {
+    if (username) trackView(username)
   }, [username])
 
   useEffect(() => {

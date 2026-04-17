@@ -23,6 +23,8 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showUidTooltip, setShowUidTooltip] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [profileViews, setProfileViews] = useState(0)
+  const [viewsToday, setViewsToday] = useState(0)
 
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
@@ -48,7 +50,6 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
       setUser(session.user)
-      // UID is now pulled from the DB row id (auto-increment), not auth UUID
       const { data } = await supabase
         .from('users').select('*').eq('email', session.user.email).single()
       if (data) {
@@ -68,13 +69,31 @@ export default function Dashboard() {
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
-        // FIX: use the table's auto-increment id as UID
         setUid(data.id ? String(data.id) : '')
+        if (data.username) fetchViewCounts(data.username)
       }
       setLoading(false)
     }
     init()
   }, [router])
+
+  const fetchViewCounts = async (uname) => {
+    const { count: total } = await supabase
+      .from('profile_views')
+      .select('*', { count: 'exact', head: true })
+      .eq('username', uname)
+
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const { count: today } = await supabase
+      .from('profile_views')
+      .select('*', { count: 'exact', head: true })
+      .eq('username', uname)
+      .gte('viewed_at', todayStart.toISOString())
+
+    setProfileViews(total || 0)
+    setViewsToday(today || 0)
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -142,7 +161,6 @@ export default function Dashboard() {
     ;[arr[i], arr[swap]] = [arr[swap], arr[i]]; setLinks(arr)
   }
   const toggleGlow = (key) => setGlowState(prev => ({ ...prev, [key]: !prev[key] }))
-
   const navTo = (page) => { setActivePage(page); setSidebarOpen(false) }
 
   const handleCopyUid = () => {
@@ -215,16 +233,13 @@ export default function Dashboard() {
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(196,0,29,0.3); border-radius: 4px; }
-
         .mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #050506; border-bottom: 1px solid rgba(196,0,29,0.35); z-index: 200; align-items: center; justify-content: space-between; padding: 0 16px; }
         .mobile-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
         .mobile-logo .fate { color: #ff2340; } .mobile-logo .rip { color: #fff; }
         .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
         .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .2s; }
-
         .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 149; }
         .sidebar-overlay.open { display: block; }
-
         .sidebar { width: 250px; background: linear-gradient(180deg,#050506 0%,#09090d 40%,#050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; transition: transform .25s ease; }
         .logo { font-size: 26px; font-weight: 800; letter-spacing: 1.2px; text-decoration: none; display: block; }
         .logo .fate { color: #ff2340; } .logo .rip { color: #fff; }
@@ -234,17 +249,14 @@ export default function Dashboard() {
         .nav-item { padding: 9px 11px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: border .15s, background .15s, color .15s; font-size: 13px; color: #b8b8c4; display: flex; align-items: center; justify-content: space-between; background: none; width: 100%; text-align: left; font-family: inherit; }
         .nav-item:hover, .nav-item.active { border-color: #c4001d; background: rgba(196,0,29,0.08); color: #fff; }
         .nav-item .chevron { font-size: 11px; opacity: 0.7; }
-
         .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 0; }
         .sidebar-support-panel { border: 1px solid rgba(196,0,29,0.3); border-radius: 14px; background: rgba(196,0,29,0.04); padding: 14px 14px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
         .support-label { font-size: 11px; color: #7a7a8a; }
         .support-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(196,0,29,0.3); background: rgba(196,0,29,0.06); color: #b8b8c4; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .15s; text-decoration: none; }
         .support-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.15); color: #fff; transform: translateY(-1px); }
-        .support-btn svg { flex-shrink: 0; }
         .support-btn-icon { width: 24px; height: 24px; border-radius: 7px; background: rgba(196,0,29,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .share-profile-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #c4001d, #ff2340); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; margin-bottom: 10px; }
         .share-profile-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
         .sidebar-user-row { border-top: 1px solid rgba(196,0,29,0.2); padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .sidebar-user-info { position: relative; cursor: pointer; flex: 1; min-width: 0; }
         .sidebar-username { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
@@ -255,7 +267,6 @@ export default function Dashboard() {
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; transition: color .15s; flex-shrink: 0; }
         .logout-link:hover { color: #ff2340; }
-
         .main { flex: 1; padding: 32px 40px; overflow-y: auto; }
         .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
         .page-breadcrumb { font-size: 11px; color: #7a7a8a; letter-spacing: 0.16em; text-transform: uppercase; }
@@ -276,7 +287,6 @@ export default function Dashboard() {
         .overview-grid { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
         .progress-bar-bg { width: 100%; height: 8px; border-radius: 999px; background: #15151c; overflow: hidden; border: 1px solid rgba(196,0,29,0.35); margin: 8px 0 4px; }
         .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#c4001d,#ff2340); transition: width 0.5s; }
-        .progress-label { font-size: 11px; color: #7a7a8a; }
         .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .field { display: flex; flex-direction: column; margin-bottom: 14px; }
         .field label { font-size: 13px; margin-bottom: 6px; color: #b8b8c4; }
@@ -300,12 +310,7 @@ export default function Dashboard() {
         .link-action-btn.del:hover { background: rgba(196,0,29,0.15); color: #ff2340; }
         .badge-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
         .badge-card { border-radius: 12px; border: 1px dashed rgba(196,0,29,0.35); padding: 10px; font-size: 11px; color: #7a7a8a; text-align: center; }
-        .settings-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .settings-pill { border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); padding: 7px 12px; font-size: 12px; color: #b8b8c4; }
         .graph-legend { margin-top: 8px; font-size: 11px; color: #7a7a8a; }
-        .theme-row { display: flex; gap: 12px; margin-top: 10px; }
-        .theme-box { width: 60px; height: 40px; border-radius: 10px; border: 2px solid rgba(196,0,29,0.35); cursor: pointer; transition: all .15s; }
-        .theme-box:hover { border-color: #c4001d; transform: translateY(-1px); }
         .section-title { font-size: 16px; font-weight: 600; color: #fff; margin: 0 0 14px; }
         .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
         .asset-card { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 12px; padding: 14px 12px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
@@ -353,7 +358,11 @@ export default function Dashboard() {
         .app-save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
         .uploading-indicator { font-size: 11px; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
         .settings-field-row { display: flex; gap: 8px; }
-
+        .analytics-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+        .analytics-bar-track { width: 100%; background: #0d0d10; border-radius: 4px; overflow: hidden; position: relative; }
+        .analytics-bar-fill { background: linear-gradient(180deg, #ff2340, #c4001d); border-radius: 4px; transition: height 0.6s ease; width: 100%; position: absolute; bottom: 0; }
+        .analytics-bar-label { font-size: 10px; color: #7a7a8a; }
+        .analytics-bar-val { font-size: 11px; color: #b8b8c4; font-weight: 600; min-height: 16px; }
         @media (max-width: 768px) {
           .mobile-topbar { display: flex; }
           .sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 150; transform: translateX(-100%); }
@@ -378,18 +387,14 @@ export default function Dashboard() {
         }
       `}</style>
 
-      {/* Mobile Top Bar */}
       <div className="mobile-topbar">
         <div className="mobile-logo"><span className="fate">FATE.</span><span className="rip">RIP</span></div>
         <button className="hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Menu">
           <span /><span /><span />
         </button>
       </div>
-
-      {/* Overlay */}
       <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
 
-      {/* Sidebar */}
       <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div>
           <a href="/" className="logo"><span className="fate">FATE.</span><span className="rip">RIP</span></a>
@@ -406,16 +411,13 @@ export default function Dashboard() {
           </div>
         ))}
 
-        {/* Bottom Panel */}
         <div className="sidebar-bottom">
           <div className="sidebar-support-panel">
             <div>
               <div className="support-label" style={{ marginBottom: 6 }}>Have a question or need support?</div>
               <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer" className="support-btn">
                 <div className="support-btn-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8b8c4">
-                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
-                  </svg>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8b8c4"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
                 </div>
                 Help Center
               </a>
@@ -424,33 +426,18 @@ export default function Dashboard() {
               <div className="support-label" style={{ marginBottom: 6 }}>Check out your page</div>
               <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" className="support-btn">
                 <div className="support-btn-icon">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8b8c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                    <polyline points="15 3 21 3 21 9"/>
-                    <line x1="10" y1="14" x2="21" y2="3"/>
-                  </svg>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8b8c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 </div>
                 My Page
               </a>
             </div>
           </div>
-
           <button className="share-profile-btn" onClick={handleShareProfile}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-            </svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Share Your Profile
           </button>
-
           <div className="sidebar-user-row">
-            <div
-              className="sidebar-user-info"
-              onMouseEnter={() => setShowUidTooltip(true)}
-              onMouseLeave={() => setShowUidTooltip(false)}
-              onClick={handleCopyUid}
-              title="Click to copy UID"
-            >
+            <div className="sidebar-user-info" onMouseEnter={() => setShowUidTooltip(true)} onMouseLeave={() => setShowUidTooltip(false)} onClick={handleCopyUid}>
               {showUidTooltip && (
                 <div className="uid-tooltip">
                   {copied ? <span style={{ color: '#22c55e' }}>✓ Copied!</span> : <>UID: <span className="uid-val">{uid || 'N/A'}</span> · click to copy</>}
@@ -467,10 +454,8 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* Main */}
       <div className="main">
 
-        {/* OVERVIEW */}
         {activePage === 'overview' && (
           <div>
             <div style={{ marginBottom: 22 }}>
@@ -480,8 +465,12 @@ export default function Dashboard() {
             <div className="stats-grid">
               <div className="stat-card"><div className="stat-label">Username</div><div className="stat-value">{username || '—'}</div><div className="stat-sub">Primary Handle</div></div>
               <div className="stat-card"><div className="stat-label">Alias</div><div className="stat-value">0 Used</div><div className="stat-sub">1 Slot Remaining</div></div>
+              <div className="stat-card">
+                <div className="stat-label">Profile Views</div>
+                <div className="stat-value">{profileViews.toLocaleString()}</div>
+                <div className="stat-sub">{viewsToday > 0 ? `+${viewsToday} today` : 'Unique visitors'}</div>
+              </div>
               <div className="stat-card"><div className="stat-label">Links</div><div className="stat-value">{links.length}</div><div className="stat-sub">Active Links</div></div>
-              <div className="stat-card"><div className="stat-label">Profile Views</div><div className="stat-value">0</div><div className="stat-sub">Last 7 Days</div></div>
             </div>
             <div className="overview-grid">
               <div>
@@ -509,13 +498,14 @@ export default function Dashboard() {
                           { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => navTo('customize') },
                           { label: 'Add A Description', done: !!bio, onClick: () => navTo('customize') },
                           { label: 'Add Links', done: links.length > 0, onClick: () => navTo('links') },
-                          { label: 'Reach 10 Profile Views', done: false, onClick: null },
+                          { label: 'Reach 10 Profile Views', done: profileViews >= 10, onClick: null, progress: `${Math.min(profileViews, 10)}/10` },
                         ].map((step, i) => (
                           <div key={i} onClick={step.onClick || undefined} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.15)', borderRadius: 10, padding: '10px 14px', marginBottom: 8, cursor: step.onClick ? 'pointer' : 'default' }}>
                             <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: step.done ? 'rgba(34,197,94,0.15)' : 'rgba(196,0,29,0.1)', border: `1px solid ${step.done ? 'rgba(34,197,94,0.4)' : 'rgba(196,0,29,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: step.done ? '#22c55e' : '#ff2340' }}>
                               {step.done ? '✓' : '!'}
                             </div>
                             <span style={{ fontSize: 13, color: step.done ? '#22c55e' : '#b8b8c4' }}>{step.label}</span>
+                            {step.progress && !step.done && <span style={{ marginLeft: 'auto', fontSize: 11, color: '#555' }}>{step.progress}</span>}
                             {!step.done && step.onClick && <span style={{ marginLeft: 'auto', fontSize: 12, color: '#444' }}>›</span>}
                           </div>
                         ))}
@@ -539,24 +529,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ANALYTICS */}
         {activePage === 'analytics' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">ACCOUNT • ANALYTICS</div><div className="page-title">Analytics</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Profile Views (Last 7 Days)</h2><div className="panel-note">Coming Soon</div></div>
-              <div className="panel-body">
-                <div style={{ height: 160, background: 'linear-gradient(180deg,#0d0d10,#09090d)', border: '1px solid rgba(196,0,29,0.35)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>Analytics tracking coming soon</div>
-                <div className="graph-legend">View counts, click-throughs and referrers will appear here.</div>
-              </div>
-            </div>
-          </div>
+          <AnalyticsPage username={username} profileViews={profileViews} viewsToday={viewsToday} onBack={() => navTo('overview')} />
         )}
 
-        {/* BADGES */}
         {activePage === 'badges' && (
           <div>
             <div className="page-title-row">
@@ -574,7 +550,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* SETTINGS */}
         {activePage === 'settings' && (
           <div>
             <div className="page-title-row">
@@ -644,19 +619,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* CUSTOMIZE / APPEARANCE */}
         {activePage === 'customize' && (
           <div>
             <div className="page-title-row">
               <div><div className="page-breadcrumb">CUSTOMIZE • APPEARANCE</div><div className="page-title">Appearance</div><div className="page-subtitle">Customize how your public profile looks and feels.</div></div>
               <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
-
             <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
             <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
             <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
             <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
-
             <div className="section-title">Assets Uploader</div>
             {uploadingType && <div className="uploading-indicator" style={{ marginBottom: 12 }}>⏳ Uploading {uploadingType}...</div>}
             <div className="assets-grid">
@@ -693,12 +665,10 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
             <div className="premium-banner" onClick={() => navTo('premium')}>
               <span>Want exclusive features? Unlock more with</span>
               <span className="prem"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b06aff"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>Premium</span>
             </div>
-
             <div className="section-title">General Customization</div>
             <div className="customization-grid">
               <div className="custom-group">
@@ -720,8 +690,7 @@ export default function Dashboard() {
                   <div className="custom-label">Profile Opacity <span className="info">?</span></div>
                   <div className="slider-row">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Opacity</span>
-                      <span className="slider-value">{opacity}%</span>
+                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Opacity</span><span className="slider-value">{opacity}%</span>
                     </div>
                     <input type="range" min="20" max="100" value={opacity} step="1" onChange={e => setOpacity(Number(e.target.value))} />
                     <div className="slider-ticks"><span>20%</span><span>60%</span><span>100%</span></div>
@@ -739,8 +708,7 @@ export default function Dashboard() {
                   <div className="custom-label">Profile Blur <span className="info">?</span></div>
                   <div className="slider-row">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Blur</span>
-                      <span className="slider-value">{blur}px</span>
+                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Blur</span><span className="slider-value">{blur}px</span>
                     </div>
                     <input type="range" min="0" max="80" value={blur} step="1" onChange={e => setBlur(Number(e.target.value))} />
                     <div className="slider-ticks"><span>0px</span><span>40px</span><span>80px</span></div>
@@ -758,7 +726,6 @@ export default function Dashboard() {
                 <button className={`glow-btn ${!glowState.badges ? 'inactive' : ''}`} style={{ width: '100%', marginTop: 7 }} onClick={() => toggleGlow('badges')}>✦ Badges</button>
               </div>
             </div>
-
             <div className="live-preview-box">
               <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
               <div className="profile-preview" style={{ opacity: opacity / 100 }}>
@@ -766,9 +733,7 @@ export default function Dashboard() {
                 <div className="prev-bg-overlay" style={previewOverlayStyle} />
                 <div className="prev-content">
                   <div className="prev-avatar">
-                    {avatarPreview
-                      ? <img src={avatarPreview} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" onError={e => { e.target.style.display = 'none' }} />
-                      : initial}
+                    {avatarPreview ? <img src={avatarPreview} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" onError={e => { e.target.style.display = 'none' }} /> : initial}
                   </div>
                   <div className="prev-name" style={previewNameStyle}>@{username}</div>
                   {appBio && <div className="prev-desc">{appBio}</div>}
@@ -781,7 +746,6 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-
             <div className="app-save-row">
               {appSaveMsg && <span className="save-msg">{appSaveMsg}</span>}
               <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('none'); setLocation('') }}>Reset</button>
@@ -790,7 +754,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* LINKS */}
         {activePage === 'links' && (
           <div>
             <div className="page-title-row">
@@ -831,7 +794,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* TEMPLATES */}
         {activePage === 'templates' && (
           <div>
             <div className="page-title-row">
@@ -848,7 +810,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* PREMIUM */}
         {activePage === 'premium' && (
           <div>
             <div className="page-title-row">
@@ -868,6 +829,88 @@ export default function Dashboard() {
           </div>
         )}
 
+      </div>
+    </div>
+  )
+}
+
+// Analytics sub-page with live chart
+function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
+  const [weekData, setWeekData] = useState([])
+  const [loadingWeek, setLoadingWeek] = useState(true)
+
+  useEffect(() => {
+    if (!username) return
+    const fetchWeek = async () => {
+      setLoadingWeek(true)
+      const days = []
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date()
+        d.setHours(0, 0, 0, 0)
+        d.setDate(d.getDate() - i)
+        const nextD = new Date(d)
+        nextD.setDate(nextD.getDate() + 1)
+        const { count } = await supabase
+          .from('profile_views')
+          .select('*', { count: 'exact', head: true })
+          .eq('username', username)
+          .gte('viewed_at', d.toISOString())
+          .lt('viewed_at', nextD.toISOString())
+        days.push({
+          label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+          count: count || 0,
+        })
+      }
+      setWeekData(days)
+      setLoadingWeek(false)
+    }
+    fetchWeek()
+  }, [username])
+
+  const maxCount = Math.max(...weekData.map(d => d.count), 1)
+  const weekTotal = weekData.reduce((a, b) => a + b.count, 0)
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 22, flexWrap: 'wrap' }}>
+        <div><div style={{ fontSize: 11, color: '#7a7a8a', letterSpacing: '0.16em', textTransform: 'uppercase' }}>ACCOUNT • ANALYTICS</div><div style={{ fontSize: 24, fontWeight: 600, color: '#ff2340', margin: '2px 0' }}>Analytics</div></div>
+        <button className="back-button" onClick={onBack}>← Back</button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
+        {[
+          { label: 'Total Unique Views', value: profileViews.toLocaleString(), sub: 'All time' },
+          { label: 'Views Today', value: viewsToday.toLocaleString(), sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
+          { label: 'This Week', value: weekTotal.toLocaleString(), sub: 'Last 7 days' },
+        ].map((c, i) => (
+          <div key={i} style={{ background: '#141419', borderRadius: 12, border: '1px solid rgba(196,0,29,0.35)', padding: '14px 16px' }}>
+            <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 4 }}>{c.label}</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{c.value}</div>
+            <div style={{ fontSize: 11, color: '#b8b8c4', marginTop: 2 }}>{c.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="panel">
+        <div className="panel-header"><h2>Views — Last 7 Days</h2><div className="panel-note">Unique IPs only</div></div>
+        <div className="panel-body">
+          {loadingWeek ? (
+            <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>Loading...</div>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 120 }}>
+              {weekData.map((day, i) => (
+                <div key={i} className="analytics-bar-wrap">
+                  <div className="analytics-bar-val">{day.count > 0 ? day.count : ''}</div>
+                  <div className="analytics-bar-track" style={{ height: 80 }}>
+                    <div className="analytics-bar-fill" style={{ height: `${Math.max((day.count / maxCount) * 100, day.count > 0 ? 6 : 0)}%` }} />
+                  </div>
+                  <div className="analytics-bar-label">{day.label}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="graph-legend" style={{ marginTop: 12 }}>Each bar = unique IP views per day. Repeat visits from the same IP don't count.</div>
+        </div>
       </div>
     </div>
   )
