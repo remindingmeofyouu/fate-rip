@@ -834,17 +834,21 @@ export default function Dashboard() {
   )
 }
 
-// Analytics sub-page with live chart
+// Replace the entire AnalyticsPage function at the bottom of app/dashboard/page.js with this:
+
 function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   const [weekData, setWeekData] = useState([])
   const [loadingWeek, setLoadingWeek] = useState(true)
+  const [timeRange, setTimeRange] = useState('7')
+  const [lastUpdated, setLastUpdated] = useState('')
 
   useEffect(() => {
     if (!username) return
     const fetchWeek = async () => {
       setLoadingWeek(true)
       const days = []
-      for (let i = 6; i >= 0; i--) {
+      const numDays = parseInt(timeRange)
+      for (let i = numDays - 1; i >= 0; i--) {
         const d = new Date()
         d.setHours(0, 0, 0, 0)
         d.setDate(d.getDate() - i)
@@ -857,60 +861,187 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
           .gte('viewed_at', d.toISOString())
           .lt('viewed_at', nextD.toISOString())
         days.push({
-          label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+          label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          shortLabel: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' }),
           count: count || 0,
+          date: d,
         })
       }
       setWeekData(days)
+      setLastUpdated('just now')
       setLoadingWeek(false)
     }
     fetchWeek()
-  }, [username])
+  }, [username, timeRange])
 
   const maxCount = Math.max(...weekData.map(d => d.count), 1)
   const weekTotal = weekData.reduce((a, b) => a + b.count, 0)
+  const avgDaily = weekData.length > 0 ? (weekTotal / weekData.length).toFixed(1) : '0'
+
+  // Simple sparkline path from week data
+  const sparklinePath = (() => {
+    if (weekData.length < 2) return ''
+    const w = 400, h = 60
+    const pts = weekData.map((d, i) => {
+      const x = (i / (weekData.length - 1)) * w
+      const y = h - (d.count / maxCount) * (h - 8) - 4
+      return `${x},${y}`
+    })
+    return `M ${pts.join(' L ')}`
+  })()
+
+  const stats = [
+    {
+      label: 'Profile Views',
+      value: profileViews.toLocaleString(),
+      sub: viewsToday > 0 ? `+${viewsToday} today` : 'All time unique',
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'This Period',
+      value: weekTotal.toLocaleString(),
+      sub: `Last ${timeRange} days`,
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'Avg Daily Views',
+      value: avgDaily,
+      sub: `Per day average`,
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'Views Today',
+      value: viewsToday.toLocaleString(),
+      sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      icon: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      ),
+    },
+  ]
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 22, flexWrap: 'wrap' }}>
-        <div><div style={{ fontSize: 11, color: '#7a7a8a', letterSpacing: '0.16em', textTransform: 'uppercase' }}>ACCOUNT • ANALYTICS</div><div style={{ fontSize: 24, fontWeight: 600, color: '#ff2340', margin: '2px 0' }}>Analytics</div></div>
+    <div style={{ fontFamily: 'system-ui, sans-serif' }}>
+      <style>{`
+        .an-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+        .an-title-wrap h1 { font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
+        .an-title-wrap p { font-size: 12px; color: #7a7a8a; margin-top: 4px; }
+        .an-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .an-updated { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.08); border: 1px solid rgba(196,0,29,0.2); border-radius: 999px; padding: 4px 10px; }
+        .an-range-select { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 10px; color: #b8b8c4; font-size: 12px; padding: 7px 28px 7px 10px; outline: none; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a8a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+        .an-range-select:focus { border-color: #c4001d; }
+        .an-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .an-stat { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 16px; position: relative; overflow: hidden; transition: border-color .15s, transform .15s; }
+        .an-stat:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-1px); }
+        .an-stat::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.04) 0%, transparent 60%); pointer-events: none; }
+        .an-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .an-stat-label { font-size: 12px; color: #7a7a8a; font-weight: 500; }
+        .an-stat-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; }
+        .an-stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 4px; }
+        .an-stat-sub { font-size: 11px; color: #555; }
+        .an-chart-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
+        .an-chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .an-chart-title { font-size: 15px; font-weight: 600; color: #fff; }
+        .an-chart-note { font-size: 11px; color: #555; background: rgba(196,0,29,0.06); border: 1px solid rgba(196,0,29,0.15); border-radius: 999px; padding: 3px 9px; }
+        .an-bars { display: flex; gap: 6px; align-items: flex-end; height: 140px; padding-bottom: 24px; position: relative; }
+        .an-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; position: relative; }
+        .an-bar-val { font-size: 10px; color: #555; font-weight: 600; min-height: 14px; transition: color .15s; }
+        .an-bar-wrap:hover .an-bar-val { color: #ff2340; }
+        .an-bar-track { width: 100%; background: rgba(196,0,29,0.06); border-radius: 6px 6px 0 0; position: relative; overflow: visible; flex: 1; display: flex; align-items: flex-end; }
+        .an-bar-fill { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #ff2340 0%, #c4001d 100%); transition: height .5s ease; position: relative; min-height: 0; }
+        .an-bar-fill::after { content: ''; position: absolute; inset: 0; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%); }
+        .an-bar-fill.zero { background: rgba(196,0,29,0.1); }
+        .an-bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #555; white-space: nowrap; }
+        .an-chart-footer { font-size: 11px; color: #444; margin-top: 8px; }
+        .an-empty { height: 140px; display: flex; align-items: center; justify-content: center; color: #2a2a2a; font-size: 13px; }
+        @media (max-width: 768px) {
+          .an-stats { grid-template-columns: 1fr 1fr; }
+          .an-stat-value { font-size: 22px; }
+        }
+        @media (max-width: 480px) {
+          .an-stats { grid-template-columns: 1fr 1fr; }
+        }
+      `}</style>
+
+      {/* Header */}
+      <div className="an-header">
+        <div className="an-title-wrap">
+          <h1>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2340" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            Account Analytics
+          </h1>
+          <p>Track your profile performance and see how many people are visiting your profile.</p>
+        </div>
         <button className="back-button" onClick={onBack}>← Back</button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 22 }}>
-        {[
-          { label: 'Total Unique Views', value: profileViews.toLocaleString(), sub: 'All time' },
-          { label: 'Views Today', value: viewsToday.toLocaleString(), sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
-          { label: 'This Week', value: weekTotal.toLocaleString(), sub: 'Last 7 days' },
-        ].map((c, i) => (
-          <div key={i} style={{ background: '#141419', borderRadius: 12, border: '1px solid rgba(196,0,29,0.35)', padding: '14px 16px' }}>
-            <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 4 }}>{c.label}</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{c.value}</div>
-            <div style={{ fontSize: 11, color: '#b8b8c4', marginTop: 2 }}>{c.sub}</div>
+      {/* Time range + last updated */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 12, color: '#7a7a8a' }}>Time Range</span>
+        {lastUpdated && <span className="an-updated">Last updated {lastUpdated}</span>}
+        <select className="an-range-select" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
+          <option value="3">Last 3 days</option>
+          <option value="7">Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+
+      {/* Stat cards */}
+      <div className="an-stats">
+        {stats.map((s, i) => (
+          <div key={i} className="an-stat">
+            <div className="an-stat-top">
+              <div className="an-stat-label">{s.label}</div>
+              <div className="an-stat-icon">{s.icon}</div>
+            </div>
+            <div className="an-stat-value">{s.value}</div>
+            <div className="an-stat-sub">{s.sub}</div>
           </div>
         ))}
       </div>
 
-      <div className="panel">
-        <div className="panel-header"><h2>Views — Last 7 Days</h2><div className="panel-note">Unique IPs only</div></div>
-        <div className="panel-body">
-          {loadingWeek ? (
-            <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>Loading...</div>
-          ) : (
-            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', height: 120 }}>
-              {weekData.map((day, i) => (
-                <div key={i} className="analytics-bar-wrap">
-                  <div className="analytics-bar-val">{day.count > 0 ? day.count : ''}</div>
-                  <div className="analytics-bar-track" style={{ height: 80 }}>
-                    <div className="analytics-bar-fill" style={{ height: `${Math.max((day.count / maxCount) * 100, day.count > 0 ? 6 : 0)}%` }} />
-                  </div>
-                  <div className="analytics-bar-label">{day.label}</div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="graph-legend" style={{ marginTop: 12 }}>Each bar = unique IP views per day. Repeat visits from the same IP don't count.</div>
+      {/* Bar chart */}
+      <div className="an-chart-panel">
+        <div className="an-chart-header">
+          <div className="an-chart-title">Profile Views</div>
+          <div className="an-chart-note">Unique visitors only</div>
         </div>
+        {loadingWeek ? (
+          <div className="an-empty">Loading...</div>
+        ) : weekTotal === 0 ? (
+          <div className="an-empty">No views yet in this period</div>
+        ) : (
+          <div className="an-bars">
+            {weekData.map((day, i) => (
+              <div key={i} className="an-bar-wrap">
+                <div className="an-bar-val">{day.count > 0 ? day.count : ''}</div>
+                <div className="an-bar-track">
+                  <div
+                    className={`an-bar-fill ${day.count === 0 ? 'zero' : ''}`}
+                    style={{ height: day.count === 0 ? '3px' : `${Math.max((day.count / maxCount) * 100, 4)}%` }}
+                  />
+                </div>
+                <div className="an-bar-label">{day.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="an-chart-footer">Each bar represents unique visitor count per day — repeat visits from the same browser don't count.</div>
       </div>
     </div>
   )
