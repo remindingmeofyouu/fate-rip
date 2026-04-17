@@ -7,6 +7,7 @@ export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
+  const [uid, setUid] = useState('')
   const [bio, setBio] = useState('')
   const [links, setLinks] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,6 +21,8 @@ export default function Dashboard() {
   const [newPassword, setNewPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showUidTooltip, setShowUidTooltip] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
@@ -45,6 +48,8 @@ export default function Dashboard() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
       setUser(session.user)
+      // Use the auth user id as UID
+      setUid(session.user.id ? session.user.id.split('-')[0].toUpperCase() : '')
       const { data } = await supabase
         .from('users').select('*').eq('email', session.user.email).single()
       if (data) {
@@ -64,6 +69,8 @@ export default function Dashboard() {
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
+        // If there's a uid field in the DB, use that instead
+        if (data.uid) setUid(data.uid)
       }
       setLoading(false)
     }
@@ -139,6 +146,27 @@ export default function Dashboard() {
 
   const navTo = (page) => { setActivePage(page); setSidebarOpen(false) }
 
+  const handleCopyUid = () => {
+    if (uid) {
+      navigator.clipboard.writeText(uid).then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 1500)
+      })
+    }
+  }
+
+  const handleShareProfile = () => {
+    const url = `${window.location.origin}/${username}`
+    if (navigator.share) {
+      navigator.share({ title: `${username}'s profile`, url })
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        setSaveMsg('Profile link copied!')
+        setTimeout(() => setSaveMsg(''), 2000)
+      })
+    }
+  }
+
   const previewNameStyle = (() => {
     if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
     if (usernameFx === 'gold') return { background: 'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
@@ -175,7 +203,7 @@ export default function Dashboard() {
     { section: 'CUSTOMIZE', items: [
       { id: 'customize', label: 'Appearance' },
       { id: 'links', label: 'Links' },
-      { id: 'themes', label: 'Themes' },
+      { id: 'templates', label: 'Templates' },
     ]},
     { section: 'PREMIUM', items: [
       { id: 'premium', label: 'Upgrade' },
@@ -210,8 +238,30 @@ export default function Dashboard() {
         .nav-item { padding: 9px 11px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: border .15s, background .15s, color .15s; font-size: 13px; color: #b8b8c4; display: flex; align-items: center; justify-content: space-between; background: none; width: 100%; text-align: left; font-family: inherit; }
         .nav-item:hover, .nav-item.active { border-color: #c4001d; background: rgba(196,0,29,0.08); color: #fff; }
         .nav-item .chevron { font-size: 11px; opacity: 0.7; }
-        .sidebar-footer { margin-top: auto; font-size: 11px; color: #7a7a8a; border-top: 1px solid rgba(196,0,29,0.25); padding-top: 12px; }
-        .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; margin-top: 8px; transition: color .15s; display: block; }
+
+        /* SIDEBAR FOOTER BOTTOM PANEL */
+        .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 0; }
+        .sidebar-support-panel { border: 1px solid rgba(196,0,29,0.3); border-radius: 14px; background: rgba(196,0,29,0.04); padding: 14px 14px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .support-row { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
+        .support-label { font-size: 11px; color: #7a7a8a; }
+        .support-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(196,0,29,0.3); background: rgba(196,0,29,0.06); color: #b8b8c4; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .15s; text-decoration: none; }
+        .support-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.15); color: #fff; transform: translateY(-1px); }
+        .support-btn svg { flex-shrink: 0; }
+        .support-btn-icon { width: 24px; height: 24px; border-radius: 7px; background: rgba(196,0,29,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .share-profile-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #c4001d, #ff2340); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; margin-bottom: 10px; }
+        .share-profile-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* UID / USER ROW */
+        .sidebar-user-row { border-top: 1px solid rgba(196,0,29,0.2); padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .sidebar-user-info { position: relative; cursor: pointer; flex: 1; min-width: 0; }
+        .sidebar-username { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
+        .sidebar-username:hover .uid-underline { text-decoration: underline; text-decoration-color: rgba(196,0,29,0.5); text-decoration-style: dashed; }
+        .sidebar-uid { font-size: 11px; color: #7a7a8a; }
+        .uid-tooltip { position: absolute; bottom: calc(100% + 8px); left: 0; background: #111114; border: 1px solid rgba(196,0,29,0.5); border-radius: 10px; padding: 8px 12px; font-size: 11px; color: #b8b8c4; white-space: nowrap; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.6); animation: fadeInUp .15s ease; pointer-events: none; }
+        .uid-tooltip .uid-val { color: #ff2340; font-weight: 600; font-family: monospace; font-size: 12px; }
+        .uid-tooltip::after { content: ''; position: absolute; top: 100%; left: 14px; border: 5px solid transparent; border-top-color: rgba(196,0,29,0.5); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; transition: color .15s; flex-shrink: 0; }
         .logout-link:hover { color: #ff2340; }
 
         /* MAIN */
@@ -366,13 +416,79 @@ export default function Dashboard() {
             ))}
           </div>
         ))}
-        <div className="sidebar-footer">
-          <div>Powered By <span style={{ color: '#ff2340' }}>FATE.</span>RIP</div>
-          <div style={{ marginTop: 4 }}>No Tracking. Just Signal.</div>
-          <div style={{ marginTop: 6 }}>
-            <a href={`/${username}`} target="_blank" style={{ color: '#444', fontSize: 11, textDecoration: 'none' }}>fate.rip/{username} ↗</a>
+
+        {/* Bottom Panel */}
+        <div className="sidebar-bottom">
+          {/* Support Panel */}
+          <div className="sidebar-support-panel">
+            <div>
+              <div className="support-label" style={{ marginBottom: 6 }}>Have a question or need support?</div>
+              <a
+                href="https://discord.gg/faterip"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="support-btn"
+              >
+                <div className="support-btn-icon">
+                  {/* Discord icon */}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8b8c4">
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                  </svg>
+                </div>
+                Help Center
+              </a>
+            </div>
+            <div>
+              <div className="support-label" style={{ marginBottom: 6 }}>Check out your page</div>
+              <a
+                href={username ? `/${username}` : '/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="support-btn"
+              >
+                <div className="support-btn-icon">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8b8c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </div>
+                My Page
+              </a>
+            </div>
           </div>
-          <button className="logout-link" onClick={handleLogout}>← Log Out</button>
+
+          {/* Share Profile Button */}
+          <button className="share-profile-btn" onClick={handleShareProfile}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            Share Your Profile
+          </button>
+
+          {/* User Row with UID Tooltip */}
+          <div className="sidebar-user-row">
+            <div
+              className="sidebar-user-info"
+              onMouseEnter={() => setShowUidTooltip(true)}
+              onMouseLeave={() => setShowUidTooltip(false)}
+              onClick={handleCopyUid}
+              title="Click to copy UID"
+            >
+              {showUidTooltip && (
+                <div className="uid-tooltip">
+                  {copied ? <span style={{ color: '#22c55e' }}>✓ Copied!</span> : <>UID: <span className="uid-val">{uid || 'N/A'}</span> · click to copy</>}
+                </div>
+              )}
+              <div className="sidebar-username">
+                <span className="uid-underline">{username || 'User'}</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <div className="sidebar-uid">UID {uid || '—'}</div>
+            </div>
+            <button className="logout-link" onClick={handleLogout}>← Log Out</button>
+          </div>
         </div>
       </nav>
 
@@ -738,22 +854,18 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* THEMES */}
-        {activePage === 'themes' && (
+        {/* TEMPLATES (renamed from Themes) */}
+        {activePage === 'templates' && (
           <div>
             <div className="page-title-row">
-              <div><div className="page-breadcrumb">CUSTOMIZE • THEMES</div><div className="page-title">Themes</div><div className="page-subtitle">Choose your profile theme.</div></div>
+              <div><div className="page-breadcrumb">CUSTOMIZE • TEMPLATES</div><div className="page-title">Templates</div><div className="page-subtitle">Choose a profile template layout.</div></div>
               <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
             </div>
             <div className="panel">
-              <div className="panel-header"><h2>Theme Presets</h2><div className="panel-note">Coming Soon</div></div>
+              <div className="panel-header"><h2>Template Presets</h2><div className="panel-note">Coming Soon</div></div>
               <div className="panel-body">
-                <div className="theme-row">
-                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#050506,#0a0a0d)' }} />
-                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#1a0004,#3a0008)' }} />
-                  <div className="theme-box" style={{ background: 'linear-gradient(180deg,#0d0d0d,#1a1a1a)' }} />
-                </div>
-                <div className="graph-legend" style={{ marginTop: 10 }}>Custom themes will apply to your public profile page.</div>
+                <div style={{ height: 160, background: 'linear-gradient(180deg,#0d0d10,#09090d)', border: '1px solid rgba(196,0,29,0.35)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>Templates are coming soon</div>
+                <div className="graph-legend" style={{ marginTop: 10 }}>Profile templates will apply a full layout and style to your public page.</div>
               </div>
             </div>
           </div>
