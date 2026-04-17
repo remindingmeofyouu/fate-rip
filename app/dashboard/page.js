@@ -834,8 +834,7 @@ export default function Dashboard() {
   )
 }
 
-// Replace the entire AnalyticsPage function at the bottom of app/dashboard/page.js with this:
-
+// Analytics sub-page with live chart
 function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   const [weekData, setWeekData] = useState([])
   const [loadingWeek, setLoadingWeek] = useState(true)
@@ -861,187 +860,192 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
           .gte('viewed_at', d.toISOString())
           .lt('viewed_at', nextD.toISOString())
         days.push({
-          label: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          shortLabel: i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+          label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           count: count || 0,
-          date: d,
         })
       }
       setWeekData(days)
-      setLastUpdated('just now')
+      setLastUpdated('less than a minute ago')
       setLoadingWeek(false)
     }
     fetchWeek()
   }, [username, timeRange])
 
-  const maxCount = Math.max(...weekData.map(d => d.count), 1)
   const weekTotal = weekData.reduce((a, b) => a + b.count, 0)
   const avgDaily = weekData.length > 0 ? (weekTotal / weekData.length).toFixed(1) : '0'
+  const maxCount = Math.max(...weekData.map(d => d.count), 1)
 
-  // Simple sparkline path from week data
-  const sparklinePath = (() => {
+  // Build SVG line chart path
+  const chartW = 1000
+  const chartH = 200
+  const linePath = (() => {
     if (weekData.length < 2) return ''
-    const w = 400, h = 60
     const pts = weekData.map((d, i) => {
-      const x = (i / (weekData.length - 1)) * w
-      const y = h - (d.count / maxCount) * (h - 8) - 4
+      const x = (i / (weekData.length - 1)) * chartW
+      const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
       return `${x},${y}`
     })
     return `M ${pts.join(' L ')}`
+  })()
+
+  const areaPath = (() => {
+    if (weekData.length < 2) return ''
+    const pts = weekData.map((d, i) => {
+      const x = (i / (weekData.length - 1)) * chartW
+      const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
+      return `${x},${y}`
+    })
+    return `M 0,${chartH} L ${pts.join(' L ')} L ${chartW},${chartH} Z`
   })()
 
   const stats = [
     {
       label: 'Profile Views',
       value: profileViews.toLocaleString(),
-      sub: viewsToday > 0 ? `+${viewsToday} today` : 'All time unique',
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-      ),
+      sub: `All time unique`,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
     },
     {
-      label: 'This Period',
+      label: 'Views This Period',
       value: weekTotal.toLocaleString(),
       sub: `Last ${timeRange} days`,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-      ),
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
     },
     {
-      label: 'Avg Daily Views',
+      label: 'Average Daily Views',
       value: avgDaily,
-      sub: `Per day average`,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-        </svg>
-      ),
+      sub: `Per day`,
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
     },
     {
       label: 'Views Today',
       value: viewsToday.toLocaleString(),
       sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-        </svg>
-      ),
+      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
     },
   ]
 
   return (
-    <div style={{ fontFamily: 'system-ui, sans-serif' }}>
+    <div>
       <style>{`
-        .an-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-        .an-title-wrap h1 { font-size: 22px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; }
-        .an-title-wrap p { font-size: 12px; color: #7a7a8a; margin-top: 4px; }
-        .an-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .an-updated { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.08); border: 1px solid rgba(196,0,29,0.2); border-radius: 999px; padding: 4px 10px; }
-        .an-range-select { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 10px; color: #b8b8c4; font-size: 12px; padding: 7px 28px 7px 10px; outline: none; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a8a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
-        .an-range-select:focus { border-color: #c4001d; }
-        .an-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
-        .an-stat { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 16px; position: relative; overflow: hidden; transition: border-color .15s, transform .15s; }
-        .an-stat:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-1px); }
-        .an-stat::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.04) 0%, transparent 60%); pointer-events: none; }
-        .an-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-        .an-stat-label { font-size: 12px; color: #7a7a8a; font-weight: 500; }
-        .an-stat-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; }
-        .an-stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 4px; }
-        .an-stat-sub { font-size: 11px; color: #555; }
-        .an-chart-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
-        .an-chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .an-chart-title { font-size: 15px; font-weight: 600; color: #fff; }
-        .an-chart-note { font-size: 11px; color: #555; background: rgba(196,0,29,0.06); border: 1px solid rgba(196,0,29,0.15); border-radius: 999px; padding: 3px 9px; }
-        .an-bars { display: flex; gap: 6px; align-items: flex-end; height: 140px; padding-bottom: 24px; position: relative; }
-        .an-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; position: relative; }
-        .an-bar-val { font-size: 10px; color: #555; font-weight: 600; min-height: 14px; transition: color .15s; }
-        .an-bar-wrap:hover .an-bar-val { color: #ff2340; }
-        .an-bar-track { width: 100%; background: rgba(196,0,29,0.06); border-radius: 6px 6px 0 0; position: relative; overflow: visible; flex: 1; display: flex; align-items: flex-end; }
-        .an-bar-fill { width: 100%; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #ff2340 0%, #c4001d 100%); transition: height .5s ease; position: relative; min-height: 0; }
-        .an-bar-fill::after { content: ''; position: absolute; inset: 0; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%); }
-        .an-bar-fill.zero { background: rgba(196,0,29,0.1); }
-        .an-bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; color: #555; white-space: nowrap; }
-        .an-chart-footer { font-size: 11px; color: #444; margin-top: 8px; }
-        .an-empty { height: 140px; display: flex; align-items: center; justify-content: center; color: #2a2a2a; font-size: 13px; }
-        @media (max-width: 768px) {
-          .an-stats { grid-template-columns: 1fr 1fr; }
-          .an-stat-value { font-size: 22px; }
-        }
-        @media (max-width: 480px) {
-          .an-stats { grid-template-columns: 1fr 1fr; }
-        }
+        .an2-wrap { display: flex; flex-direction: column; gap: 0; }
+        .an2-top { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
+        .an2-top-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .an2-top-title { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+        .an2-top-sub { font-size: 12px; color: #7a7a8a; }
+        .an2-time-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+        .an2-updated { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.25); border-radius: 999px; padding: 4px 12px; }
+        .an2-select { background: #0c0c10; border: 1px solid rgba(196,0,29,0.3); border-radius: 10px; color: #b8b8c4; font-size: 12px; padding: 8px 32px 8px 12px; outline: none; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a8a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; width: 100%; max-width: 200px; }
+        .an2-select:focus { border-color: #c4001d; }
+        .an2-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+        .an2-stat { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 14px; padding: 20px; transition: border-color .15s, transform .15s; position: relative; overflow: hidden; }
+        .an2-stat:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-2px); }
+        .an2-stat::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.05) 0%, transparent 60%); pointer-events: none; }
+        .an2-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .an2-stat-label { font-size: 13px; color: #b8b8c4; font-weight: 500; }
+        .an2-stat-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
+        .an2-stat-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
+        .an2-stat-sub { font-size: 12px; color: #555; }
+        .an2-chart-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 14px; padding: 24px; }
+        .an2-chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
+        .an2-chart-title { font-size: 16px; font-weight: 600; color: #fff; }
+        .an2-chart-badge { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.08); border: 1px solid rgba(196,0,29,0.2); border-radius: 999px; padding: 4px 12px; }
+        .an2-chart-svg-wrap { width: 100%; position: relative; }
+        .an2-x-labels { display: flex; justify-content: space-between; margin-top: 8px; padding: 0 2px; }
+        .an2-x-label { font-size: 10px; color: #444; }
+        .an2-chart-footer { font-size: 11px; color: #3a3a3a; margin-top: 12px; }
+        .an2-empty { height: 200px; display: flex; align-items: center; justify-content: center; color: #2a2a2a; font-size: 13px; }
+        @media (max-width: 900px) { .an2-stats { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 480px) { .an2-stats { grid-template-columns: 1fr 1fr; } .an2-stat-value { font-size: 24px; } }
       `}</style>
 
-      {/* Header */}
-      <div className="an-header">
-        <div className="an-title-wrap">
-          <h1>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2340" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Account Analytics
-          </h1>
-          <p>Track your profile performance and see how many people are visiting your profile.</p>
-        </div>
-        <button className="back-button" onClick={onBack}>← Back</button>
-      </div>
-
-      {/* Time range + last updated */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, color: '#7a7a8a' }}>Time Range</span>
-        {lastUpdated && <span className="an-updated">Last updated {lastUpdated}</span>}
-        <select className="an-range-select" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
-          <option value="3">Last 3 days</option>
-          <option value="7">Last 7 days</option>
-          <option value="14">Last 14 days</option>
-          <option value="30">Last 30 days</option>
-        </select>
-      </div>
-
-      {/* Stat cards */}
-      <div className="an-stats">
-        {stats.map((s, i) => (
-          <div key={i} className="an-stat">
-            <div className="an-stat-top">
-              <div className="an-stat-label">{s.label}</div>
-              <div className="an-stat-icon">{s.icon}</div>
+      <div className="an2-wrap">
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          <div>
+            <div className="an2-top-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2340" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              Account Analytics
             </div>
-            <div className="an-stat-value">{s.value}</div>
-            <div className="an-stat-sub">{s.sub}</div>
+            <div className="an2-top-sub">Track your profile performance and see how many people are visiting your profile.</div>
           </div>
-        ))}
-      </div>
-
-      {/* Bar chart */}
-      <div className="an-chart-panel">
-        <div className="an-chart-header">
-          <div className="an-chart-title">Profile Views</div>
-          <div className="an-chart-note">Unique visitors only</div>
+          <button className="back-button" onClick={onBack}>← Back</button>
         </div>
-        {loadingWeek ? (
-          <div className="an-empty">Loading...</div>
-        ) : weekTotal === 0 ? (
-          <div className="an-empty">No views yet in this period</div>
-        ) : (
-          <div className="an-bars">
-            {weekData.map((day, i) => (
-              <div key={i} className="an-bar-wrap">
-                <div className="an-bar-val">{day.count > 0 ? day.count : ''}</div>
-                <div className="an-bar-track">
-                  <div
-                    className={`an-bar-fill ${day.count === 0 ? 'zero' : ''}`}
-                    style={{ height: day.count === 0 ? '3px' : `${Math.max((day.count / maxCount) * 100, 4)}%` }}
-                  />
-                </div>
-                <div className="an-bar-label">{day.label}</div>
+
+        {/* Time range row */}
+        <div className="an2-time-row">
+          <span style={{ fontSize: 13, color: '#7a7a8a' }}>Time Range</span>
+          {lastUpdated && <span className="an2-updated">Last updated {lastUpdated}</span>}
+          <select className="an2-select" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
+            <option value="3">Last 3 days</option>
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+          </select>
+        </div>
+
+        {/* Stat cards */}
+        <div className="an2-stats">
+          {stats.map((s, i) => (
+            <div key={i} className="an2-stat">
+              <div className="an2-stat-top">
+                <div className="an2-stat-label">{s.label}</div>
+                <div className="an2-stat-icon">{s.icon}</div>
               </div>
-            ))}
+              <div className="an2-stat-value">{s.value}</div>
+              <div className="an2-stat-sub">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Line chart */}
+        <div className="an2-chart-panel">
+          <div className="an2-chart-header">
+            <div className="an2-chart-title">Profile Views</div>
+            <div className="an2-chart-badge">Unique visitors only</div>
           </div>
-        )}
-        <div className="an-chart-footer">Each bar represents unique visitor count per day — repeat visits from the same browser don't count.</div>
+          {loadingWeek ? (
+            <div className="an2-empty">Loading...</div>
+          ) : weekTotal === 0 ? (
+            <div className="an2-empty">No views yet in this period — share your profile to get started!</div>
+          ) : (
+            <div className="an2-chart-svg-wrap">
+              <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }} preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#ff2340" stopOpacity="0.25"/>
+                    <stop offset="100%" stopColor="#ff2340" stopOpacity="0.02"/>
+                  </linearGradient>
+                </defs>
+                {/* Grid lines */}
+                {[0.25, 0.5, 0.75, 1].map((v, i) => (
+                  <line key={i} x1="0" y1={chartH - v * (chartH - 20) - 10} x2={chartW} y2={chartH - v * (chartH - 20) - 10} stroke="rgba(196,0,29,0.08)" strokeWidth="1"/>
+                ))}
+                {/* Area fill */}
+                {areaPath && <path d={areaPath} fill="url(#areaGrad)"/>}
+                {/* Line */}
+                {linePath && <path d={linePath} fill="none" stroke="#ff2340" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
+                {/* Dots */}
+                {weekData.map((d, i) => {
+                  const x = (i / (weekData.length - 1)) * chartW
+                  const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
+                  return d.count > 0 ? (
+                    <g key={i}>
+                      <circle cx={x} cy={y} r="5" fill="#ff2340" stroke="#111114" strokeWidth="2"/>
+                    </g>
+                  ) : null
+                })}
+              </svg>
+              {/* X axis labels */}
+              <div className="an2-x-labels">
+                {weekData.map((d, i) => (
+                  <span key={i} className="an2-x-label">{d.label}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="an2-chart-footer">Each data point represents unique visitor count per day — repeat visits from the same browser don't count.</div>
+        </div>
       </div>
     </div>
   )
