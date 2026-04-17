@@ -456,74 +456,169 @@ export default function Dashboard() {
 
       <div className="main">
 
-        {activePage === 'overview' && (
+      {activePage === 'overview' && (
           <div>
-            <div style={{ marginBottom: 22 }}>
-              <div className="page-breadcrumb">ACCOUNT • OVERVIEW</div>
-              <div className="page-title">Account Overview</div>
-            </div>
-            <div className="stats-grid">
-              <div className="stat-card"><div className="stat-label">Username</div><div className="stat-value">{username || '—'}</div><div className="stat-sub">Primary Handle</div></div>
-              <div className="stat-card"><div className="stat-label">Alias</div><div className="stat-value">0 Used</div><div className="stat-sub">1 Slot Remaining</div></div>
-              <div className="stat-card">
-                <div className="stat-label">Profile Views</div>
-                <div className="stat-value">{profileViews.toLocaleString()}</div>
-                <div className="stat-sub">{viewsToday > 0 ? `+${viewsToday} today` : 'Unique visitors'}</div>
+            <style>{`
+              .ov-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 18px; }
+              .ov-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+              .ov-card { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; transition: border-color .15s, transform .15s; cursor: default; }
+              .ov-card:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-2px); }
+              .ov-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.05) 0%, transparent 60%); pointer-events: none; }
+              .ov-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+              .ov-card-label { font-size: 13px; color: #b8b8c4; font-weight: 500; }
+              .ov-card-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
+              .ov-card-value { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 5px; }
+              .ov-card-sub { font-size: 12px; color: #555; }
+              .ov-stats-title { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 14px; }
+              .ov-grid { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+              .ov-completion-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; }
+              .ov-completion-label { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 14px; }
+              .ov-progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+              .ov-progress-bar { flex: 1; height: 8px; background: #0d0d10; border-radius: 999px; overflow: hidden; border: 1px solid rgba(196,0,29,0.2); }
+              .ov-progress-fill { height: 100%; background: linear-gradient(90deg, #c4001d, #ff2340); border-radius: 999px; transition: width .5s; }
+              .ov-progress-pct { font-size: 12px; color: #7a7a8a; flex-shrink: 0; }
+              .ov-warning { background: rgba(196,0,29,0.07); border: 1px solid rgba(196,0,29,0.2); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
+              .ov-warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+              .ov-warning-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
+              .ov-warning-sub { font-size: 12px; color: #7a7a8a; }
+              .ov-steps-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+              .ov-step { display: flex; align-items: center; gap: 10px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.15); border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color .15s, background .15s; }
+              .ov-step:hover { border-color: rgba(196,0,29,0.35); background: rgba(196,0,29,0.05); }
+              .ov-step.done { border-color: rgba(34,197,94,0.2); background: rgba(34,197,94,0.04); cursor: default; }
+              .ov-step.full-width { grid-column: 1 / -1; }
+              .ov-step-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+              .ov-step-dot.active { background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.3); color: #ff2340; }
+              .ov-step-dot.done { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #22c55e; }
+              .ov-step-label { font-size: 13px; color: #b8b8c4; flex: 1; }
+              .ov-step.done .ov-step-label { color: #22c55e; }
+              .ov-step-arrow { font-size: 12px; color: #333; flex-shrink: 0; }
+              .ov-step-progress { font-size: 11px; color: #444; flex-shrink: 0; }
+              .ov-manage-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; }
+              .ov-manage-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+              .ov-manage-sub { font-size: 12px; color: #7a7a8a; margin-bottom: 16px; }
+              .ov-manage-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px; margin-bottom: 8px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.15); border-radius: 10px; cursor: pointer; font-family: inherit; color: #b8b8c4; font-size: 13px; text-align: left; transition: all .15s; }
+              .ov-manage-btn:hover { border-color: rgba(196,0,29,0.4); background: rgba(196,0,29,0.06); color: #fff; transform: translateX(2px); }
+              .ov-manage-btn:last-child { margin-bottom: 0; }
+              .ov-manage-btn-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
+              .ov-section-divider { font-size: 13px; font-weight: 600; color: #7a7a8a; letter-spacing: 0.08em; text-transform: uppercase; margin: 18px 0 12px; }
+              @media (max-width: 900px) { .ov-cards { grid-template-columns: 1fr 1fr; } .ov-grid { grid-template-columns: 1fr; } }
+              @media (max-width: 480px) { .ov-cards { grid-template-columns: 1fr 1fr; } .ov-steps-row { grid-template-columns: 1fr; } }
+            `}</style>
+
+            <div className="ov-title">Account Overview</div>
+
+            {/* Top stat cards */}
+            <div className="ov-cards">
+              <div className="ov-card">
+                <div className="ov-card-top">
+                  <div className="ov-card-label">Username</div>
+                  <div className="ov-card-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </div>
+                </div>
+                <div className="ov-card-value">{username || '—'}</div>
+                <div className="ov-card-sub">Change available now</div>
               </div>
-              <div className="stat-card"><div className="stat-label">Links</div><div className="stat-value">{links.length}</div><div className="stat-sub">Active Links</div></div>
+              <div className="ov-card">
+                <div className="ov-card-top">
+                  <div className="ov-card-label">Alias</div>
+                  <div className="ov-card-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  </div>
+                </div>
+                <div className="ov-card-value">0 Aliases Used</div>
+                <div className="ov-card-sub">1 Alias Slot Remaining</div>
+              </div>
+              <div className="ov-card">
+                <div className="ov-card-top">
+                  <div className="ov-card-label">UID</div>
+                  <div className="ov-card-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                  </div>
+                </div>
+                <div className="ov-card-value" style={{ fontSize: 22 }}>{uid || '—'}</div>
+                <div className="ov-card-sub">Your unique ID</div>
+              </div>
+              <div className="ov-card">
+                <div className="ov-card-top">
+                  <div className="ov-card-label">Profile Views</div>
+                  <div className="ov-card-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </div>
+                </div>
+                <div className="ov-card-value">{profileViews.toLocaleString()}</div>
+                <div className="ov-card-sub">{viewsToday > 0 ? `+${viewsToday} views since last 7 days` : '+0 views since last 7 days'}</div>
+              </div>
             </div>
-            <div className="overview-grid">
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 14 }}>Account Statistics</div>
-                <div className="panel">
-                  {(() => {
-                    const steps = [!!bio, links.length > 0, !!avatarPreview]
-                    const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
-                    return (
-                      <>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                          <div className="progress-bar-bg" style={{ flex: 1, margin: 0 }}>
-                            <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
-                          </div>
-                          <span style={{ fontSize: 12, color: '#7a7a8a', flexShrink: 0 }}>{pct}% completed</span>
+
+            <div className="ov-stats-title">Account Statistics</div>
+
+            <div className="ov-grid">
+              {/* Left: completion panel */}
+              <div className="ov-completion-panel">
+                <div className="ov-completion-label">Profile Completion</div>
+                {(() => {
+                  const steps = [!!bio, links.length > 0, !!avatarPreview]
+                  const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
+                  return (
+                    <>
+                      <div className="ov-progress-wrap">
+                        <div className="ov-progress-bar">
+                          <div className="ov-progress-fill" style={{ width: `${pct}%` }} />
                         </div>
-                        <div style={{ background: 'rgba(196,0,29,0.07)', border: '1px solid rgba(196,0,29,0.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 14 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                            <span style={{ fontSize: 14, color: '#f59e0b' }}>⚠</span>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Your profile isn't complete yet!</span>
-                          </div>
-                          <div style={{ fontSize: 12, color: '#7a7a8a' }}>Complete your profile to make it more discoverable.</div>
+                        <span className="ov-progress-pct">{pct}% completed</span>
+                      </div>
+                      <div className="ov-warning">
+                        <span className="ov-warning-icon">⚠️</span>
+                        <div>
+                          <div className="ov-warning-title">Your profile isn't complete yet!</div>
+                          <div className="ov-warning-sub">Complete your profile to make it more discoverable and appealing.</div>
                         </div>
+                      </div>
+                      <div className="ov-steps-row">
                         {[
                           { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => navTo('customize') },
                           { label: 'Add A Description', done: !!bio, onClick: () => navTo('customize') },
                           { label: 'Add Links', done: links.length > 0, onClick: () => navTo('links') },
-                          { label: 'Reach 10 Profile Views', done: profileViews >= 10, onClick: null, progress: `${Math.min(profileViews, 10)}/10` },
                         ].map((step, i) => (
-                          <div key={i} onClick={step.onClick || undefined} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.15)', borderRadius: 10, padding: '10px 14px', marginBottom: 8, cursor: step.onClick ? 'pointer' : 'default' }}>
-                            <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: step.done ? 'rgba(34,197,94,0.15)' : 'rgba(196,0,29,0.1)', border: `1px solid ${step.done ? 'rgba(34,197,94,0.4)' : 'rgba(196,0,29,0.3)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, color: step.done ? '#22c55e' : '#ff2340' }}>
+                          <div key={i} className={`ov-step ${step.done ? 'done' : ''}`} onClick={step.onClick || undefined}>
+                            <div className={`ov-step-dot ${step.done ? 'done' : 'active'}`}>
                               {step.done ? '✓' : '!'}
                             </div>
-                            <span style={{ fontSize: 13, color: step.done ? '#22c55e' : '#b8b8c4' }}>{step.label}</span>
-                            {step.progress && !step.done && <span style={{ marginLeft: 'auto', fontSize: 11, color: '#555' }}>{step.progress}</span>}
-                            {!step.done && step.onClick && <span style={{ marginLeft: 'auto', fontSize: 12, color: '#444' }}>›</span>}
+                            <span className="ov-step-label">{step.label}</span>
+                            {!step.done && <span className="ov-step-arrow">›</span>}
                           </div>
                         ))}
-                      </>
-                    )
-                  })()}
-                </div>
+                      </div>
+                      <div className="ov-steps-row">
+                        <div className={`ov-step full-width ${profileViews >= 10 ? 'done' : ''}`}>
+                          <div className={`ov-step-dot ${profileViews >= 10 ? 'done' : 'active'}`}>
+                            {profileViews >= 10 ? '✓' : '!'}
+                          </div>
+                          <span className="ov-step-label">Reach 10 Profile Views</span>
+                          {profileViews < 10 && <span className="ov-step-progress">{profileViews}/10</span>}
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                <div className="panel" style={{ padding: '18px 16px' }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>Manage your account</div>
-                  <div style={{ fontSize: 11, color: '#7a7a8a', marginBottom: 14 }}>Change your email, username and more.</div>
-                  {[{ label: 'Change Username', page: 'settings' }, { label: 'Change Display Name', page: 'customize' }, { label: 'Account Settings', page: 'settings' }].map((item, i) => (
-                    <button key={i} onClick={() => navTo(item.page)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 12px', marginBottom: 6, background: '#0d0d10', border: '1px solid rgba(196,0,29,0.2)', borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit', color: '#b8b8c4', fontSize: 12, textAlign: 'left' }}>
-                      ✎ {item.label}
-                    </button>
-                  ))}
-                </div>
+
+              {/* Right: manage account panel */}
+              <div className="ov-manage-panel">
+                <div className="ov-manage-title">Manage your account</div>
+                <div className="ov-manage-sub">Change your email, username and more.</div>
+                {[
+                  { label: 'Change Username', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+                  { label: 'Change Display Name', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
+                  { label: 'Manage Aliases', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> },
+                  { label: 'Account Settings', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+                ].map((item, i) => (
+                  <button key={i} className="ov-manage-btn" onClick={() => navTo(item.page)}>
+                    <div className="ov-manage-btn-icon">{item.icon}</div>
+                    {item.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
