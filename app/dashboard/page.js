@@ -18,6 +18,7 @@ export default function Dashboard() {
   const [newLinkUrl, setNewLinkUrl] = useState('')
   const [uploadingType, setUploadingType] = useState(null)
   const [displayName, setDisplayName] = useState('')
+  const [originalUsername, setOriginalUsername] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -66,6 +67,7 @@ export default function Dashboard() {
         setDiscordPresence(data.discord_presence || 'Enabled')
         if (data.avatar_url) setAvatarPreview(data.avatar_url)
         setDisplayName(data.display_name || '')
+        setOriginalUsername(data.username || '')
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
@@ -722,7 +724,8 @@ export default function Dashboard() {
                     const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).single()
                     if (existing) { setSaveMsg('error:username:Username already taken'); setTimeout(() => setSaveMsg(''), 2000); return }
                     const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
-                    setSaveMsg(error ? 'error:username:Failed to save.' : 'success:username:Username updated!')
+if (!error) setOriginalUsername(username.trim())
+setSaveMsg(error ? 'error:username:Failed to save.' : 'success:username:Username updated!')
                     setTimeout(() => setSaveMsg(''), 2000)
                   }}>Save</button>
                 </div>
