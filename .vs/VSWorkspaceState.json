@@ -1,8 +1,13 @@
 {
   "ExpandedNodes": [
     "",
+    "\\.next",
     "\\app",
-    "\\app\\dashboard"
+    "\\app\\dashboard",
+    "\\app\\login",
+    "\\app\\pricing",
+    "\\app\\[username]",
+    "\\lib"
   ],
   "SelectedNode": "\\app\\dashboard\\page.js",
   "PreviewInSolutionExplorer": false

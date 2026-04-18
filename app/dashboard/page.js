@@ -645,182 +645,241 @@ export default function Dashboard() {
           </div>
         )}
 
- {activePage === 'settings' && (
-          <div>
-            <style>{`
-              .st-wrap { max-width: 680px; margin: 0 auto; }
-              .st-page-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 28px; }
-              .st-section-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 14px; }
-              .st-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
-              .st-field { margin-bottom: 18px; }
-              .st-field:last-child { margin-bottom: 0; }
-              .st-label { font-size: 13px; color: #b8b8c4; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-              .st-cooldown { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
-              .st-cooldown.available { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
-              .st-cooldown.locked { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
-              .st-input-wrap { background: #0c0c10; border: 1px solid rgba(196,0,29,0.25); border-radius: 12px; display: flex; align-items: center; gap: 10px; padding: 0 14px; transition: border-color .15s; }
-              .st-input-wrap:focus-within { border-color: #c4001d; }
-              .st-input-wrap.disabled { opacity: 0.5; }
-              .st-input-icon { color: #555; flex-shrink: 0; display: flex; align-items: center; }
-              .st-input { background: transparent; border: none; outline: none; color: #fff; font-size: 14px; font-family: inherit; padding: 12px 0; flex: 1; min-width: 0; }
-              .st-input::placeholder { color: #333; }
-              .st-input:disabled { cursor: not-allowed; }
-              .st-input-action { background: none; border: none; color: #555; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color .15s; flex-shrink: 0; }
-              .st-input-action:hover { color: #b8b8c4; }
-              .st-save-btn { background: linear-gradient(135deg, #c4001d, #ff2340); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: opacity .15s, transform .15s; white-space: nowrap; flex-shrink: 0; }
-              .st-save-btn:hover { opacity: .9; transform: translateY(-1px); }
-              .st-save-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-              .st-input-row { display: flex; gap: 10px; align-items: flex-start; }
-              .st-input-row .st-input-wrap { flex: 1; }
-              .st-msg { font-size: 12px; font-weight: 500; margin-top: 8px; }
-              .st-msg.success { color: #22c55e; }
-              .st-msg.error { color: #ff2340; }
-              .st-divider { height: 1px; background: rgba(196,0,29,0.1); margin: 18px 0; }
-              .st-danger-zone { background: rgba(196,0,29,0.04); border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
-              .st-danger-title { font-size: 14px; font-weight: 600; color: #ff2340; margin-bottom: 4px; }
-              .st-danger-sub { font-size: 12px; color: #7a7a8a; margin-bottom: 14px; }
-              .st-logout-btn { background: transparent; border: 1px solid rgba(196,0,29,0.35); border-radius: 10px; color: #b8b8c4; font-size: 13px; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: all .15s; }
-              .st-logout-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.1); color: #fff; }
-            `}</style>
+{activePage === 'settings' && (
+  <div>
+    <style>{`
+      .st-wrap { max-width: 680px; margin: 0 auto; }
+      .st-page-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 28px; }
+      .st-section-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 14px; }
+      .st-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
+      .st-field { margin-bottom: 18px; }
+      .st-field:last-child { margin-bottom: 0; }
+      .st-label { font-size: 13px; color: #b8b8c4; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+      .st-cooldown { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
+      .st-cooldown.available { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
+      .st-cooldown.locked { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
+      .st-input-wrap { background: #0c0c10; border: 1px solid rgba(196,0,29,0.25); border-radius: 12px; display: flex; align-items: center; gap: 10px; padding: 0 14px; transition: border-color .15s; }
+      .st-input-wrap:focus-within { border-color: #c4001d; }
+      .st-input-wrap.disabled { opacity: 0.5; }
+      .st-input-icon { color: #555; flex-shrink: 0; display: flex; align-items: center; }
+      .st-input { background: transparent; border: none; outline: none; color: #fff; font-size: 14px; font-family: inherit; padding: 12px 0; flex: 1; min-width: 0; }
+      .st-input::placeholder { color: #333; }
+      .st-input:disabled { cursor: not-allowed; }
+      .st-input-action { background: none; border: none; color: #555; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color .15s; flex-shrink: 0; }
+      .st-input-action:hover { color: #b8b8c4; }
+      .st-save-btn { background: linear-gradient(135deg, #c4001d, #ff2340); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: opacity .15s, transform .15s; white-space: nowrap; flex-shrink: 0; }
+      .st-save-btn:hover { opacity: .9; transform: translateY(-1px); }
+      .st-save-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+      .st-input-row { display: flex; gap: 10px; align-items: flex-start; }
+      .st-input-row .st-input-wrap { flex: 1; }
+      .st-msg { font-size: 12px; font-weight: 500; margin-top: 8px; }
+      .st-msg.success { color: #22c55e; }
+      .st-msg.error { color: #ff2340; }
+      .st-divider { height: 1px; background: rgba(196,0,29,0.1); margin: 18px 0; }
+      .st-danger-zone { background: rgba(196,0,29,0.04); border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
+      .st-danger-title { font-size: 14px; font-weight: 600; color: #ff2340; margin-bottom: 4px; }
+      .st-danger-sub { font-size: 12px; color: #7a7a8a; margin-bottom: 14px; }
+      .st-logout-btn { background: transparent; border: 1px solid rgba(196,0,29,0.35); border-radius: 10px; color: #b8b8c4; font-size: 13px; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: all .15s; }
+      .st-logout-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.1); color: #fff; }
+    `}</style>
 
-            <div className="st-wrap">
-              <div className="st-page-title">Account Settings</div>
+    <div className="st-wrap">
+      <div className="st-page-title">Account Settings</div>
 
-              {/* General Information */}
-              <div className="st-section-title">General Information</div>
-              <div className="st-panel">
+      <div className="st-section-title">General Information</div>
+      <div className="st-panel">
 
-                {/* Username */}
-                <div className="st-field">
-                  <div className="st-label">
-                    Username
-                    {(() => {
-                      const lastChanged = user?.username_changed_at ? new Date(user.username_changed_at) : null
-                      if (lastChanged) {
-                        const daysLeft = 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
-                        if (daysLeft > 0) return <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
-                      }
-                      return <span className="st-cooldown available">Available to change</span>
-                    })()}
-                  </div>
-                  <div className="st-input-wrap disabled">
+        {/* USERNAME */}
+        <div className="st-field">
+          {(() => {
+            const lastChanged = user?.username_changed_at ? new Date(user.username_changed_at) : null
+            const daysLeft = lastChanged ? 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000) : 0
+            const locked = daysLeft > 0
+            return (
+              <>
+                <div className="st-label">
+                  Username
+                  {locked
+                    ? <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
+                    : <span className="st-cooldown available">Available to change</span>
+                  }
+                </div>
+                <div className="st-input-row">
+                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
                     <div className="st-input-icon">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </div>
-                    <input className="st-input" value={username} disabled />
+                    <input
+                      className="st-input"
+                      value={username}
+                      disabled={locked}
+                      onChange={e => setUsername(e.target.value)}
+                      placeholder="Username"
+                    />
                   </div>
+                  <button className="st-save-btn" disabled={locked} onClick={async () => {
+                    if (!username.trim()) { setSaveMsg('error:username:Username cannot be empty'); setTimeout(() => setSaveMsg(''), 2000); return }
+                    const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).single()
+                    if (existing) { setSaveMsg('error:username:Username already taken'); setTimeout(() => setSaveMsg(''), 2000); return }
+                    const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
+                    setSaveMsg(error ? 'error:username:Failed to save.' : 'success:username:Username updated!')
+                    setTimeout(() => setSaveMsg(''), 2000)
+                  }}>Save</button>
                 </div>
-
-                <div className="st-divider" />
-
-                {/* Display Name */}
-                <div className="st-field">
-                  <div className="st-label">
-                    Display Name
-                    <span className="st-cooldown available">Can always change</span>
+                {saveMsg.includes(':username:') && (
+                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
+                    {saveMsg.split(':username:')[1]}
                   </div>
-                  <div className="st-input-row">
-                    <div className="st-input-wrap">
-                      <div className="st-input-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      </div>
-                      <input className="st-input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
-                    </div>
-                    <button className="st-save-btn" onClick={async () => {
-                      const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('username', username)
-                      setSaveMsg(error ? 'error:Failed to save.' : 'success:Display name saved!')
-                      setTimeout(() => setSaveMsg(''), 2000)
-                    }}>Save</button>
-                  </div>
-                  {saveMsg.startsWith('success:') && saveMsg.includes('Display') && <div className="st-msg success">{saveMsg.replace('success:', '')}</div>}
+                )}
+              </>
+            )
+          })()}
+        </div>
+
+        <div className="st-divider" />
+
+        {/* DISPLAY NAME */}
+        <div className="st-field">
+          <div className="st-label">
+            Display Name
+            <span className="st-cooldown available">Can always change</span>
+          </div>
+          <div className="st-input-row">
+            <div className="st-input-wrap">
+              <div className="st-input-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              </div>
+              <input className="st-input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
+            </div>
+            <button className="st-save-btn" onClick={async () => {
+              const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('email', user.email)
+              setSaveMsg(error ? 'error:displayname:Failed to save.' : 'success:displayname:Display name saved!')
+              setTimeout(() => setSaveMsg(''), 2000)
+            }}>Save</button>
+          </div>
+          {saveMsg.includes(':displayname:') && (
+            <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
+              {saveMsg.split(':displayname:')[1]}
+            </div>
+          )}
+        </div>
+
+        <div className="st-divider" />
+
+        {/* EMAIL */}
+        <div className="st-field">
+          {(() => {
+            const lastChanged = user?.email_changed_at ? new Date(user.email_changed_at) : null
+            const daysLeft = lastChanged ? 3 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000) : 0
+            const locked = daysLeft > 0
+            return (
+              <>
+                <div className="st-label">
+                  Email
+                  {locked
+                    ? <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
+                    : <span className="st-cooldown available">Available to change</span>
+                  }
                 </div>
-
-                <div className="st-divider" />
-
-                {/* Password */}
-                <div className="st-field">
-                  <div className="st-label">
-                    Password
-                    {(() => {
-                      const lastChanged = user?.password_changed_at ? new Date(user.password_changed_at) : null
-                      if (lastChanged) {
-                        const minsLeft = 60 - Math.floor((Date.now() - lastChanged.getTime()) / 60000)
-                        if (minsLeft > 0) return <span className="st-cooldown locked">Locked for {minsLeft} min{minsLeft !== 1 ? 's' : ''}</span>
-                      }
-                      return <span className="st-cooldown available">Available to change</span>
-                    })()}
-                  </div>
-                  <div className="st-input-row">
-                    <div className="st-input-wrap">
-                      <div className="st-input-icon">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                      </div>
-                      <input className="st-input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-                      <button className="st-input-action" onClick={() => setShowPassword(p => !p)}>
-                        {showPassword
-                          ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                          : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        }
-                      </button>
-                    </div>
-                    <button className="st-save-btn" onClick={async () => {
-                      if (!newPassword || newPassword.length < 6) { setSaveMsg('error:Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
-                      const { error } = await supabase.auth.updateUser({ password: newPassword })
-                      if (!error) {
-                        setNewPassword('')
-                        await supabase.from('users').update({ password_changed_at: new Date().toISOString() }).eq('username', username)
-                        setSaveMsg('success:Password updated!')
-                      } else {
-                        setSaveMsg('error:Failed to update password.')
-                      }
-                      setTimeout(() => setSaveMsg(''), 2000)
-                    }}>Update</button>
-                  </div>
-                  {saveMsg && saveMsg.includes('Password') && (
-                    <div className={`st-msg ${saveMsg.startsWith('success:') ? 'success' : 'error'}`}>{saveMsg.replace('success:', '').replace('error:', '')}</div>
-                  )}
-                </div>
-
-                <div className="st-divider" />
-
-                {/* Email */}
-                <div className="st-field">
-                  <div className="st-label">
-                    Email
-                    {(() => {
-                      const lastChanged = user?.email_changed_at ? new Date(user.email_changed_at) : null
-                      if (lastChanged) {
-                        const daysLeft = 3 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)
-                        if (daysLeft > 0) return <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
-                      }
-                      return <span className="st-cooldown available">Available to change</span>
-                    })()}
-                  </div>
-                  <div className="st-input-wrap disabled">
+                <div className="st-input-row">
+                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
                     <div className="st-input-icon">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                     </div>
-                    <input className="st-input" value={user?.email || ''} disabled />
+                    <input
+                      className="st-input"
+                      type="email"
+                      value={user?.email || ''}
+                      disabled={locked}
+                      placeholder="New email"
+                      onChange={e => setUser(prev => ({ ...prev, email: e.target.value }))}
+                    />
                   </div>
+                  <button className="st-save-btn" disabled={locked} onClick={async () => {
+                    const { error } = await supabase.auth.updateUser({ email: user.email })
+                    if (!error) {
+                      await supabase.from('users').update({ email: user.email, email_changed_at: new Date().toISOString() }).eq('username', username)
+                      setSaveMsg('success:email:Confirmation sent! Check your inbox.')
+                    } else {
+                      setSaveMsg('error:email:Failed to update email.')
+                    }
+                    setTimeout(() => setSaveMsg(''), 3000)
+                  }}>Save</button>
                 </div>
+                {saveMsg.includes(':email:') && (
+                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
+                    {saveMsg.split(':email:')[1]}
+                  </div>
+                )}
+              </>
+            )
+          })()}
+        </div>
 
-              </div>
+        <div className="st-divider" />
 
-              {/* Danger zone */}
-              <div className="st-danger-zone">
-                <div className="st-danger-title">Session</div>
-                <div className="st-danger-sub">Sign out of your current session on this device.</div>
-                <button className="st-logout-btn" onClick={handleLogout}>← Log Out</button>
-              </div>
-
-              {saveMsg && !saveMsg.includes('Display') && !saveMsg.includes('Password') && !saveMsg.includes('password') && (
-                <div className={`st-msg ${saveMsg.startsWith('success:') ? 'success' : 'error'}`} style={{ marginTop: 8 }}>
-                  {saveMsg.replace('success:', '').replace('error:', '')}
+        {/* PASSWORD */}
+        <div className="st-field">
+          {(() => {
+            const lastChanged = user?.password_changed_at ? new Date(user.password_changed_at) : null
+            const hoursLeft = lastChanged ? 24 - Math.floor((Date.now() - lastChanged.getTime()) / 3600000) : 0
+            const locked = hoursLeft > 0
+            return (
+              <>
+                <div className="st-label">
+                  Password
+                  {locked
+                    ? <span className="st-cooldown locked">Locked for {hoursLeft} hour{hoursLeft !== 1 ? 's' : ''}</span>
+                    : <span className="st-cooldown available">Available to change</span>
+                  }
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+                <div className="st-input-row">
+                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
+                    <div className="st-input-icon">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <input className="st-input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} disabled={locked} onChange={e => setNewPassword(e.target.value)} />
+                    <button className="st-input-action" onClick={() => setShowPassword(p => !p)}>
+                      {showPassword
+                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      }
+                    </button>
+                  </div>
+                  <button className="st-save-btn" disabled={locked} onClick={async () => {
+                    if (!newPassword || newPassword.length < 6) { setSaveMsg('error:password:Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
+                    const { error } = await supabase.auth.updateUser({ password: newPassword })
+                    if (!error) {
+                      setNewPassword('')
+                      await supabase.from('users').update({ password_changed_at: new Date().toISOString() }).eq('username', username)
+                      setSaveMsg('success:password:Password updated!')
+                    } else {
+                      setSaveMsg('error:password:Failed to update password.')
+                    }
+                    setTimeout(() => setSaveMsg(''), 2000)
+                  }}>Update</button>
+                </div>
+                {saveMsg.includes(':password:') && (
+                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
+                    {saveMsg.split(':password:')[1]}
+                  </div>
+                )}
+              </>
+            )
+          })()}
+        </div>
+
+      </div>
+
+      <div className="st-danger-zone">
+        <div className="st-danger-title">Session</div>
+        <div className="st-danger-sub">Sign out of your current session on this device.</div>
+        <button className="st-logout-btn" onClick={handleLogout}>← Log Out</button>
+      </div>
+
+    </div>
+  </div>
+)}
 
         {activePage === 'customize' && (
           <div>
