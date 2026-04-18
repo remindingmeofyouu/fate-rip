@@ -648,7 +648,7 @@ export default function Dashboard() {
  {activePage === 'settings' && (
           <div>
             <style>{`
-              .st-wrap { max-width: 680px; }
+              .st-wrap { max-width: 680px; margin: 0 auto; }
               .st-page-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 28px; }
               .st-section-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 14px; }
               .st-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
