@@ -3,6 +3,136 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
+// ─── Analytics Sub-Page ───────────────────────────────────────────────────────
+function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
+  const [weekData, setWeekData] = useState([])
+  const [loadingWeek, setLoadingWeek] = useState(true)
+  const [timeRange, setTimeRange] = useState('7')
+  const [lastUpdated, setLastUpdated] = useState('')
+
+  useEffect(() => {
+    if (!username) return
+    const fetchWeek = async () => {
+      setLoadingWeek(true)
+      const days = []
+      const numDays = parseInt(timeRange)
+      for (let i = numDays - 1; i >= 0; i--) {
+        const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i)
+        const nextD = new Date(d); nextD.setDate(nextD.getDate() + 1)
+        const { count } = await supabase.from('profile_views').select('*', { count: 'exact', head: true })
+          .eq('username', username).gte('viewed_at', d.toISOString()).lt('viewed_at', nextD.toISOString())
+        days.push({ label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), count: count || 0 })
+      }
+      setWeekData(days); setLastUpdated('less than a minute ago'); setLoadingWeek(false)
+    }
+    fetchWeek()
+  }, [username, timeRange])
+
+  const weekTotal = weekData.reduce((a, b) => a + b.count, 0)
+  const avgDaily = weekData.length > 0 ? (weekTotal / weekData.length).toFixed(1) : '0'
+  const maxCount = Math.max(...weekData.map(d => d.count), 1)
+  const chartW = 1000, chartH = 200
+
+  const linePath = (() => {
+    if (weekData.length < 2) return ''
+    const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`)
+    return `M ${pts.join(' L ')}`
+  })()
+  const areaPath = (() => {
+    if (weekData.length < 2) return ''
+    const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`)
+    return `M 0,${chartH} L ${pts.join(' L ')} L ${chartW},${chartH} Z`
+  })()
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <style>{`
+        .an-stat { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 20px; transition: border-color .15s, transform .15s; position: relative; overflow: hidden; }
+        .an-stat:hover { border-color: rgba(224,48,48,0.3); transform: translateY(-2px); }
+        .an-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
+        @media(max-width:900px){ .an-stat-grid { grid-template-columns: 1fr 1fr; } }
+        @media(max-width:480px){ .an-stat-grid { grid-template-columns: 1fr 1fr; } }
+      `}</style>
+
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Analytics</div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, fontFamily: 'Syne, sans-serif', margin: 0 }}>View <span style={{ color: '#e03030' }}>Analytics</span></h1>
+          <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Track your profile performance</p>
+        </div>
+        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+          ← Back
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Time Range</span>
+        {lastUpdated && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(224,48,48,0.08)', border: '1px solid rgba(224,48,48,0.2)', borderRadius: 999, padding: '4px 12px' }}>Updated {lastUpdated}</span>}
+        <select value={timeRange} onChange={e => setTimeRange(e.target.value)} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, color: '#fff', fontSize: 12, padding: '8px 12px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer' }}>
+          <option value="3">Last 3 days</option>
+          <option value="7">Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30">Last 30 days</option>
+        </select>
+      </div>
+
+      <div className="an-stat-grid">
+        {[
+          { label: 'Total Views', value: profileViews.toLocaleString(), sub: 'All time' },
+          { label: 'Period Views', value: weekTotal.toLocaleString(), sub: `Last ${timeRange} days` },
+          { label: 'Daily Average', value: avgDaily, sub: 'Per day' },
+          { label: 'Today', value: viewsToday.toLocaleString(), sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
+        ].map((s, i) => (
+          <div key={i} className="an-stat">
+            <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>{s.label}</div>
+            <div style={{ fontSize: 32, fontWeight: 700, color: '#fff', lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>{s.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Profile Views</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(224,48,48,0.06)', border: '1px solid rgba(224,48,48,0.15)', borderRadius: 999, padding: '4px 12px' }}>Unique visitors only</div>
+        </div>
+        {loadingWeek ? (
+          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading…</div>
+        ) : weekTotal === 0 ? (
+          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No views yet — share your profile to get started!</div>
+        ) : (
+          <div style={{ width: '100%', position: 'relative' }}>
+            <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }} preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#e03030" stopOpacity="0.2"/>
+                  <stop offset="100%" stopColor="#e03030" stopOpacity="0.02"/>
+                </linearGradient>
+              </defs>
+              {[0.25,0.5,0.75,1].map((v,i) => (
+                <line key={i} x1="0" y1={chartH - v*(chartH-20)-10} x2={chartW} y2={chartH - v*(chartH-20)-10} stroke="rgba(224,48,48,0.06)" strokeWidth="1"/>
+              ))}
+              {areaPath && <path d={areaPath} fill="url(#areaGrad2)"/>}
+              {linePath && <path d={linePath} fill="none" stroke="#e03030" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
+              {weekData.map((d, i) => {
+                if (!d.count) return null
+                const x = (i / (weekData.length - 1)) * chartW
+                const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
+                return <circle key={i} cx={x} cy={y} r="5" fill="#e03030" stroke="#050202" strokeWidth="2"/>
+              })}
+            </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, padding: '0 2px' }}>
+              {weekData.map((d, i) => <span key={i} style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{d.label}</span>)}
+            </div>
+          </div>
+        )}
+        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 12 }}>Each data point represents unique visitor count per day.</div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const router = useRouter()
   const [user, setUser] = useState(null)
@@ -10,24 +140,21 @@ export default function Dashboard() {
   const [uid, setUid] = useState('')
   const [bio, setBio] = useState('')
   const [links, setLinks] = useState([])
+  const [buttons, setButtons] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saveMsg, setSaveMsg] = useState('')
+  const [toast, setToast] = useState('')
+  const [toastVisible, setToastVisible] = useState(false)
   const [activePage, setActivePage] = useState('overview')
-  const [newLinkTitle, setNewLinkTitle] = useState('')
-  const [newLinkUrl, setNewLinkUrl] = useState('')
-  const [uploadingType, setUploadingType] = useState(null)
   const [displayName, setDisplayName] = useState('')
-  const [originalUsername, setOriginalUsername] = useState('')
   const [dbUser, setDbUser] = useState(null)
   const [newPassword, setNewPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [showUidTooltip, setShowUidTooltip] = useState(false)
-  const [copied, setCopied] = useState(false)
   const [profileViews, setProfileViews] = useState(0)
   const [viewsToday, setViewsToday] = useState(0)
+  const [saveMsg, setSaveMsg] = useState('')
 
+  // Appearance state
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
@@ -40,20 +167,80 @@ export default function Dashboard() {
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [cursorPreview, setCursorPreview] = useState(null)
   const [audioName, setAudioName] = useState(null)
+  const [uploadingType, setUploadingType] = useState(null)
   const [appSaveMsg, setAppSaveMsg] = useState('')
+
+  // Appearance tabs
+  const [appearTab, setAppearTab] = useState('Presets')
+  const [selectedPreset, setSelectedPreset] = useState('Crimson')
+  const [bgType, setBgType] = useState('Solid')
+  const [selectedFont, setSelectedFont] = useState('Inter')
+  const [glowIntensity, setGlowIntensity] = useState(50)
+  const [accentColor, setAccentColor] = useState('#e03030')
+  const [bgColor, setBgColor] = useState('#050202')
+
+  // Effects state
+  const [effectsTab, setEffectsTab] = useState('Particles')
+  const [particleEnabled, setParticleEnabled] = useState(false)
+  const [particleStyle, setParticleStyle] = useState('Dots')
+  const [cursorStyle, setCursorStyle] = useState('Default')
+  const [entranceAnim, setEntranceAnim] = useState('Fade In')
+  const [clickEffect, setClickEffect] = useState('None')
+
+  // Music state
+  const [musicEnabled, setMusicEnabled] = useState(false)
+  const [musicType, setMusicType] = useState('direct')
+  const [musicUrl, setMusicUrl] = useState('')
+  const [musicTitle, setMusicTitle] = useState('')
+  const [musicArtist, setMusicArtist] = useState('')
+  const [musicAutoplay, setMusicAutoplay] = useState(false)
+  const [musicVolume, setMusicVolume] = useState(50)
+  const [musicShowTitle, setMusicShowTitle] = useState(true)
+  const [musicShowArtist, setMusicShowArtist] = useState(true)
+
+  // Profile editor state
+  const [profileTab, setProfileTab] = useState('Identity')
+  const [panelSize, setPanelSize] = useState('medium')
+  const [showAvatar, setShowAvatar] = useState(true)
+  const [avatarPos, setAvatarPos] = useState('center')
+  const [avatarPlacement, setAvatarPlacement] = useState('outside')
+  const [typingBio, setTypingBio] = useState(false)
+  const [enterEnabled, setEnterEnabled] = useState(true)
+  const [enterTitle, setEnterTitle] = useState('')
+  const [enterSubtitle, setEnterSubtitle] = useState('Click anywhere to enter')
+  const [enterShowAvatar, setEnterShowAvatar] = useState(true)
+  const [enterShowTitle, setEnterShowTitle] = useState(true)
+  const [enterShowSubtitle, setEnterShowSubtitle] = useState(true)
+
+  // Links/Buttons modals
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false)
+  const [showAddBtnModal, setShowAddBtnModal] = useState(false)
+  const [newLinkLabel, setNewLinkLabel] = useState('')
+  const [newLinkUrl, setNewLinkUrl] = useState('')
+  const [newBtnLabel, setNewBtnLabel] = useState('')
+  const [newBtnUrl, setNewBtnUrl] = useState('')
+
+  // Sidebar
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [avatarDDOpen, setAvatarDDOpen] = useState(false)
 
   const fileBgRef = useRef()
   const fileAvatarRef = useRef()
   const fileCursorRef = useRef()
   const fileAudioRef = useRef()
 
+  const showToast = (msg) => {
+    setToast(msg); setToastVisible(true)
+    setTimeout(() => setToastVisible(false), 2500)
+  }
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) { router.push('/login'); return }
       setUser(session.user)
-      const { data } = await supabase
-        .from('users').select('*').eq('email', session.user.email).single()
+      const { data } = await supabase.from('users').select('*').eq('email', session.user.email).single()
       if (data) {
         setUsername(data.username || '')
         setBio(data.bio || '')
@@ -68,12 +255,12 @@ export default function Dashboard() {
         setDiscordPresence(data.discord_presence || 'Enabled')
         if (data.avatar_url) setAvatarPreview(data.avatar_url)
         setDisplayName(data.display_name || '')
-        setOriginalUsername(data.username || '')
         setDbUser(data)
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
         setUid(data.id ? String(data.id) : '')
+        setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
       }
       setLoading(false)
@@ -82,47 +269,13 @@ export default function Dashboard() {
   }, [router])
 
   const fetchViewCounts = async (uname) => {
-    const { count: total } = await supabase
-      .from('profile_views')
-      .select('*', { count: 'exact', head: true })
-      .eq('username', uname)
-
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-    const { count: today } = await supabase
-      .from('profile_views')
-      .select('*', { count: 'exact', head: true })
-      .eq('username', uname)
-      .gte('viewed_at', todayStart.toISOString())
-
-    setProfileViews(total || 0)
-    setViewsToday(today || 0)
+    const { count: total } = await supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('username', uname)
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0)
+    const { count: today } = await supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('username', uname).gte('viewed_at', todayStart.toISOString())
+    setProfileViews(total || 0); setViewsToday(today || 0)
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  const saveProfile = async () => {
-    setSaving(true); setSaveMsg('')
-    const { error } = await supabase.from('users').update({ bio, links }).eq('username', username)
-    setSaving(false)
-    if (error) { setSaveMsg('Failed to save.') }
-    else { setSaveMsg('Saved!'); setTimeout(() => setSaveMsg(''), 2000) }
-  }
-
-  const saveAppearance = async () => {
-    setSaving(true); setAppSaveMsg('')
-    const { error } = await supabase.from('users').update({
-      bio: appBio, opacity, blur, username_fx: usernameFx,
-      bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence,
-    }).eq('username', username)
-    setSaving(false)
-    if (!error) setBio(appBio)
-    setAppSaveMsg(error ? 'Failed to save.' : 'Saved!')
-    setTimeout(() => setAppSaveMsg(''), 2000)
-  }
+  const handleLogout = async () => { await supabase.auth.signOut(); router.push('/') }
 
   const handleFileUpload = async (type, file) => {
     if (!file) return
@@ -131,7 +284,7 @@ export default function Dashboard() {
     const bucket = type === 'audio' ? 'audio' : 'images'
     const path = `${username}/${type}-${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage.from(bucket).upload(path, file, { upsert: true })
-    if (uploadError) { console.error('Upload error:', uploadError); setUploadingType(null); return }
+    if (uploadError) { showToast('Upload failed'); setUploadingType(null); return }
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(path)
     const url = urlData.publicUrl
     const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
@@ -140,6 +293,7 @@ export default function Dashboard() {
     else if (type === 'avatar') setAvatarPreview(url)
     else if (type === 'cursor') setCursorPreview(url)
     else if (type === 'audio') setAudioName(file.name)
+    showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded!`)
     setUploadingType(null)
   }
 
@@ -150,1170 +304,1032 @@ export default function Dashboard() {
     else if (type === 'avatar') setAvatarPreview(null)
     else if (type === 'cursor') setCursorPreview(null)
     else if (type === 'audio') setAudioName(null)
+    showToast('Removed')
+  }
+
+  const saveProfile = async () => {
+    setSaving(true)
+    const { error } = await supabase.from('users').update({ bio: appBio, links, display_name: displayName, location }).eq('username', username)
+    setSaving(false)
+    if (!error) setBio(appBio)
+    showToast(error ? 'Failed to save' : 'Profile saved!')
+  }
+
+  const saveAppearance = async () => {
+    setSaving(true)
+    const { error } = await supabase.from('users').update({
+      bio: appBio, opacity, blur, username_fx: usernameFx,
+      bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence,
+    }).eq('username', username)
+    setSaving(false)
+    if (!error) setBio(appBio)
+    showToast(error ? 'Failed to save' : 'Appearance saved!')
   }
 
   const addLink = () => {
-    if (!newLinkTitle.trim()) return
+    if (!newLinkLabel.trim() || !newLinkUrl.trim()) { showToast('Please fill in both fields'); return }
     const url = newLinkUrl.trim().startsWith('http') ? newLinkUrl.trim() : `https://${newLinkUrl.trim()}`
-    setLinks([...links, { title: newLinkTitle.trim(), url: newLinkUrl.trim() ? url : '#' }])
-    setNewLinkTitle(''); setNewLinkUrl('')
+    setLinks([...links, { title: newLinkLabel.trim(), url, id: Date.now() }])
+    setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(false)
+    showToast('Link added!')
   }
-  const removeLink = (i) => setLinks(links.filter((_, idx) => idx !== i))
-  const moveLink = (i, dir) => {
-    const arr = [...links]; const swap = i + dir
-    if (swap < 0 || swap >= arr.length) return
-    ;[arr[i], arr[swap]] = [arr[swap], arr[i]]; setLinks(arr)
-  }
-  const toggleGlow = (key) => setGlowState(prev => ({ ...prev, [key]: !prev[key] }))
-  const navTo = (page) => { setActivePage(page); setSidebarOpen(false) }
-
-  const handleCopyUid = () => {
-    if (uid) {
-      navigator.clipboard.writeText(uid).then(() => {
-        setCopied(true)
-        setTimeout(() => setCopied(false), 1500)
-      })
-    }
+  const deleteLink = (id) => { setLinks(links.filter(l => l.id !== id || l.title !== id)); showToast('Link removed') }
+  const addButton = () => {
+    if (!newBtnLabel.trim() || !newBtnUrl.trim()) { showToast('Please fill in both fields'); return }
+    const url = newBtnUrl.trim().startsWith('http') ? newBtnUrl.trim() : `https://${newBtnUrl.trim()}`
+    setButtons([...buttons, { label: newBtnLabel.trim(), url, id: Date.now() }])
+    setNewBtnLabel(''); setNewBtnUrl(''); setShowAddBtnModal(false)
+    showToast('Button created!')
   }
 
-  const handleShareProfile = () => {
-    const url = `${window.location.origin}/${username}`
-    if (navigator.share) {
-      navigator.share({ title: `${username}'s profile`, url })
-    } else {
-      navigator.clipboard.writeText(url).then(() => {
-        setSaveMsg('Profile link copied!')
-        setTimeout(() => setSaveMsg(''), 2000)
-      })
-    }
-  }
-
-  const previewNameStyle = (() => {
-    if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
-    if (usernameFx === 'gold') return { background: 'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }
-    if (usernameFx === 'neon') return { color: '#ff2340', textShadow: '0 0 8px rgba(255,35,64,0.8)' }
-    if (usernameFx === 'glitch') return { color: '#fff', animation: 'glitch 0.4s infinite' }
-    if (glowState.username) return { textShadow: '0 0 12px rgba(196,0,29,0.5)' }
-    return {}
-  })()
-
-  const previewOverlayStyle = (() => {
-    if (bgFx === 'nighttime') return { background: 'linear-gradient(180deg, rgba(5,5,12,0.3) 0%, rgba(20,0,40,0.4) 100%)' }
-    if (bgFx === 'particles') return { background: 'radial-gradient(circle at 20% 80%, rgba(196,0,29,0.15) 0%, transparent 50%)' }
-    if (bgFx === 'matrix') return { background: 'linear-gradient(180deg, rgba(0,30,10,0.4) 0%, rgba(0,60,20,0.2) 100%)' }
-    if (bgFx === 'rain') return { background: 'linear-gradient(180deg, rgba(0,10,30,0.4) 0%, rgba(0,20,60,0.2) 100%)' }
-    if (bgFx === 'snow') return { background: 'linear-gradient(180deg, rgba(200,220,255,0.05) 0%, rgba(180,200,255,0.1) 100%)' }
-    return {}
-  })()
-
+  const navTo = (page) => { setActivePage(page); setSidebarOpen(false); setNotifOpen(false); setAvatarDDOpen(false) }
   const initial = username ? username[0].toUpperCase() : '?'
 
+  const presets = [
+    ['Crimson','#1a0000','#e03030'],['Obsidian','#050505','#6366f1'],
+    ['Sunset','#1a0800','#f97316'],['Rose','#240b1a','#fb7185'],
+    ['Lime','#060b02','#84cc16'],['Ice','#07131d','#7dd3fc'],
+    ['Gold','#140f02','#facc15'],['Cherry','#15030b','#f43f5e'],
+    ['Ocean','#03111c','#0ea5e9'],['Violet','#0a0517','#8b5cf6'],
+  ]
+
+  const fonts = ['Inter','Syne','Space Mono','Roboto','Poppins','Montserrat','Sora','DM Sans','Manrope','JetBrains Mono','Bebas Neue','Playfair Display']
+  const particles = ['Dots','Stars','Snow','Bubbles','Fireflies','Sparks','Matrix','Confetti']
+  const cursors = ['Default','Dot','Ring','Crosshair','Skull','Star','Heart','Arrow']
+  const entranceAnims = ['Fade In','Slide Up','Zoom In','Glitch','None']
+  const clickEffects = ['None','Sparks','Hearts','Stars','Explosion','Ripple']
+  const platforms = ['Twitter','GitHub','Instagram','Discord','YouTube','TikTok','Twitch','Spotify','LinkedIn','Reddit','Steam','Kick']
+
   if (loading) return (
-    <div style={{ background: '#050506', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#7a7a8a', fontFamily: 'system-ui, sans-serif', fontSize: '14px' }}>Loading...</div>
+    <div style={{ background: '#050202', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Loading…</div>
     </div>
   )
 
-  const navSections = [
+  const navLinks = [
+    { section: null, items: [
+      { id: 'overview', label: 'Overview', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> },
+    ]},
+    { section: 'PROFILE', items: [
+      { id: 'profile', label: 'Edit Profile', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
+      { id: 'appearance', label: 'Appearance', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8H12"/></svg> },
+      { id: 'links', label: 'Links', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg> },
+      { id: 'buttons', label: 'Buttons', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="2"/></svg> },
+    ]},
+    { section: 'FEATURES', items: [
+      { id: 'effects', label: 'Effects', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg> },
+      { id: 'music', label: 'Music', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> },
+      { id: 'widgets', label: 'Widgets', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="4" rx="1"/><rect x="14" y="3" width="7" height="4" rx="1"/><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="17" width="7" height="4" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/></svg> },
+      { id: 'templates', label: 'Templates', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> },
+    ]},
     { section: 'ACCOUNT', items: [
-      { id: 'overview', label: 'Overview' },
-      { id: 'analytics', label: 'Analytics' },
-      { id: 'badges', label: 'Badges' },
-      { id: 'settings', label: 'Settings' },
-    ]},
-    { section: 'CUSTOMIZE', items: [
-      { id: 'customize', label: 'Appearance' },
-      { id: 'links', label: 'Links' },
-      { id: 'templates', label: 'Templates' },
-    ]},
-    { section: 'PREMIUM', items: [
-      { id: 'premium', label: 'Upgrade' },
+      { id: 'analytics', label: 'Analytics', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+      { id: 'settings', label: 'Settings', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+      { id: 'premium', label: 'Premium', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
     ]},
   ]
 
+  const PageHeader = ({ breadcrumb, title, subtitle }) => (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>{breadcrumb}</div>
+      <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, fontFamily: 'Syne, sans-serif' }} dangerouslySetInnerHTML={{ __html: title }} />
+      {subtitle && <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{subtitle}</p>}
+    </div>
+  )
+
+  const Card = ({ children, style }) => (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', ...style }}>{children}</div>
+  )
+
+  const CardHeader = ({ icon, title, sub, action }) => (
+    <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {icon && <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(224,48,48,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</div>}
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{title}</div>
+          {sub && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{sub}</div>}
+        </div>
+      </div>
+      {action}
+    </div>
+  )
+
+  const Input = ({ style, ...props }) => (
+    <input style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box', ...style }} {...props} />
+  )
+
+  const Textarea = ({ style, ...props }) => (
+    <textarea style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', resize: 'vertical', boxSizing: 'border-box', ...style }} {...props} />
+  )
+
+  const BtnAccent = ({ children, onClick, style, disabled }) => (
+    <button onClick={onClick} disabled={disabled} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: disabled ? 'not-allowed' : 'pointer', border: 'none', background: disabled ? 'rgba(224,48,48,0.4)' : '#e03030', color: '#fff', fontFamily: 'inherit', transition: 'all .15s', opacity: disabled ? 0.6 : 1, ...style }}>{children}</button>
+  )
+
+  const BtnGhost = ({ children, onClick, style }) => (
+    <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontFamily: 'inherit', transition: 'all .15s', ...style }}>{children}</button>
+  )
+
+  const SaveBar = ({ onSave, onDiscard }) => (
+    <div style={{ position: 'sticky', bottom: 0, background: 'rgba(5,2,2,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+      <BtnGhost onClick={onDiscard}>Discard</BtnGhost>
+      <BtnAccent onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</BtnAccent>
+    </div>
+  )
+
+  const Toggle = ({ checked, onChange }) => (
+    <label style={{ position: 'relative', width: 34, height: 20, flexShrink: 0, cursor: 'pointer', display: 'inline-block' }}>
+      <input type="checkbox" checked={checked} onChange={onChange} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 20, background: checked ? '#e03030' : 'rgba(255,255,255,0.1)', transition: 'background .2s' }} />
+      <div style={{ position: 'absolute', top: 3, left: checked ? 17 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
+    </label>
+  )
+
+  const ToggleRow = ({ label, sub, checked, onChange }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
+      <div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0 }}>{label}</p>
+        {sub && <small style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', display: 'block', marginTop: 1 }}>{sub}</small>}
+      </div>
+      <Toggle checked={checked} onChange={onChange} />
+    </div>
+  )
+
+  const TabBar = ({ tabs, active, onSelect, cols }) => (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols || tabs.length},1fr)`, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 4, gap: 2 }}>
+      {tabs.map(t => (
+        <button key={t} onClick={() => onSelect(t)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 12px', borderRadius: 9, border: active === t ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent', background: active === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: active === t ? '#fff' : 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>{t}</button>
+      ))}
+    </div>
+  )
+
+  // ── Preview Panel (used in Profile editor) ──────────────────────────────────
+  const PreviewPanel = () => (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="15" height="15" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Live Preview
+        </span>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e03030', animation: 'pulse2 1.5s infinite', display: 'inline-block' }} />
+      </div>
+      <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0202', position: 'relative', overflow: 'hidden' }}>
+        {bgPreview && <img src={bgPreview} alt="bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur/8)}px)` : 'none' }} />}
+        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 20, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: opacity / 100 }}>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(224,48,48,0.12)', border: '2px solid rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: '#e03030', overflow: 'hidden' }}>
+            {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{displayName || username}</div>
+          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio}</div>}
+          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
+        </div>
+      </div>
+    </div>
+  )
+
   return (
-    <div style={{ margin: 0, background: 'radial-gradient(circle at top, #09090d 0%, #050506 45%, #020203 100%)', fontFamily: 'system-ui, -apple-system, sans-serif', color: '#fff', display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ margin: 0, background: '#050202', fontFamily: 'Inter, sans-serif', color: '#fff', display: 'flex', minHeight: '100vh' }}>
       <title>fate.rip | Dashboard</title>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(196,0,29,0.3); border-radius: 4px; }
-        .mobile-topbar { display: none; position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #050506; border-bottom: 1px solid rgba(196,0,29,0.35); z-index: 200; align-items: center; justify-content: space-between; padding: 0 16px; }
-        .mobile-logo { font-size: 20px; font-weight: 800; letter-spacing: 1px; }
-        .mobile-logo .fate { color: #ff2340; } .mobile-logo .rip { color: #fff; }
-        .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; }
-        .hamburger span { display: block; width: 22px; height: 2px; background: #fff; border-radius: 2px; transition: all .2s; }
-        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 149; }
-        .sidebar-overlay.open { display: block; }
-        .sidebar { width: 250px; background: linear-gradient(180deg,#050506 0%,#09090d 40%,#050506 100%); border-right: 1px solid rgba(196,0,29,0.35); padding: 26px 20px 20px; display: flex; flex-direction: column; gap: 26px; flex-shrink: 0; overflow-y: auto; height: 100vh; transition: transform .25s ease; }
-        .logo { font-size: 26px; font-weight: 800; letter-spacing: 1.2px; text-decoration: none; display: block; }
-        .logo .fate { color: #ff2340; } .logo .rip { color: #fff; }
-        .logo-sub { font-size: 11px; color: #b8b8c4; margin-top: 4px; letter-spacing: 0.16em; text-transform: uppercase; }
-        .nav-section { display: flex; flex-direction: column; gap: 8px; }
-        .nav-title { font-size: 12px; color: #7a7a8a; margin-bottom: 4px; letter-spacing: 0.16em; text-transform: uppercase; }
-        .nav-item { padding: 9px 11px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: border .15s, background .15s, color .15s; font-size: 13px; color: #b8b8c4; display: flex; align-items: center; justify-content: space-between; background: none; width: 100%; text-align: left; font-family: inherit; }
-        .nav-item:hover, .nav-item.active { border-color: #c4001d; background: rgba(196,0,29,0.08); color: #fff; }
-        .nav-item .chevron { font-size: 11px; opacity: 0.7; }
-        .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 0; }
-        .sidebar-support-panel { border: 1px solid rgba(196,0,29,0.3); border-radius: 14px; background: rgba(196,0,29,0.04); padding: 14px 14px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
-        .support-label { font-size: 11px; color: #7a7a8a; }
-        .support-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(196,0,29,0.3); background: rgba(196,0,29,0.06); color: #b8b8c4; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all .15s; text-decoration: none; }
-        .support-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.15); color: #fff; transform: translateY(-1px); }
-        .support-btn-icon { width: 24px; height: 24px; border-radius: 7px; background: rgba(196,0,29,0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .share-profile-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #c4001d, #ff2340); color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s; margin-bottom: 10px; }
-        .share-profile-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .sidebar-user-row { border-top: 1px solid rgba(196,0,29,0.2); padding-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .sidebar-user-info { position: relative; cursor: pointer; flex: 1; min-width: 0; }
-        .sidebar-username { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; }
-        .sidebar-uid { font-size: 11px; color: #7a7a8a; }
-        .uid-tooltip { position: absolute; bottom: calc(100% + 8px); left: 0; background: #111114; border: 1px solid rgba(196,0,29,0.5); border-radius: 10px; padding: 8px 12px; font-size: 11px; color: #b8b8c4; white-space: nowrap; z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.6); animation: fadeInUp .15s ease; pointer-events: none; }
-        .uid-tooltip .uid-val { color: #ff2340; font-weight: 600; font-family: monospace; font-size: 12px; }
-        .uid-tooltip::after { content: ''; position: absolute; top: 100%; left: 14px; border: 5px solid transparent; border-top-color: rgba(196,0,29,0.5); }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .logout-link { color: #7a7a8a; cursor: pointer; font-size: 11px; background: none; border: none; font-family: inherit; padding: 0; transition: color .15s; flex-shrink: 0; }
-        .logout-link:hover { color: #ff2340; }
-        .main { flex: 1; padding: 32px 40px; overflow-y: auto; }
-        .page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
-        .page-breadcrumb { font-size: 11px; color: #7a7a8a; letter-spacing: 0.16em; text-transform: uppercase; }
-        .page-title { font-size: 24px; font-weight: 600; color: #ff2340; letter-spacing: 0.4px; margin: 2px 0; }
-        .page-subtitle { font-size: 12px; color: #b8b8c4; }
-        .back-button { border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); background: rgba(10,10,13,0.9); color: #b8b8c4; font-size: 11px; padding: 6px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; font-family: inherit; flex-shrink: 0; margin-top: 4px; }
-        .back-button:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
-        .panel { background: #111114; border: 1px solid rgba(196,0,29,0.35); border-radius: 16px; padding: 20px; margin-bottom: 22px; }
-        .panel-header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
-        .panel h2 { margin: 0; font-size: 17px; color: #ff2340; }
-        .panel-note { font-size: 11px; color: #7a7a8a; }
-        .panel-body { font-size: 13px; color: #b8b8c4; }
-        .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
-        .stat-card { background: #141419; border-radius: 12px; border: 1px solid rgba(196,0,29,0.35); padding: 10px 12px; font-size: 12px; }
-        .stat-label { color: #7a7a8a; margin-bottom: 4px; }
-        .stat-value { font-size: 16px; font-weight: 600; color: #fff; }
-        .stat-sub { font-size: 11px; color: #b8b8c4; margin-top: 2px; }
-        .overview-grid { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
-        .progress-bar-bg { width: 100%; height: 8px; border-radius: 999px; background: #15151c; overflow: hidden; border: 1px solid rgba(196,0,29,0.35); margin: 8px 0 4px; }
-        .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#c4001d,#ff2340); transition: width 0.5s; }
-        .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .field { display: flex; flex-direction: column; margin-bottom: 14px; }
-        .field label { font-size: 13px; margin-bottom: 6px; color: #b8b8c4; }
-        .input { background: #0c0c10; border: 1px solid rgba(196,0,29,0.35); border-radius: 12px; padding: 10px 12px; color: #fff; font-size: 13px; outline: none; transition: border .15s, background .15s; font-family: inherit; width: 100%; resize: none; }
-        .input:focus { border-color: #c4001d; background: #101018; }
-        .input:disabled { opacity: 0.3; cursor: not-allowed; }
-        .input::placeholder { color: #2a2a2a; }
-        .button { background: linear-gradient(135deg,#c4001d,#ff2340); border: none; padding: 11px 16px; border-radius: 14px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity .15s, transform .15s; font-family: inherit; }
-        .button:hover { opacity: .9; transform: translateY(-1px); }
-        .button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        .button-secondary { background: transparent; border-radius: 999px; border: 1px solid rgba(196,0,29,0.35); color: #b8b8c4; padding: 8px 14px; font-size: 12px; cursor: pointer; transition: all .15s; font-family: inherit; }
-        .button-secondary:hover { border-color: #c4001d; background: rgba(196,0,29,0.12); color: #fff; transform: translateY(-1px); }
-        .save-bar { margin-top: 10px; display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex-wrap: wrap; }
-        .save-msg { font-size: 12px; color: #22c55e; font-weight: 500; }
-        .link-item { display: flex; align-items: center; gap: 10px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
-        .link-item-title { font-size: 13px; color: #ddd; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .link-item-url { font-size: 11px; color: #444; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .link-actions { display: flex; gap: 4px; flex-shrink: 0; }
-        .link-action-btn { width: 28px; height: 28px; border-radius: 7px; border: none; background: rgba(255,255,255,0.05); color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; }
-        .link-action-btn:hover { background: rgba(255,255,255,0.1); color: #aaa; }
-        .link-action-btn.del:hover { background: rgba(196,0,29,0.15); color: #ff2340; }
-        .badge-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
-        .badge-card { border-radius: 12px; border: 1px dashed rgba(196,0,29,0.35); padding: 10px; font-size: 11px; color: #7a7a8a; text-align: center; }
-        .graph-legend { margin-top: 8px; font-size: 11px; color: #7a7a8a; }
-        .section-title { font-size: 16px; font-weight: 600; color: #fff; margin: 0 0 14px; }
-        .assets-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 22px; }
-        .asset-card { background: #111114; border: 1px solid rgba(196,0,29,0.3); border-radius: 12px; padding: 14px 12px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
-        .asset-card:hover { border-color: #ff2340; background: #16161c; }
-        .asset-label { font-size: 12px; color: #b8b8c4; margin-bottom: 10px; font-weight: 500; }
-        .asset-drop { border: 1px dashed rgba(196,0,29,0.4); border-radius: 10px; padding: 24px 10px; display: flex; flex-direction: column; align-items: center; gap: 7px; cursor: pointer; transition: border-color .15s, background .15s; min-height: 90px; height: 90px; justify-content: center; position: relative; overflow: hidden; }
-        .asset-drop:hover { border-color: #ff2340; background: rgba(196,0,29,0.05); }
-        .asset-drop.has-preview { border-style: solid; border-color: rgba(196,0,29,0.5); padding: 0; }
-        .asset-drop-text { font-size: 11px; color: #7a7a8a; text-align: center; line-height: 1.4; }
-        .asset-preview-img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; border-radius: 9px; display: block; }
-        .asset-remove-btn { position: absolute; top: 5px; right: 5px; width: 20px; height: 20px; background: rgba(196,0,29,0.8); border: none; border-radius: 50%; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        .premium-banner { background: linear-gradient(135deg,#1a0a2e 0%,#0d0516 50%,#120818 100%); border: 1px solid rgba(130,60,255,0.3); border-radius: 999px; padding: 14px 28px; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 22px; cursor: pointer; transition: border-color .15s; flex-wrap: wrap; }
-        .premium-banner:hover { border-color: rgba(160,100,255,0.6); }
-        .premium-banner span { font-size: 14px; color: #ccc; }
-        .premium-banner .prem { color: #b06aff; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        .customization-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 14px; }
-        .custom-group { display: flex; flex-direction: column; gap: 7px; }
-        .custom-label { font-size: 12px; color: #7a7a8a; font-weight: 500; display: flex; align-items: center; gap: 5px; }
-        .custom-label .info { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #7a7a8a; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; cursor: default; }
-        .custom-input { background: #0c0c10; border: 1px solid rgba(196,0,29,0.3); border-radius: 9px; padding: 9px 10px; color: #fff; font-size: 12px; outline: none; font-family: inherit; width: 100%; transition: border-color .15s; resize: none; }
-        .custom-input:focus { border-color: #c4001d; }
-        .custom-input::placeholder { color: #333; }
-        .custom-select { background: #0c0c10; border: 1px solid rgba(196,0,29,0.3); border-radius: 9px; padding: 9px 10px; color: #fff; font-size: 12px; outline: none; font-family: inherit; width: 100%; appearance: none; cursor: pointer; transition: border-color .15s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a8a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
-        .custom-select:focus { border-color: #c4001d; }
-        .slider-row { display: flex; flex-direction: column; gap: 6px; }
-        .slider-value { font-size: 11px; color: #b8b8c4; font-weight: 600; }
-        .slider-ticks { display: flex; justify-content: space-between; font-size: 10px; color: #7a7a8a; margin-top: 2px; }
-        input[type="range"] { width: 100%; accent-color: #c4001d; cursor: pointer; height: 3px; }
-        .glow-btn { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.35); border-radius: 9px; color: #22c55e; font-size: 12px; font-weight: 600; padding: 9px 12px; cursor: pointer; transition: all .15s; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .glow-btn:hover { background: rgba(34,197,94,0.25); }
-        .glow-btn.inactive { background: #0c0c10; border-color: rgba(196,0,29,0.3); color: #7a7a8a; }
-        .glow-btn.inactive:hover { border-color: #c4001d; color: #b8b8c4; }
-        .live-preview-box { background: #111114; border: 1px solid rgba(196,0,29,0.35); border-radius: 14px; padding: 18px; margin-top: 14px; }
-        .live-preview-title { font-size: 12px; color: #7a7a8a; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-        .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #ff2340; animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
-        @keyframes glitch { 0%,100%{text-shadow:2px 0 #ff0000,-2px 0 #0000ff} 25%{text-shadow:-2px 0 #ff0000,2px 0 #0000ff} 50%{text-shadow:2px 2px #ff0000,-2px -2px #0000ff} 75%{text-shadow:-2px 2px #ff0000,2px -2px #0000ff} }
-        .profile-preview { background: #09090d; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; min-height: 140px; position: relative; overflow: hidden; transition: all .3s; }
-        .prev-avatar { width: 64px; height: 64px; border-radius: 50%; background: radial-gradient(circle at 30% 0%,#ff4d5f,#c4001d 50%,#5a000c); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; transition: all .3s; overflow: hidden; }
-        .prev-name { font-size: 15px; font-weight: 700; transition: all .3s; }
-        .prev-desc { font-size: 12px; color: #b8b8c4; text-align: center; max-width: 200px; }
-        .prev-bg-overlay { position: absolute; inset: 0; pointer-events: none; transition: all .3s; }
-        .prev-bg-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; z-index: 0; }
-        .prev-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; }
-        .app-save-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-        .uploading-indicator { font-size: 11px; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
-        .settings-field-row { display: flex; gap: 8px; }
-        .analytics-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
-        .analytics-bar-track { width: 100%; background: #0d0d10; border-radius: 4px; overflow: hidden; position: relative; }
-        .analytics-bar-fill { background: linear-gradient(180deg, #ff2340, #c4001d); border-radius: 4px; transition: height 0.6s ease; width: 100%; position: absolute; bottom: 0; }
-        .analytics-bar-label { font-size: 10px; color: #7a7a8a; }
-        .analytics-bar-val { font-size: 11px; color: #b8b8c4; font-weight: 600; min-height: 16px; }
-        @media (max-width: 768px) {
-          .mobile-topbar { display: flex; }
-          .sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 150; transform: translateX(-100%); }
-          .sidebar.open { transform: translateX(0); }
-          .main { padding: 80px 16px 24px; }
-          .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .overview-grid { grid-template-columns: 1fr; }
-          .assets-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-          .customization-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-          .badge-grid { grid-template-columns: repeat(2, 1fr); }
-          .premium-banner { border-radius: 14px; padding: 12px 16px; text-align: center; }
-          .page-title { font-size: 20px; }
-          .settings-field-row { flex-direction: column; }
-          .save-bar { justify-content: flex-start; }
-          .app-save-row { justify-content: flex-start; }
-          .panel { padding: 14px; }
-        }
-        @media (max-width: 480px) {
-          .stats-grid { grid-template-columns: 1fr 1fr; }
-          .customization-grid { grid-template-columns: 1fr; }
-          .assets-grid { grid-template-columns: 1fr 1fr; }
-        }
+        html { color-scheme: dark; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(224,48,48,0.2); border-radius: 2px; }
+        body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
+        .nav-link-btn { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:500; color:rgba(255,255,255,0.35); cursor:pointer; border:none; background:transparent; width:100%; text-align:left; transition:background .15s, color .15s; font-family:inherit; }
+        .nav-link-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
+        .nav-link-btn.active { background:rgba(224,48,48,0.10); color:#e03030; }
+        .action-card { border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); border-radius:12px; padding:20px; cursor:pointer; display:block; transition:transform .2s, border-color .15s, background .15s; }
+        .action-card:hover { transform:translateY(-2px); border-color:rgba(224,48,48,0.25); background:rgba(224,48,48,0.04); }
+        .stat-card-h { border:1px solid rgba(255,255,255,0.05); background:rgba(255,255,255,0.02); border-radius:12px; padding:20px; backdrop-filter:blur(4px); transition:transform .2s, border-color .2s; }
+        .stat-card-h:hover { transform:translateY(-2px); border-color:rgba(255,255,255,0.09); }
+        .effect-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+        .effect-btn { padding:10px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; text-align:center; font-family:inherit; }
+        .effect-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
+        .effect-btn.active { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); color:#e03030; }
+        .platform-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:12px 8px; cursor:pointer; transition:all .15s; font-size:11px; color:rgba(255,255,255,0.5); font-family:inherit; }
+        .platform-btn:hover { border-color:rgba(224,48,48,0.3); background:rgba(224,48,48,0.06); color:#fff; }
+        .preset-btn { display:flex; flex-direction:column; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:10px; cursor:pointer; transition:all .15s; font-family:inherit; }
+        .preset-btn:hover { border-color:rgba(255,255,255,0.09); background:rgba(255,255,255,0.04); }
+        .preset-btn.selected { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); }
+        .link-item-row { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:10px 14px; transition:border-color .15s; }
+        .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        @keyframes pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+        @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+        @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} }
+        @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} }
       `}</style>
 
-      <div className="mobile-topbar">
-        <div className="mobile-logo"><span className="fate">FATE.</span><span className="rip">RIP</span></div>
-        <button className="hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Menu">
-          <span /><span /><span />
-        </button>
-      </div>
-      <div className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`} onClick={() => setSidebarOpen(false)} />
-
-      <nav className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div>
-          <a href="/" className="logo"><span className="fate">FATE.</span><span className="rip">RIP</span></a>
-          <div className="logo-sub">Profile Control Surface</div>
+      {/* ── SIDEBAR ── */}
+      <div className="sidebar-desktop" style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.97)', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', zIndex: 20 }}>
+        {/* Logo */}
+        <div style={{ height: 64, display: 'flex', alignItems: 'center', gap: 8, padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>
+            fate<span style={{ color: 'rgba(255,255,255,0.18)' }}>.</span><span style={{ color: '#e03030' }}>rip</span>
+          </span>
         </div>
-        {navSections.map(({ section, items }) => (
-          <div className="nav-section" key={section}>
-            <div className="nav-title">{section}</div>
-            {items.map(item => (
-              <button key={item.id} className={`nav-item ${activePage === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
-                <span>{item.label}</span><span className="chevron">›</span>
-              </button>
-            ))}
-          </div>
-        ))}
 
-        <div className="sidebar-bottom">
-          <div className="sidebar-support-panel">
-            <div>
-              <div className="support-label" style={{ marginBottom: 6 }}>Have a question or need support?</div>
-              <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer" className="support-btn">
-                <div className="support-btn-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#b8b8c4"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
-                </div>
-                Help Center
-              </a>
-            </div>
-            <div>
-              <div className="support-label" style={{ marginBottom: 6 }}>Check out your page</div>
-              <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" className="support-btn">
-                <div className="support-btn-icon">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#b8b8c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </div>
-                My Page
-              </a>
-            </div>
-          </div>
-          <button className="share-profile-btn" onClick={handleShareProfile}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Share Your Profile
-          </button>
-          <div className="sidebar-user-row">
-            <div className="sidebar-user-info" onMouseEnter={() => setShowUidTooltip(true)} onMouseLeave={() => setShowUidTooltip(false)} onClick={handleCopyUid}>
-              {showUidTooltip && (
-                <div className="uid-tooltip">
-                  {copied ? <span style={{ color: '#22c55e' }}>✓ Copied!</span> : <>UID: <span className="uid-val">{uid || 'N/A'}</span> · click to copy</>}
-                </div>
-              )}
-              <div className="sidebar-username">
-                <span>{username || 'User'}</span>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-              </div>
-              <div className="sidebar-uid">UID {uid || '—'}</div>
-            </div>
-            <button className="logout-link" onClick={handleLogout}>← Log Out</button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="main">
-
-      {activePage === 'overview' && (
-          <div>
-            <style>{`
-              .ov-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 18px; }
-              .ov-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-              .ov-card { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; transition: border-color .15s, transform .15s; cursor: default; }
-              .ov-card:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-2px); }
-              .ov-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.05) 0%, transparent 60%); pointer-events: none; }
-              .ov-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-              .ov-card-label { font-size: 13px; color: #b8b8c4; font-weight: 500; }
-              .ov-card-icon { width: 32px; height: 32px; border-radius: 9px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
-              .ov-card-value { font-size: 26px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 5px; }
-              .ov-card-sub { font-size: 12px; color: #555; }
-              .ov-stats-title { font-size: 17px; font-weight: 600; color: #fff; margin-bottom: 14px; }
-              .ov-grid { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
-              .ov-completion-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; }
-              .ov-completion-label { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 14px; }
-              .ov-progress-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-              .ov-progress-bar { flex: 1; height: 8px; background: #0d0d10; border-radius: 999px; overflow: hidden; border: 1px solid rgba(196,0,29,0.2); }
-              .ov-progress-fill { height: 100%; background: linear-gradient(90deg, #c4001d, #ff2340); border-radius: 999px; transition: width .5s; }
-              .ov-progress-pct { font-size: 12px; color: #7a7a8a; flex-shrink: 0; }
-              .ov-warning { background: rgba(196,0,29,0.07); border: 1px solid rgba(196,0,29,0.2); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px; }
-              .ov-warning-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-              .ov-warning-title { font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 2px; }
-              .ov-warning-sub { font-size: 12px; color: #7a7a8a; }
-              .ov-steps-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-              .ov-step { display: flex; align-items: center; gap: 10px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.15); border-radius: 10px; padding: 11px 14px; cursor: pointer; transition: border-color .15s, background .15s; }
-              .ov-step:hover { border-color: rgba(196,0,29,0.35); background: rgba(196,0,29,0.05); }
-              .ov-step.done { border-color: rgba(34,197,94,0.2); background: rgba(34,197,94,0.04); cursor: default; }
-              .ov-step.full-width { grid-column: 1 / -1; }
-              .ov-step-dot { width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
-              .ov-step-dot.active { background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.3); color: #ff2340; }
-              .ov-step-dot.done { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: #22c55e; }
-              .ov-step-label { font-size: 13px; color: #b8b8c4; flex: 1; }
-              .ov-step.done .ov-step-label { color: #22c55e; }
-              .ov-step-arrow { font-size: 12px; color: #333; flex-shrink: 0; }
-              .ov-step-progress { font-size: 11px; color: #444; flex-shrink: 0; }
-              .ov-manage-panel { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 14px; padding: 20px; }
-              .ov-manage-title { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
-              .ov-manage-sub { font-size: 12px; color: #7a7a8a; margin-bottom: 16px; }
-              .ov-manage-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 11px 14px; margin-bottom: 8px; background: #0c0c10; border: 1px solid rgba(196,0,29,0.15); border-radius: 10px; cursor: pointer; font-family: inherit; color: #b8b8c4; font-size: 13px; text-align: left; transition: all .15s; }
-              .ov-manage-btn:hover { border-color: rgba(196,0,29,0.4); background: rgba(196,0,29,0.06); color: #fff; transform: translateX(2px); }
-              .ov-manage-btn:last-child { margin-bottom: 0; }
-              .ov-manage-btn-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
-              .ov-section-divider { font-size: 13px; font-weight: 600; color: #7a7a8a; letter-spacing: 0.08em; text-transform: uppercase; margin: 18px 0 12px; }
-              @media (max-width: 900px) { .ov-cards { grid-template-columns: 1fr 1fr; } .ov-grid { grid-template-columns: 1fr; } }
-              @media (max-width: 480px) { .ov-cards { grid-template-columns: 1fr 1fr; } .ov-steps-row { grid-template-columns: 1fr; } }
-            `}</style>
-
-            <div className="ov-title">Account Overview</div>
-
-            {/* Top stat cards */}
-            <div className="ov-cards">
-              <div className="ov-card">
-                <div className="ov-card-top">
-                  <div className="ov-card-label">Username</div>
-                  <div className="ov-card-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  </div>
-                </div>
-                <div className="ov-card-value">{username || '—'}</div>
-                <div className="ov-card-sub">Change available now</div>
-              </div>
-              <div className="ov-card">
-                <div className="ov-card-top">
-                  <div className="ov-card-label">Alias</div>
-                  <div className="ov-card-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                  </div>
-                </div>
-                <div className="ov-card-value">0 Aliases Used</div>
-                <div className="ov-card-sub">1 Alias Slot Remaining</div>
-              </div>
-              <div className="ov-card">
-                <div className="ov-card-top">
-                  <div className="ov-card-label">UID</div>
-                  <div className="ov-card-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
-                  </div>
-                </div>
-                <div className="ov-card-value" style={{ fontSize: 22 }}>{uid || '—'}</div>
-                <div className="ov-card-sub">Your unique ID</div>
-              </div>
-              <div className="ov-card">
-                <div className="ov-card-top">
-                  <div className="ov-card-label">Profile Views</div>
-                  <div className="ov-card-icon">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                  </div>
-                </div>
-                <div className="ov-card-value">{profileViews.toLocaleString()}</div>
-                <div className="ov-card-sub">{viewsToday > 0 ? `+${viewsToday} views since last 7 days` : '+0 views since last 7 days'}</div>
-              </div>
-            </div>
-
-            <div className="ov-stats-title">Account Statistics</div>
-
-            <div className="ov-grid">
-              {/* Left: completion panel */}
-              <div className="ov-completion-panel">
-                <div className="ov-completion-label">Profile Completion</div>
-                {(() => {
-                  const steps = [!!bio, links.length > 0, !!avatarPreview]
-                  const pct = Math.round((steps.filter(Boolean).length / steps.length) * 100)
-                  return (
-                    <>
-                      <div className="ov-progress-wrap">
-                        <div className="ov-progress-bar">
-                          <div className="ov-progress-fill" style={{ width: `${pct}%` }} />
-                        </div>
-                        <span className="ov-progress-pct">{pct}% completed</span>
-                      </div>
-                      <div className="ov-warning">
-                        <span className="ov-warning-icon">⚠️</span>
-                        <div>
-                          <div className="ov-warning-title">Your profile isn't complete yet!</div>
-                          <div className="ov-warning-sub">Complete your profile to make it more discoverable and appealing.</div>
-                        </div>
-                      </div>
-                      <div className="ov-steps-row">
-                        {[
-                          { label: 'Upload An Avatar', done: !!avatarPreview, onClick: () => navTo('customize') },
-                          { label: 'Add A Description', done: !!bio, onClick: () => navTo('customize') },
-                          { label: 'Add Links', done: links.length > 0, onClick: () => navTo('links') },
-                        ].map((step, i) => (
-                          <div key={i} className={`ov-step ${step.done ? 'done' : ''}`} onClick={step.onClick || undefined}>
-                            <div className={`ov-step-dot ${step.done ? 'done' : 'active'}`}>
-                              {step.done ? '✓' : '!'}
-                            </div>
-                            <span className="ov-step-label">{step.label}</span>
-                            {!step.done && <span className="ov-step-arrow">›</span>}
-                          </div>
-                        ))}
-                      </div>
-                      <div className="ov-steps-row">
-                        <div className={`ov-step full-width ${profileViews >= 10 ? 'done' : ''}`}>
-                          <div className={`ov-step-dot ${profileViews >= 10 ? 'done' : 'active'}`}>
-                            {profileViews >= 10 ? '✓' : '!'}
-                          </div>
-                          <span className="ov-step-label">Reach 10 Profile Views</span>
-                          {profileViews < 10 && <span className="ov-step-progress">{profileViews}/10</span>}
-                        </div>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-
-              {/* Right: manage account panel */}
-              <div className="ov-manage-panel">
-                <div className="ov-manage-title">Manage your account</div>
-                <div className="ov-manage-sub">Change your email, username and more.</div>
-                {[
-                  { label: 'Change Username', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
-                  { label: 'Change Display Name', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> },
-                  { label: 'Manage Aliases', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> },
-                  { label: 'Account Settings', page: 'settings', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-                ].map((item, i) => (
-                  <button key={i} className="ov-manage-btn" onClick={() => navTo(item.page)}>
-                    <div className="ov-manage-btn-icon">{item.icon}</div>
-                    {item.label}
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: 12, paddingTop: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {navLinks.map(({ section, items }) => (
+            <div key={section || 'root'}>
+              {section && <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0 12px', marginBottom: 4 }}>{section}</div>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {items.map(item => (
+                  <button key={item.id} className={`nav-link-btn ${activePage === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
+                    {item.icon}{item.label}
+                    {activePage === item.id && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#e03030', flexShrink: 0 }} />}
                   </button>
                 ))}
               </div>
             </div>
-          </div>
-        )}
+          ))}
+        </nav>
 
-        {activePage === 'analytics' && (
-          <AnalyticsPage username={username} profileViews={profileViews} viewsToday={viewsToday} onBack={() => navTo('overview')} />
-        )}
-
-        {activePage === 'badges' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">ACCOUNT • BADGES</div><div className="page-title">Badges</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
+        {/* Footer */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: 12 }}>
+          <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(224,48,48,0.22)', background: 'rgba(224,48,48,0.10)', color: '#e03030', fontSize: 13, fontWeight: 500, textDecoration: 'none', marginBottom: 8, transition: 'background .15s' }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            View Profile
+          </a>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 4px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#e03030' }}>{initial}</div>
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{username || 'User'}</span>
             </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Your Badges</h2><div className="panel-note">None unlocked yet</div></div>
-              <div className="panel-body">
-                <div className="badge-grid">
-                  {['First View', 'Ten Views', 'Linked Socials', 'Custom Theme'].map(b => <div key={b} className="badge-card">{b}</div>)}
-                </div>
-              </div>
-            </div>
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', transition: 'color .15s' }}>Log out</button>
           </div>
-        )}
-
-{activePage === 'settings' && (
-  <div>
-    <style>{`
-      .st-wrap { max-width: 680px; margin: 0 auto; }
-      .st-page-title { font-size: 22px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 28px; }
-      .st-section-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 14px; }
-      .st-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
-      .st-field { margin-bottom: 18px; }
-      .st-field:last-child { margin-bottom: 0; }
-      .st-label { font-size: 13px; color: #b8b8c4; font-weight: 500; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-      .st-cooldown { font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 600; }
-      .st-cooldown.available { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.3); color: #22c55e; }
-      .st-cooldown.locked { background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; }
-      .st-input-wrap { background: #0c0c10; border: 1px solid rgba(196,0,29,0.25); border-radius: 12px; display: flex; align-items: center; gap: 10px; padding: 0 14px; transition: border-color .15s; }
-      .st-input-wrap:focus-within { border-color: #c4001d; }
-      .st-input-wrap.disabled { opacity: 0.5; }
-      .st-input-icon { color: #555; flex-shrink: 0; display: flex; align-items: center; }
-      .st-input { background: transparent; border: none; outline: none; color: #fff; font-size: 14px; font-family: inherit; padding: 12px 0; flex: 1; min-width: 0; }
-      .st-input::placeholder { color: #333; }
-      .st-input:disabled { cursor: not-allowed; }
-      .st-input-action { background: none; border: none; color: #555; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color .15s; flex-shrink: 0; }
-      .st-input-action:hover { color: #b8b8c4; }
-      .st-save-btn { background: linear-gradient(135deg, #c4001d, #ff2340); border: none; border-radius: 10px; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: opacity .15s, transform .15s; white-space: nowrap; flex-shrink: 0; }
-      .st-save-btn:hover { opacity: .9; transform: translateY(-1px); }
-      .st-save-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-      .st-input-row { display: flex; gap: 10px; align-items: flex-start; }
-      .st-input-row .st-input-wrap { flex: 1; }
-      .st-msg { font-size: 12px; font-weight: 500; margin-top: 8px; }
-      .st-msg.success { color: #22c55e; }
-      .st-msg.error { color: #ff2340; }
-      .st-divider { height: 1px; background: rgba(196,0,29,0.1); margin: 18px 0; }
-      .st-danger-zone { background: rgba(196,0,29,0.04); border: 1px solid rgba(196,0,29,0.2); border-radius: 16px; padding: 22px; margin-bottom: 20px; }
-      .st-danger-title { font-size: 14px; font-weight: 600; color: #ff2340; margin-bottom: 4px; }
-      .st-danger-sub { font-size: 12px; color: #7a7a8a; margin-bottom: 14px; }
-      .st-logout-btn { background: transparent; border: 1px solid rgba(196,0,29,0.35); border-radius: 10px; color: #b8b8c4; font-size: 13px; padding: 10px 18px; cursor: pointer; font-family: inherit; transition: all .15s; }
-      .st-logout-btn:hover { border-color: #c4001d; background: rgba(196,0,29,0.1); color: #fff; }
-    `}</style>
-
-    <div className="st-wrap">
-      <div className="st-page-title">Account Settings</div>
-
-      <div className="st-section-title">General Information</div>
-      <div className="st-panel">
-
-        {/* USERNAME */}
-        <div className="st-field">
-          {(() => {
-            const lastChanged = dbUser?.username_changed_at ? new Date(dbUser.username_changed_at) : null
-            const daysLeft = lastChanged ? 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000) : 0
-            const locked = daysLeft > 0
-            return (
-              <>
-                <div className="st-label">
-                  Username
-                  {locked
-                    ? <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
-                    : <span className="st-cooldown available">Available to change</span>
-                  }
-                </div>
-                <div className="st-input-row">
-                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
-                    <div className="st-input-icon">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                    <input
-                      className="st-input"
-                      value={username}
-                      disabled={locked}
-                      onChange={e => setUsername(e.target.value)}
-                      placeholder="Username"
-                    />
-                  </div>
-                  <button className="st-save-btn" disabled={locked} onClick={async () => {
-                    if (!username.trim()) { setSaveMsg('error:username:Username cannot be empty'); setTimeout(() => setSaveMsg(''), 2000); return }
-                    const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).single()
-                    if (existing) { setSaveMsg('error:username:Username already taken'); setTimeout(() => setSaveMsg(''), 2000); return }
-                    const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
-if (!error) { setOriginalUsername(username.trim()); setDbUser(prev => ({ ...prev, username_changed_at: new Date().toISOString() })) }
-setSaveMsg(error ? 'error:username:Failed to save.' : 'success:username:Username updated!')
-                    setTimeout(() => setSaveMsg(''), 2000)
-                  }}>Save</button>
-                </div>
-                {saveMsg.includes(':username:') && (
-                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
-                    {saveMsg.split(':username:')[1]}
-                  </div>
-                )}
-              </>
-            )
-          })()}
         </div>
+      </div>
 
-        <div className="st-divider" />
-
-        {/* DISPLAY NAME */}
-        <div className="st-field">
-          <div className="st-label">
-            Display Name
-            <span className="st-cooldown available">Can always change</span>
-          </div>
-          <div className="st-input-row">
-            <div className="st-input-wrap">
-              <div className="st-input-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      {/* ── MAIN AREA ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', minWidth: 0, position: 'relative', zIndex: 1 }}>
+        {/* Topbar */}
+        <header style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.88)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 10, gap: 8 }}>
+          <button onClick={() => { navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : 'https://fate.rip'}/${username}`); showToast('Profile URL copied!') }} style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .15s, color .15s' }} title="Copy profile URL">
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          </button>
+          <button onClick={() => { setAvatarDDOpen(!avatarDDOpen); setNotifOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px 4px 4px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background .15s', position: 'relative' }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#e03030', overflow: 'hidden' }}>
+              {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{username || 'User'}</span>
+            <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            {avatarDDOpen && (
+              <div style={{ position: 'absolute', top: 48, right: 0, width: 200, background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, overflow: 'hidden', zIndex: 50 }} onClick={e => e.stopPropagation()}>
+                {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => (
+                  <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit', transition: 'background .12s' }}>{label}</button>
+                ))}
+                <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: '#e03030', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}>Log out</button>
               </div>
-              <input className="st-input" placeholder="Display Name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
-            </div>
-            <button className="st-save-btn" onClick={async () => {
-              const { error } = await supabase.from('users').update({ display_name: displayName, display_name_changed_at: new Date().toISOString() }).eq('email', user.email)
-              setSaveMsg(error ? 'error:displayname:Failed to save.' : 'success:displayname:Display name saved!')
-              setTimeout(() => setSaveMsg(''), 2000)
-            }}>Save</button>
-          </div>
-          {saveMsg.includes(':displayname:') && (
-            <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
-              {saveMsg.split(':displayname:')[1]}
-            </div>
+            )}
+          </button>
+        </header>
+
+        {/* Content */}
+        <div style={{ flex: 1, padding: 32, maxWidth: 1100, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }} onClick={() => { setNotifOpen(false); setAvatarDDOpen(false) }}>
+
+          {/* ═══ OVERVIEW ═══ */}
+          {activePage === 'overview' && (
+            <>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Overview</div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, fontFamily: 'Syne, sans-serif' }}>Welcome back, <span style={{ color: '#e03030' }}>{username}</span></h1>
+                <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Here&apos;s what&apos;s happening with your profile</p>
+              </div>
+
+              {/* Profile URL card */}
+              <div style={{ border: '1px solid rgba(224,48,48,0.22)', background: 'rgba(224,48,48,0.05)', borderRadius: 12, padding: 20 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>Your profile URL</div>
+                    <div style={{ marginTop: 6, fontFamily: 'Space Mono, monospace', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>fate.rip/{username}</div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <BtnGhost onClick={() => { navigator.clipboard.writeText(`https://fate.rip/${username}`); showToast('URL copied!') }}>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                      Copy
+                    </BtnGhost>
+                    <a href={`/${username}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none', background: '#e03030', color: '#fff', textDecoration: 'none', transition: 'all .15s' }}>
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                      View
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats */}
+              <div className="stats-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
+                {[
+                  { label: 'Total Views', value: profileViews.toLocaleString(), color: '#e03030' },
+                  { label: 'Username', value: `@${username}`, color: '#f05050' },
+                  { label: 'UID', value: `#${uid || '0001'}`, color: '#b41414' },
+                ].map((s, i) => (
+                  <div key={i} className="stat-card-h">
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ minWidth: 0, flex: 1, paddingRight: 12 }}>
+                        <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
+                        <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.value}</div>
+                      </div>
+                      <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <svg width="24" height="24" fill="none" stroke={s.color} strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick actions */}
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Quick Actions</div>
+                <div className="actions-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
+                  {[
+                    { page: 'links', title: 'Links', desc: 'Add or edit your social links' },
+                    { page: 'profile', title: 'Edit Profile', desc: 'Update bio, avatar, and display name' },
+                    { page: 'buttons', title: 'Custom Buttons', desc: 'Create call-to-action buttons' },
+                    { page: 'appearance', title: 'Appearance', desc: 'Colors, fonts, and themes' },
+                    { page: 'effects', title: 'Effects', desc: 'Particles, cursors, and animations' },
+                    { page: 'music', title: 'Music', desc: 'Add background music' },
+                  ].map((item, i) => (
+                    <div key={i} className="action-card" onClick={() => navTo(item.page)}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e03030' }}>
+                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+                        </div>
+                        <span style={{ color: 'rgba(255,255,255,0.2)' }}><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
+                      </div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{item.title}</div>
+                      <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', lineHeight: 1.5 }}>{item.desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
-        </div>
 
-        <div className="st-divider" />
+          {/* ═══ ANALYTICS ═══ */}
+          {activePage === 'analytics' && (
+            <AnalyticsPage username={username} profileViews={profileViews} viewsToday={viewsToday} onBack={() => navTo('overview')} />
+          )}
 
-        {/* EMAIL */}
-        <div className="st-field">
-          {(() => {
-            const lastChanged = dbUser?.email_changed_at ? new Date(dbUser.email_changed_at) : null
-            const daysLeft = lastChanged ? 3 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000) : 0
-            const locked = daysLeft > 0
-            return (
-              <>
-                <div className="st-label">
-                  Email
-                  {locked
-                    ? <span className="st-cooldown locked">Locked for {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
-                    : <span className="st-cooldown available">Available to change</span>
-                  }
+          {/* ═══ PROFILE EDITOR ═══ */}
+          {activePage === 'profile' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Profile" title='Edit <span style="color:#e03030">Profile</span>' subtitle="Update your bio, avatar, and display name" />
+              <div className="editor-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <TabBar tabs={['Identity','Layout','Entrance']} active={profileTab} onSelect={setProfileTab} />
+
+                  {profileTab === 'Identity' && (
+                    <Card>
+                      <CardHeader title="Profile Identity" sub="Your public-facing info" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        {/* Avatar upload */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 24, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12, textAlign: 'center' }}>
+                          <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
+                          <div style={{ position: 'relative', width: 96, height: 96, cursor: 'pointer' }} onClick={() => fileAvatarRef.current.click()}>
+                            <div style={{ width: 96, height: 96, borderRadius: '50%', background: 'rgba(224,48,48,0.12)', border: '3px solid rgba(224,48,48,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 32, fontWeight: 800, color: '#e03030', overflow: 'hidden' }}>
+                              {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+                            </div>
+                          </div>
+                          <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>
+                            {uploadingType === 'avatar' ? 'Uploading…' : 'Click to change avatar'}
+                          </p>
+                          <small style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)' }}>JPG, PNG, GIF or WebP · Max 5MB</small>
+                          {avatarPreview && <BtnGhost onClick={() => removeAsset('avatar')} style={{ fontSize: 11 }}>Remove</BtnGhost>}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Display Name</label>
+                            <Input placeholder="Your name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Location</label>
+                            <Input placeholder="City, Country" value={location} onChange={e => setLocation(e.target.value)} />
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Bio</label>
+                          <Textarea placeholder="Tell visitors about yourself…" value={appBio} onChange={e => setAppBio(e.target.value)} rows={4} />
+                        </div>
+                        <ToggleRow label="Typing Bio Effect" sub="Animate bio text as it types in" checked={typingBio} onChange={e => setTypingBio(e.target.checked)} />
+                      </div>
+                    </Card>
+                  )}
+
+                  {profileTab === 'Layout' && (
+                    <Card>
+                      <CardHeader title="Profile Layout" sub="Control the structure of your page" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>} />
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Panel Size</label>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            {['compact','medium','wide','full'].map(s => (
+                              <button key={s} onClick={() => setPanelSize(s)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${panelSize === s ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: panelSize === s ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: panelSize === s ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{s}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Avatar Position</label>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            {['left','center','right'].map(p => (
+                              <button key={p} onClick={() => setAvatarPos(p)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${avatarPos === p ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: avatarPos === p ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: avatarPos === p ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{p}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <ToggleRow label="Show Avatar" sub="Display your avatar on your profile" checked={showAvatar} onChange={e => setShowAvatar(e.target.checked)} />
+                      </div>
+                    </Card>
+                  )}
+
+                  {profileTab === 'Entrance' && (
+                    <Card>
+                      <CardHeader title="Entrance Screen" sub="Show a splash screen before visitors see your profile" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>}
+                        action={<Toggle checked={enterEnabled} onChange={e => setEnterEnabled(e.target.checked)} />}
+                      />
+                      {enterEnabled && (
+                        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Title</label>
+                              <Input placeholder="Enter title" value={enterTitle} onChange={e => setEnterTitle(e.target.value)} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Subtitle</label>
+                              <Input placeholder="Click anywhere to enter" value={enterSubtitle} onChange={e => setEnterSubtitle(e.target.value)} />
+                            </div>
+                          </div>
+                          <ToggleRow label="Show Avatar" checked={enterShowAvatar} onChange={e => setEnterShowAvatar(e.target.checked)} />
+                          <ToggleRow label="Show Title" checked={enterShowTitle} onChange={e => setEnterShowTitle(e.target.checked)} />
+                          <ToggleRow label="Show Subtitle" checked={enterShowSubtitle} onChange={e => setEnterShowSubtitle(e.target.checked)} />
+                        </div>
+                      )}
+                    </Card>
+                  )}
+
+                  <SaveBar onSave={saveProfile} onDiscard={() => { setAppBio(bio); setDisplayName(dbUser?.display_name || ''); setLocation(dbUser?.location || '') }} />
                 </div>
-                <div className="st-input-row">
-                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
-                    <div className="st-input-icon">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <PreviewPanel />
+              </div>
+            </>
+          )}
+
+          {/* ═══ APPEARANCE ═══ */}
+          {activePage === 'appearance' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Appearance" title='Customize <span style="color:#e03030">Appearance</span>' subtitle="Colors, fonts, and themes" />
+              <div className="editor-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                  <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
+                  <TabBar tabs={['Presets','Colors','Fonts','Background','Glow']} active={appearTab} onSelect={setAppearTab} cols={5} />
+
+                  {appearTab === 'Presets' && (
+                    <Card>
+                      <CardHeader title="Theme Presets" sub="One-click themes with coordinated colors and effects" />
+                      <div style={{ padding: 24 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8 }}>
+                          {presets.map(([name, bg, acc]) => (
+                            <button key={name} className={`preset-btn ${selectedPreset === name ? 'selected' : ''}`} onClick={() => { setSelectedPreset(name); setAccentColor(acc); setBgColor(bg); showToast(`${name} applied!`) }}>
+                              <div style={{ width: '100%', height: 36, borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
+                                <div style={{ flex: 1, background: bg }} />
+                                <div style={{ width: 20, background: acc }} />
+                              </div>
+                              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{name}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {appearTab === 'Colors' && (
+                    <Card>
+                      <CardHeader title="Color Settings" sub="Customize accent, background, text and card colors" />
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        {[['Accent Color', accentColor, setAccentColor],['Background Color', bgColor, setBgColor],['Text Color','#ffffff',()=>{}],['Card Color','#1a0000',()=>{}]].map(([lbl, val, setter]) => (
+                          <div key={lbl} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                            <div>
+                              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{lbl}</div>
+                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono, monospace', marginTop: 4 }}>{val}</div>
+                            </div>
+                            <input type="color" value={val} onChange={e => { setter(e.target.value); showToast(`${lbl} updated`) }} style={{ width: 44, height: 44, border: 'none', borderRadius: 10, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', padding: 4 }} />
+                          </div>
+                        ))}
+                      </div>
+                    </Card>
+                  )}
+
+                  {appearTab === 'Fonts' && (
+                    <Card>
+                      <CardHeader title="Font Family" sub="Choose a font for your profile text" />
+                      <div style={{ padding: 24 }}>
+                        <div className="effect-grid">
+                          {fonts.map(f => (
+                            <button key={f} className={`effect-btn ${selectedFont === f ? 'active' : ''}`} style={{ fontFamily: `'${f}', sans-serif` }} onClick={() => { setSelectedFont(f); showToast(`Font set to ${f}`) }}>{f}</button>
+                          ))}
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {appearTab === 'Background' && (
+                    <Card>
+                      <CardHeader title="Background" sub="Choose how your profile background looks" />
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Type</label>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            {['Solid','Gradient','Image','Video'].map(t => (
+                              <button key={t} onClick={() => setBgType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${bgType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: bgType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: bgType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>{t}</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Background Effect</label>
+                          <select value={bgFx} onChange={e => setBgFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}>
+                            <option value="none">None</option><option value="nighttime">Night Time</option><option value="particles">Particles</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="matrix">Matrix</option>
+                          </select>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Opacity — {opacity}%</label>
+                          <input type="range" min={20} max={100} value={opacity} onChange={e => setOpacity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Blur — {blur}px</label>
+                          <input type="range" min={0} max={80} value={blur} onChange={e => setBlur(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
+                        </div>
+                        <div onClick={() => fileBgRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '32px 24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'rgba(255,255,255,0.01)', transition: 'all .15s' }}>
+                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                          {uploadingType === 'bg' ? 'Uploading…' : bgPreview ? 'Replace background media' : 'Upload background media (max 25MB)'}
+                        </div>
+                        {bgPreview && <BtnGhost onClick={() => removeAsset('bg')} style={{ alignSelf: 'flex-start' }}>Remove Background</BtnGhost>}
+                      </div>
+                    </Card>
+                  )}
+
+                  {appearTab === 'Glow' && (
+                    <Card>
+                      <CardHeader title="Glow Effects" sub="Add glowing highlights to profile elements" />
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <ToggleRow label="Glow Username" checked={glowState.username} onChange={e => setGlowState(p => ({ ...p, username: e.target.checked }))} />
+                        <ToggleRow label="Glow Social Links" checked={glowState.socials} onChange={e => setGlowState(p => ({ ...p, socials: e.target.checked }))} />
+                        <ToggleRow label="Glow Badges" checked={glowState.badges} onChange={e => setGlowState(p => ({ ...p, badges: e.target.checked }))} />
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Glow Intensity — {glowIntensity}%</label>
+                          <input type="range" min={0} max={100} value={glowIntensity} onChange={e => setGlowIntensity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Username Effect</label>
+                          <select value={usernameFx} onChange={e => setUsernameFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}>
+                            <option value="">None</option><option value="rainbow">🌈 Rainbow</option><option value="glitch">⚡ Glitch</option><option value="neon">✨ Neon</option><option value="gold">🏆 Gold</option>
+                          </select>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  <SaveBar onSave={saveAppearance} onDiscard={() => showToast('Changes discarded')} />
+                </div>
+                <PreviewPanel />
+              </div>
+            </>
+          )}
+
+          {/* ═══ LINKS ═══ */}
+          {activePage === 'links' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Links" title='Manage <span style="color:#e03030">Links</span>' subtitle="Add or edit your social links" />
+
+              {/* Platform quick-add */}
+              <Card>
+                <CardHeader title="Quick Add" sub="Click a platform to add your link" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>} />
+                <div style={{ padding: 24 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 8 }}>
+                    {platforms.map(p => (
+                      <button key={p} className="platform-btn" onClick={() => { setNewLinkLabel(p); setNewLinkUrl(''); setShowAddLinkModal(true) }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(224,48,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#e03030', fontWeight: 700 }}>{p[0]}</div>
+                        <span>{p}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Links list */}
+              <Card>
+                <CardHeader title="Your Links" sub={`${links.length} link${links.length !== 1 ? 's' : ''}`}
+                  action={<BtnAccent onClick={() => { setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(true) }}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add Link
+                  </BtnAccent>}
+                />
+                <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {links.length === 0 && <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No links yet — add one above!</div>}
+                  {links.map((l, i) => (
+                    <div key={i} className="link-item-row">
+                      <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(224,48,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e03030', flexShrink: 0 }}>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{l.title}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.url}</div>
+                      </div>
+                      <button onClick={() => { setLinks(links.filter((_, idx) => idx !== i)); showToast('Link removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s', flexShrink: 0 }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
                     </div>
-                    <input
-                      className="st-input"
-                      type="email"
-                      value={user?.email || ''}
-                      disabled={locked}
-                      placeholder="New email"
-                      onChange={e => setUser(prev => ({ ...prev, email: e.target.value }))}
+                  ))}
+                </div>
+              </Card>
+
+              {links.length > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <BtnAccent onClick={async () => { const { error } = await supabase.from('users').update({ links }).eq('username', username); showToast(error ? 'Failed to save' : 'Links saved!') }} disabled={saving}>Save Links</BtnAccent>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* ═══ BUTTONS ═══ */}
+          {activePage === 'buttons' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Buttons" title='Custom <span style="color:#e03030">Buttons</span>' subtitle="Create call-to-action buttons" />
+              <Card>
+                <CardHeader title="Your Buttons" sub={`${buttons.length} button${buttons.length !== 1 ? 's' : ''}`}
+                  action={<BtnAccent onClick={() => setShowAddBtnModal(true)}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Add Button
+                  </BtnAccent>}
+                />
+                <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {buttons.length === 0 && <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No buttons yet — create one above!</div>}
+                  {buttons.map((b, i) => (
+                    <div key={i} className="link-item-row">
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{b.label}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace' }}>{b.url}</div>
+                      </div>
+                      <button onClick={() => { setButtons(buttons.filter((_, idx) => idx !== i)); showToast('Button removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </>
+          )}
+
+          {/* ═══ EFFECTS ═══ */}
+          {activePage === 'effects' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Effects" title='Visual <span style="color:#e03030">Effects</span>' subtitle="Particles, cursors, and animations" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <TabBar tabs={['Particles','Cursor','Animations','Click Effects']} active={effectsTab} onSelect={setEffectsTab} cols={4} />
+
+                {effectsTab === 'Particles' && (
+                  <Card>
+                    <CardHeader title="Particle Effects" sub="Background particles on your profile"
+                      action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />}
                     />
-                  </div>
-                  <button className="st-save-btn" disabled={locked} onClick={async () => {
-                    const { error } = await supabase.auth.updateUser({ email: user.email })
-                    if (!error) {
-                      await supabase.from('users').update({ email: user.email, email_changed_at: new Date().toISOString() }).eq('username', username)
-                      setSaveMsg('success:email:Confirmation sent! Check your inbox.')
-                    } else {
-                      setSaveMsg('error:email:Failed to update email.')
-                    }
-                    setTimeout(() => setSaveMsg(''), 3000)
-                  }}>Save</button>
-                </div>
-                {saveMsg.includes(':email:') && (
-                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
-                    {saveMsg.split(':email:')[1]}
-                  </div>
+                    {particleEnabled && (
+                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Style</label>
+                          <div className="effect-grid">
+                            {particles.map(p => <button key={p} className={`effect-btn ${particleStyle === p ? 'active' : ''}`} onClick={() => setParticleStyle(p)}>{p}</button>)}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </Card>
                 )}
-              </>
-            )
-          })()}
-        </div>
 
-        <div className="st-divider" />
-
-        {/* PASSWORD */}
-        <div className="st-field">
-          {(() => {
-            const lastChanged = dbUser?.password_changed_at ? new Date(dbUser.password_changed_at) : null
-            const hoursLeft = lastChanged ? 24 - Math.floor((Date.now() - lastChanged.getTime()) / 3600000) : 0
-            const locked = hoursLeft > 0
-            return (
-              <>
-                <div className="st-label">
-                  Password
-                  {locked
-                    ? <span className="st-cooldown locked">Locked for {hoursLeft} hour{hoursLeft !== 1 ? 's' : ''}</span>
-                    : <span className="st-cooldown available">Available to change</span>
-                  }
-                </div>
-                <div className="st-input-row">
-                  <div className={`st-input-wrap ${locked ? 'disabled' : ''}`}>
-                    <div className="st-input-icon">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                {effectsTab === 'Cursor' && (
+                  <Card>
+                    <CardHeader title="Custom Cursor" sub="Replace the default cursor on your profile" />
+                    <div style={{ padding: 24 }}>
+                      <div className="effect-grid">
+                        {cursors.map(c => <button key={c} className={`effect-btn ${cursorStyle === c ? 'active' : ''}`} onClick={() => { setCursorStyle(c); showToast(`Cursor set to ${c}`) }}>{c}</button>)}
+                      </div>
                     </div>
-                    <input className="st-input" type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} disabled={locked} onChange={e => setNewPassword(e.target.value)} />
-                    <button className="st-input-action" onClick={() => setShowPassword(p => !p)}>
-                      {showPassword
-                        ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-                        : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      }
-                    </button>
-                  </div>
-                  <button className="st-save-btn" disabled={locked} onClick={async () => {
-                    if (!newPassword || newPassword.length < 6) { setSaveMsg('error:password:Password must be 6+ characters'); setTimeout(() => setSaveMsg(''), 2000); return }
-                    const { error } = await supabase.auth.updateUser({ password: newPassword })
-                    if (!error) {
-                      setNewPassword('')
-                      await supabase.from('users').update({ password_changed_at: new Date().toISOString() }).eq('username', username)
-                      setSaveMsg('success:password:Password updated!')
-                    } else {
-                      setSaveMsg('error:password:Failed to update password.')
-                    }
-                    setTimeout(() => setSaveMsg(''), 2000)
-                  }}>Update</button>
-                </div>
-                {saveMsg.includes(':password:') && (
-                  <div className={`st-msg ${saveMsg.startsWith('success') ? 'success' : 'error'}`}>
-                    {saveMsg.split(':password:')[1]}
-                  </div>
+                    <div style={{ padding: '0 24px 24px' }}>
+                      <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
+                      <div onClick={() => fileCursorRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all .15s' }}>
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                        {uploadingType === 'cursor' ? 'Uploading…' : cursorPreview ? 'Replace custom cursor image' : 'Upload a custom cursor image'}
+                      </div>
+                      {cursorPreview && <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}><img src={cursorPreview} alt="cursor" style={{ width: 32, height: 32, objectFit: 'contain' }} /><BtnGhost onClick={() => removeAsset('cursor')}>Remove</BtnGhost></div>}
+                    </div>
+                  </Card>
                 )}
-              </>
-            )
-          })()}
-        </div>
 
-      </div>
-
-      <div className="st-danger-zone">
-        <div className="st-danger-title">Session</div>
-        <div className="st-danger-sub">Sign out of your current session on this device.</div>
-        <button className="st-logout-btn" onClick={handleLogout}>← Log Out</button>
-      </div>
-
-    </div>
-  </div>
-)}
-
-        {activePage === 'customize' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">CUSTOMIZE • APPEARANCE</div><div className="page-title">Appearance</div><div className="page-subtitle">Customize how your public profile looks and feels.</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
-            </div>
-            <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
-            <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
-            <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
-            <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
-            <div className="section-title">Assets Uploader</div>
-            {uploadingType && <div className="uploading-indicator" style={{ marginBottom: 12 }}>⏳ Uploading {uploadingType}...</div>}
-            <div className="assets-grid">
-              <div className="asset-card" onClick={() => fileBgRef.current.click()}>
-                <div className="asset-label">Background</div>
-                <div className={`asset-drop ${bgPreview ? 'has-preview' : ''}`}>
-                  {!bgPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'bg' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {bgPreview && <img src={bgPreview} crossOrigin="anonymous" className="asset-preview-img" alt="bg" onError={e => { e.target.style.display = 'none' }} />}
-                  {bgPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('bg') }}>✕</button>}
-                </div>
-              </div>
-              <div className="asset-card" onClick={() => fileAudioRef.current.click()}>
-                <div className="asset-label">Audio</div>
-                <div className={`asset-drop ${audioName ? 'has-preview' : ''}`}>
-                  <svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><path d="M3 6h4l3-3v18l-3-3H3z"/><path d="M16 8.5a5 5 0 0 1 0 7M19.5 5a10 10 0 0 1 0 14"/></svg>
-                  <div className="asset-drop-text">{uploadingType === 'audio' ? 'Uploading...' : audioName ? `🎵 ${audioName}` : 'Click to upload audio'}</div>
-                  {audioName && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('audio') }}>✕</button>}
-                </div>
-              </div>
-              <div className="asset-card" onClick={() => fileAvatarRef.current.click()}>
-                <div className="asset-label">Profile Avatar</div>
-                <div className={`asset-drop ${avatarPreview ? 'has-preview' : ''}`}>
-                  {!avatarPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'avatar' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {avatarPreview && <img src={avatarPreview} crossOrigin="anonymous" className="asset-preview-img" alt="avatar" onError={e => { e.target.style.display = 'none' }} />}
-                  {avatarPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('avatar') }}>✕</button>}
-                </div>
-              </div>
-              <div className="asset-card" onClick={() => fileCursorRef.current.click()}>
-                <div className="asset-label">Custom Cursor</div>
-                <div className={`asset-drop ${cursorPreview ? 'has-preview' : ''}`}>
-                  {!cursorPreview && <><svg style={{ width: 26, height: 26, opacity: 0.4 }} viewBox="0 0 24 24" fill="none" stroke="#7a7a8a" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div className="asset-drop-text">{uploadingType === 'cursor' ? 'Uploading...' : 'Click to upload'}</div></>}
-                  {cursorPreview && <img src={cursorPreview} crossOrigin="anonymous" className="asset-preview-img" alt="cursor" onError={e => { e.target.style.display = 'none' }} />}
-                  {cursorPreview && <button className="asset-remove-btn" onClick={e => { e.stopPropagation(); removeAsset('cursor') }}>✕</button>}
-                </div>
-              </div>
-            </div>
-            <div className="premium-banner" onClick={() => navTo('premium')}>
-              <span>Want exclusive features? Unlock more with</span>
-              <span className="prem"><svg width="14" height="14" viewBox="0 0 24 24" fill="#b06aff"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>Premium</span>
-            </div>
-            <div className="section-title">General Customization</div>
-            <div className="customization-grid">
-              <div className="custom-group">
-                <div className="custom-label">Description</div>
-                <textarea className="custom-input" rows={3} placeholder="this is my description" value={appBio} onChange={e => setAppBio(e.target.value)} />
-              </div>
-              <div className="custom-group">
-                <div className="custom-label">Discord Presence</div>
-                <select className="custom-select" value={discordPresence} onChange={e => setDiscordPresence(e.target.value)}>
-                  <option>Enabled</option><option>Disabled</option><option>Only when online</option>
-                </select>
-                <div className="custom-label" style={{ marginTop: 8 }}>Username Effects</div>
-                <select className="custom-select" value={usernameFx} onChange={e => setUsernameFx(e.target.value)}>
-                  <option value="">None</option><option value="rainbow">🌈 Rainbow</option><option value="glitch">⚡ Glitch</option><option value="neon">✨ Neon</option><option value="gold">🏆 Gold</option>
-                </select>
-              </div>
-              <div>
-                <div className="custom-group" style={{ marginBottom: 12 }}>
-                  <div className="custom-label">Profile Opacity <span className="info">?</span></div>
-                  <div className="slider-row">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Opacity</span><span className="slider-value">{opacity}%</span>
+                {effectsTab === 'Animations' && (
+                  <Card>
+                    <CardHeader title="Entrance Animation" sub="How your profile animates in for visitors" />
+                    <div style={{ padding: 24 }}>
+                      <div className="effect-grid">
+                        {entranceAnims.map(a => <button key={a} className={`effect-btn ${entranceAnim === a ? 'active' : ''}`} onClick={() => { setEntranceAnim(a); showToast(`Entrance: ${a}`) }}>{a}</button>)}
+                      </div>
                     </div>
-                    <input type="range" min="20" max="100" value={opacity} step="1" onChange={e => setOpacity(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>20%</span><span>60%</span><span>100%</span></div>
-                  </div>
-                </div>
-                <div className="custom-group">
-                  <div className="custom-label">Background Effects</div>
-                  <select className="custom-select" value={bgFx} onChange={e => setBgFx(e.target.value)}>
-                    <option value="none">None</option><option value="nighttime">Night Time</option><option value="particles">Particles</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="matrix">Matrix</option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <div className="custom-group" style={{ marginBottom: 12 }}>
-                  <div className="custom-label">Profile Blur <span className="info">?</span></div>
-                  <div className="slider-row">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: 11, color: '#7a7a8a' }}>Blur</span><span className="slider-value">{blur}px</span>
+                  </Card>
+                )}
+
+                {effectsTab === 'Click Effects' && (
+                  <Card>
+                    <CardHeader title="Click Effects" sub="What happens when visitors click on your profile" />
+                    <div style={{ padding: 24 }}>
+                      <div className="effect-grid">
+                        {clickEffects.map(e => <button key={e} className={`effect-btn ${clickEffect === e ? 'active' : ''}`} onClick={() => { setClickEffect(e); showToast(`Click effect: ${e}`) }}>{e}</button>)}
+                      </div>
                     </div>
-                    <input type="range" min="0" max="80" value={blur} step="1" onChange={e => setBlur(Number(e.target.value))} />
-                    <div className="slider-ticks"><span>0px</span><span>40px</span><span>80px</span></div>
-                  </div>
-                </div>
-                <div className="custom-group" style={{ marginBottom: 10 }}>
-                  <div className="custom-label">Location</div>
-                  <input className="custom-input" placeholder="My Location" value={location} onChange={e => setLocation(e.target.value)} />
-                </div>
-                <div className="custom-label">Glow Settings <span className="info">?</span></div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 7, marginTop: 6 }}>
-                  <button className={`glow-btn ${!glowState.username ? 'inactive' : ''}`} onClick={() => toggleGlow('username')}>✦ Username</button>
-                  <button className={`glow-btn ${!glowState.socials ? 'inactive' : ''}`} onClick={() => toggleGlow('socials')}>✦ Socials</button>
-                </div>
-                <button className={`glow-btn ${!glowState.badges ? 'inactive' : ''}`} style={{ width: '100%', marginTop: 7 }} onClick={() => toggleGlow('badges')}>✦ Badges</button>
+                  </Card>
+                )}
+
+                <SaveBar onSave={() => showToast('Effects saved!')} onDiscard={() => {}} />
               </div>
-            </div>
-            <div className="live-preview-box">
-              <div className="live-preview-title"><div className="live-dot" /> Live Preview</div>
-              <div className="profile-preview" style={{ opacity: opacity / 100 }}>
-                {bgPreview && <img src={bgPreview} crossOrigin="anonymous" className="prev-bg-img" alt="bg" style={{ filter: blur > 0 ? `blur(${Math.round(blur / 10)}px)` : 'none' }} onError={e => { e.target.style.display = 'none' }} />}
-                <div className="prev-bg-overlay" style={previewOverlayStyle} />
-                <div className="prev-content">
-                  <div className="prev-avatar">
-                    {avatarPreview ? <img src={avatarPreview} crossOrigin="anonymous" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} alt="avatar" onError={e => { e.target.style.display = 'none' }} /> : initial}
-                  </div>
-                  <div className="prev-name" style={previewNameStyle}>@{username}</div>
-                  {appBio && <div className="prev-desc">{appBio}</div>}
-                  {location && (
-                    <div style={{ fontSize: 11, color: '#7a7a8a', display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-                      {location}
+            </>
+          )}
+
+          {/* ═══ MUSIC ═══ */}
+          {activePage === 'music' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Music" title='Background <span style="color:#e03030">Music</span>' subtitle="Add a track that plays when visitors view your profile" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
+                <Card>
+                  <CardHeader title="Background Music" sub="Add a track that plays when visitors view your profile"
+                    icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}
+                    action={<Toggle checked={musicEnabled} onChange={e => setMusicEnabled(e.target.checked)} />}
+                  />
+                  {musicEnabled && (
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {['direct','spotify','soundcloud'].map(t => (
+                          <button key={t} onClick={() => setMusicType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${musicType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: musicType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: musicType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                            {{ direct: 'Direct URL', spotify: 'Spotify', soundcloud: 'SoundCloud' }[t]}
+                          </button>
+                        ))}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{musicType === 'direct' ? 'Audio URL' : 'Track URL'}</label>
+                        <Input placeholder={musicType === 'direct' ? 'https://example.com/song.mp3' : musicType === 'spotify' ? 'https://open.spotify.com/track/…' : 'https://soundcloud.com/…'} value={musicUrl} onChange={e => setMusicUrl(e.target.value)} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Track Title</label>
+                          <Input placeholder="Song name" value={musicTitle} onChange={e => setMusicTitle(e.target.value)} />
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Artist</label>
+                          <Input placeholder="Artist name" value={musicArtist} onChange={e => setMusicArtist(e.target.value)} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Volume — {musicVolume}%</label>
+                        <input type="range" min={0} max={100} value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
+                      </div>
                     </div>
                   )}
+                </Card>
+
+                {musicEnabled && (
+                  <Card>
+                    <CardHeader title="Display Options" sub="Control how the music player appears" />
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                      <ToggleRow label="Autoplay" sub="Start playing when visitors arrive" checked={musicAutoplay} onChange={e => setMusicAutoplay(e.target.checked)} />
+                      <ToggleRow label="Show Track Title" sub="Display song name in player" checked={musicShowTitle} onChange={e => setMusicShowTitle(e.target.checked)} />
+                      <ToggleRow label="Show Artist" sub="Display artist name in player" checked={musicShowArtist} onChange={e => setMusicShowArtist(e.target.checked)} />
+                    </div>
+                  </Card>
+                )}
+
+                <SaveBar onSave={() => showToast('Music settings saved!')} onDiscard={() => {}} />
+              </div>
+            </>
+          )}
+
+          {/* ═══ WIDGETS / TEMPLATES ═══ */}
+          {(activePage === 'widgets' || activePage === 'templates') && (
+            <>
+              <PageHeader
+                breadcrumb={`Dashboard · ${activePage === 'widgets' ? 'Widgets' : 'Templates'}`}
+                title={activePage === 'widgets' ? 'Profile <span style="color:#e03030">Widgets</span>' : 'Browse <span style="color:#e03030">Templates</span>'}
+                subtitle={activePage === 'widgets' ? 'Add widgets to your page' : 'Pick a pre-built layout'}
+              />
+              <div style={{ padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12 }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>{activePage === 'widgets' ? '⊞' : '⊟'}</div>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Coming Soon</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
+                  {activePage === 'widgets' ? 'Add countdown timers, now-playing widgets, Discord status, and more.' : 'Pick from pre-built layouts to instantly style your profile.'}
                 </div>
               </div>
-            </div>
-            <div className="app-save-row">
-              {appSaveMsg && <span className="save-msg">{appSaveMsg}</span>}
-              <button className="button-secondary" onClick={() => { setAppBio(''); setOpacity(100); setBlur(0); setUsernameFx(''); setBgFx('none'); setLocation('') }}>Reset</button>
-              <button className="button" onClick={saveAppearance} disabled={saving}>{saving ? 'Saving...' : 'Save Appearance'}</button>
-            </div>
-          </div>
-        )}
+            </>
+          )}
 
-        {activePage === 'links' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">CUSTOMIZE • LINKS</div><div className="page-title">Links</div><div className="page-subtitle">Configure links on your public profile.</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Your Links</h2><div className="panel-note">{links.length} link{links.length !== 1 ? 's' : ''}</div></div>
-              <div className="panel-body">
-                {links.length === 0 && <div style={{ color: '#2a2a2a', padding: '8px 0 16px', fontSize: 13 }}>No links yet. Add one below!</div>}
-                {links.map((l, i) => (
-                  <div key={i} className="link-item">
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="link-item-title">{l.title}</div>
-                      <div className="link-item-url">{l.url}</div>
-                    </div>
-                    <div className="link-actions">
-                      <button className="link-action-btn" onClick={() => moveLink(i, -1)}>↑</button>
-                      <button className="link-action-btn" onClick={() => moveLink(i, 1)}>↓</button>
-                      <button className="link-action-btn del" onClick={() => removeLink(i)}>✕</button>
-                    </div>
+          {/* ═══ PREMIUM ═══ */}
+          {activePage === 'premium' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Premium" title='Go <span style="color:#e03030">Premium</span>' subtitle="Unlock exclusive features" />
+              <div style={{ background: 'linear-gradient(135deg,rgba(224,48,48,0.08),rgba(100,0,0,0.08))', border: '1px solid rgba(224,48,48,0.22)', borderRadius: 14, padding: 28, textAlign: 'center' }}>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>💀</div>
+                <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, marginBottom: 8 }}>fate.rip <span style={{ color: '#e03030' }}>Premium</span></div>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', maxWidth: 340, margin: '0 auto 20px' }}>Unlock custom domains, advanced analytics, exclusive effects, and priority support.</p>
+                <BtnAccent style={{ padding: '12px 28px', fontSize: 14 }} onClick={() => showToast('Redirecting to checkout…')}>Upgrade Now</BtnAccent>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {['Custom domain (yourname.com)','Advanced analytics dashboard','Exclusive cursor & particle effects','Priority support','Early access to new features','Remove fate.rip branding'].map(f => (
+                  <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
+                    <svg width="16" height="16" fill="none" stroke="#e03030" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+                    <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>{f}</span>
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Add Link</h2></div>
-              <div className="panel-body">
-                <div className="field"><label>Label</label><input className="input" placeholder="e.g. Twitter" value={newLinkTitle} onChange={e => setNewLinkTitle(e.target.value)} /></div>
-                <div className="field"><label>URL</label><input className="input" placeholder="https://twitter.com/you" value={newLinkUrl} onChange={e => setNewLinkUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addLink()} /></div>
-                <div className="save-bar">
-                  {saveMsg && <span className="save-msg">{saveMsg}</span>}
-                  <button className="button-secondary" onClick={addLink}>+ Add Link</button>
-                  <button className="button" onClick={saveProfile} disabled={saving}>{saving ? 'Saving...' : 'Save Links'}</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activePage === 'templates' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">CUSTOMIZE • TEMPLATES</div><div className="page-title">Templates</div><div className="page-subtitle">Choose a profile template layout.</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Template Presets</h2><div className="panel-note">Coming Soon</div></div>
-              <div className="panel-body">
-                <div style={{ height: 160, background: 'linear-gradient(180deg,#0d0d10,#09090d)', border: '1px solid rgba(196,0,29,0.35)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2a2a2a', fontSize: 13 }}>Templates are coming soon</div>
-                <div className="graph-legend" style={{ marginTop: 10 }}>Profile templates will apply a full layout and style to your public page.</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activePage === 'premium' && (
-          <div>
-            <div className="page-title-row">
-              <div><div className="page-breadcrumb">PREMIUM</div><div className="page-title">Premium</div><div className="page-subtitle">Unlock extended features.</div></div>
-              <button className="back-button" onClick={() => navTo('overview')}>← Back</button>
-            </div>
-            <div className="panel">
-              <div className="panel-header"><h2>Upgrade</h2><div className="panel-note">Coming Soon</div></div>
-              <div className="panel-body">
-                <p style={{ marginBottom: 12 }}>Unlock additional customization, advanced analytics, and more profile slots.</p>
-                <div className="button-row">
-                  <button className="button" style={{ opacity: 0.5, cursor: 'not-allowed' }}>Upgrade Now</button>
-                  <button className="button-secondary">View Benefits</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  )
-}
-
-// Analytics sub-page with live chart
-function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
-  const [weekData, setWeekData] = useState([])
-  const [loadingWeek, setLoadingWeek] = useState(true)
-  const [timeRange, setTimeRange] = useState('7')
-  const [lastUpdated, setLastUpdated] = useState('')
-
-  useEffect(() => {
-    if (!username) return
-    const fetchWeek = async () => {
-      setLoadingWeek(true)
-      const days = []
-      const numDays = parseInt(timeRange)
-      for (let i = numDays - 1; i >= 0; i--) {
-        const d = new Date()
-        d.setHours(0, 0, 0, 0)
-        d.setDate(d.getDate() - i)
-        const nextD = new Date(d)
-        nextD.setDate(nextD.getDate() + 1)
-        const { count } = await supabase
-          .from('profile_views')
-          .select('*', { count: 'exact', head: true })
-          .eq('username', username)
-          .gte('viewed_at', d.toISOString())
-          .lt('viewed_at', nextD.toISOString())
-        days.push({
-          label: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          count: count || 0,
-        })
-      }
-      setWeekData(days)
-      setLastUpdated('less than a minute ago')
-      setLoadingWeek(false)
-    }
-    fetchWeek()
-  }, [username, timeRange])
-
-  const weekTotal = weekData.reduce((a, b) => a + b.count, 0)
-  const avgDaily = weekData.length > 0 ? (weekTotal / weekData.length).toFixed(1) : '0'
-  const maxCount = Math.max(...weekData.map(d => d.count), 1)
-
-  // Build SVG line chart path
-  const chartW = 1000
-  const chartH = 200
-  const linePath = (() => {
-    if (weekData.length < 2) return ''
-    const pts = weekData.map((d, i) => {
-      const x = (i / (weekData.length - 1)) * chartW
-      const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
-      return `${x},${y}`
-    })
-    return `M ${pts.join(' L ')}`
-  })()
-
-  const areaPath = (() => {
-    if (weekData.length < 2) return ''
-    const pts = weekData.map((d, i) => {
-      const x = (i / (weekData.length - 1)) * chartW
-      const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
-      return `${x},${y}`
-    })
-    return `M 0,${chartH} L ${pts.join(' L ')} L ${chartW},${chartH} Z`
-  })()
-
-  const stats = [
-    {
-      label: 'Profile Views',
-      value: profileViews.toLocaleString(),
-      sub: `All time unique`,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
-    },
-    {
-      label: 'Views This Period',
-      value: weekTotal.toLocaleString(),
-      sub: `Last ${timeRange} days`,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-    },
-    {
-      label: 'Average Daily Views',
-      value: avgDaily,
-      sub: `Per day`,
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
-    },
-    {
-      label: 'Views Today',
-      value: viewsToday.toLocaleString(),
-      sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
-    },
-  ]
-
-  return (
-    <div>
-      <style>{`
-        .an2-wrap { display: flex; flex-direction: column; gap: 0; }
-        .an2-top { background: #111114; border: 1px solid rgba(196,0,29,0.25); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
-        .an2-top-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-        .an2-top-title { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-        .an2-top-sub { font-size: 12px; color: #7a7a8a; }
-        .an2-time-row { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
-        .an2-updated { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.1); border: 1px solid rgba(196,0,29,0.25); border-radius: 999px; padding: 4px 12px; }
-        .an2-select { background: #0c0c10; border: 1px solid rgba(196,0,29,0.3); border-radius: 10px; color: #b8b8c4; font-size: 12px; padding: 8px 32px 8px 12px; outline: none; font-family: inherit; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7a8a'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; width: 100%; max-width: 200px; }
-        .an2-select:focus { border-color: #c4001d; }
-        .an2-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
-        .an2-stat { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 14px; padding: 20px; transition: border-color .15s, transform .15s; position: relative; overflow: hidden; }
-        .an2-stat:hover { border-color: rgba(196,0,29,0.5); transform: translateY(-2px); }
-        .an2-stat::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(196,0,29,0.05) 0%, transparent 60%); pointer-events: none; }
-        .an2-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .an2-stat-label { font-size: 13px; color: #b8b8c4; font-weight: 500; }
-        .an2-stat-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(196,0,29,0.12); border: 1px solid rgba(196,0,29,0.2); display: flex; align-items: center; justify-content: center; color: #ff2340; flex-shrink: 0; }
-        .an2-stat-value { font-size: 32px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 6px; }
-        .an2-stat-sub { font-size: 12px; color: #555; }
-        .an2-chart-panel { background: #111114; border: 1px solid rgba(196,0,29,0.2); border-radius: 14px; padding: 24px; }
-        .an2-chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 10px; }
-        .an2-chart-title { font-size: 16px; font-weight: 600; color: #fff; }
-        .an2-chart-badge { font-size: 11px; color: #7a7a8a; background: rgba(196,0,29,0.08); border: 1px solid rgba(196,0,29,0.2); border-radius: 999px; padding: 4px 12px; }
-        .an2-chart-svg-wrap { width: 100%; position: relative; }
-        .an2-x-labels { display: flex; justify-content: space-between; margin-top: 8px; padding: 0 2px; }
-        .an2-x-label { font-size: 10px; color: #444; }
-        .an2-chart-footer { font-size: 11px; color: #3a3a3a; margin-top: 12px; }
-        .an2-empty { height: 200px; display: flex; align-items: center; justify-content: center; color: #2a2a2a; font-size: 13px; }
-        @media (max-width: 900px) { .an2-stats { grid-template-columns: 1fr 1fr; } }
-        @media (max-width: 480px) { .an2-stats { grid-template-columns: 1fr 1fr; } .an2-stat-value { font-size: 24px; } }
-      `}</style>
-
-      <div className="an2-wrap">
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <div>
-            <div className="an2-top-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2340" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              Account Analytics
-            </div>
-            <div className="an2-top-sub">Track your profile performance and see how many people are visiting your profile.</div>
-          </div>
-          <button className="back-button" onClick={onBack}>← Back</button>
-        </div>
-
-        {/* Time range row */}
-        <div className="an2-time-row">
-          <span style={{ fontSize: 13, color: '#7a7a8a' }}>Time Range</span>
-          {lastUpdated && <span className="an2-updated">Last updated {lastUpdated}</span>}
-          <select className="an2-select" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
-            <option value="3">Last 3 days</option>
-            <option value="7">Last 7 days</option>
-            <option value="14">Last 14 days</option>
-            <option value="30">Last 30 days</option>
-          </select>
-        </div>
-
-        {/* Stat cards */}
-        <div className="an2-stats">
-          {stats.map((s, i) => (
-            <div key={i} className="an2-stat">
-              <div className="an2-stat-top">
-                <div className="an2-stat-label">{s.label}</div>
-                <div className="an2-stat-icon">{s.icon}</div>
-              </div>
-              <div className="an2-stat-value">{s.value}</div>
-              <div className="an2-stat-sub">{s.sub}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Line chart */}
-        <div className="an2-chart-panel">
-          <div className="an2-chart-header">
-            <div className="an2-chart-title">Profile Views</div>
-            <div className="an2-chart-badge">Unique visitors only</div>
-          </div>
-          {loadingWeek ? (
-            <div className="an2-empty">Loading...</div>
-          ) : weekTotal === 0 ? (
-            <div className="an2-empty">No views yet in this period — share your profile to get started!</div>
-          ) : (
-            <div className="an2-chart-svg-wrap">
-              <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }} preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#ff2340" stopOpacity="0.25"/>
-                    <stop offset="100%" stopColor="#ff2340" stopOpacity="0.02"/>
-                  </linearGradient>
-                </defs>
-                {/* Grid lines */}
-                {[0.25, 0.5, 0.75, 1].map((v, i) => (
-                  <line key={i} x1="0" y1={chartH - v * (chartH - 20) - 10} x2={chartW} y2={chartH - v * (chartH - 20) - 10} stroke="rgba(196,0,29,0.08)" strokeWidth="1"/>
-                ))}
-                {/* Area fill */}
-                {areaPath && <path d={areaPath} fill="url(#areaGrad)"/>}
-                {/* Line */}
-                {linePath && <path d={linePath} fill="none" stroke="#ff2340" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
-                {/* Dots */}
-                {weekData.map((d, i) => {
-                  const x = (i / (weekData.length - 1)) * chartW
-                  const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
-                  return d.count > 0 ? (
-                    <g key={i}>
-                      <circle cx={x} cy={y} r="5" fill="#ff2340" stroke="#111114" strokeWidth="2"/>
-                    </g>
-                  ) : null
-                })}
-              </svg>
-              {/* X axis labels */}
-              <div className="an2-x-labels">
-                {weekData.map((d, i) => (
-                  <span key={i} className="an2-x-label">{d.label}</span>
-                ))}
-              </div>
-            </div>
+            </>
           )}
-          <div className="an2-chart-footer">Each data point represents unique visitor count per day — repeat visits from the same browser don't count.</div>
+
+          {/* ═══ SETTINGS ═══ */}
+          {activePage === 'settings' && (
+            <>
+              <PageHeader breadcrumb="Dashboard · Settings" title='Account <span style="color:#e03030">Settings</span>' subtitle="Manage your account" />
+              <div style={{ maxWidth: 680 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+                  {/* Username */}
+                  <Card>
+                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
+                      {[
+                        {
+                          label: 'Username', cooldownDays: 7, cooldownField: 'username_changed_at',
+                          value: username, setValue: setUsername,
+                          onSave: async () => {
+                            if (!username.trim()) { showToast('Username cannot be empty'); return }
+                            const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).single()
+                            if (existing) { showToast('Username already taken'); return }
+                            const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
+                            if (!error) setDbUser(p => ({ ...p, username_changed_at: new Date().toISOString() }))
+                            showToast(error ? 'Failed to save' : 'Username updated!')
+                          }
+                        },
+                        {
+                          label: 'Display Name', cooldownDays: 0, cooldownField: null,
+                          value: displayName, setValue: setDisplayName,
+                          onSave: async () => {
+                            const { error } = await supabase.from('users').update({ display_name: displayName }).eq('email', user.email)
+                            showToast(error ? 'Failed to save' : 'Display name saved!')
+                          }
+                        }
+                      ].map(({ label, cooldownDays, cooldownField, value, setValue, onSave }) => {
+                        const lastChanged = cooldownField && dbUser?.[cooldownField] ? new Date(dbUser[cooldownField]) : null
+                        const daysLeft = lastChanged ? Math.max(0, cooldownDays - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
+                        const locked = daysLeft > 0
+                        return (
+                          <div key={label}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{label}</span>
+                              {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {daysLeft}d</span>
+                                : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
+                            </div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                              <Input value={value} disabled={locked} onChange={e => setValue(e.target.value)} placeholder={label} style={{ opacity: locked ? 0.5 : 1 }} />
+                              <BtnAccent onClick={onSave} disabled={locked}>Save</BtnAccent>
+                            </div>
+                          </div>
+                        )
+                      })}
+
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+
+                      {/* Email */}
+                      {(() => {
+                        const [newEmail, setNewEmail] = useState('')
+                        const lastChanged = dbUser?.email_changed_at ? new Date(dbUser.email_changed_at) : null
+                        const daysLeft = lastChanged ? Math.max(0, 3 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
+                        const locked = daysLeft > 0
+                        return (
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>Email</span>
+                              {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {daysLeft}d</span>
+                                : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
+                            </div>
+                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Current: {user?.email}</div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                              <Input type="email" placeholder="New email address" value={newEmail} disabled={locked} onChange={e => setNewEmail(e.target.value)} style={{ opacity: locked ? 0.5 : 1 }} />
+                              <BtnAccent disabled={locked} onClick={async () => {
+                                if (!newEmail || !newEmail.includes('@')) { showToast('Enter a valid email'); return }
+                                const { error } = await supabase.auth.updateUser({ email: newEmail })
+                                if (!error) { await supabase.from('users').update({ email_changed_at: new Date().toISOString() }).eq('username', username); setDbUser(p => ({ ...p, email_changed_at: new Date().toISOString() })); setNewEmail('') }
+                                showToast(error ? 'Failed to update email' : 'Confirmation sent! Check your inbox.')
+                              }}>Save</BtnAccent>
+                            </div>
+                          </div>
+                        )
+                      })()}
+
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+
+                      {/* Password */}
+                      {(() => {
+                        const lastChanged = dbUser?.password_changed_at ? new Date(dbUser.password_changed_at) : null
+                        const hoursLeft = lastChanged ? Math.max(0, 1 - Math.floor((Date.now() - lastChanged.getTime()) / 3600000)) : 0
+                        const locked = hoursLeft > 0
+                        return (
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>Password</span>
+                              {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {hoursLeft}h</span>
+                                : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
+                            </div>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                              <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, paddingRight: 10 }}>
+                                <Input type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} disabled={locked} onChange={e => setNewPassword(e.target.value)} style={{ border: 'none', background: 'transparent', flex: 1, opacity: locked ? 0.5 : 1 }} />
+                                <button onClick={() => setShowPassword(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                              </div>
+                              <BtnAccent disabled={locked} onClick={async () => {
+                                if (!newPassword || newPassword.length < 6) { showToast('Password must be 6+ characters'); return }
+                                const { error } = await supabase.auth.updateUser({ password: newPassword })
+                                if (!error) { setNewPassword(''); await supabase.from('users').update({ password_changed_at: new Date().toISOString() }).eq('username', username); setDbUser(p => ({ ...p, password_changed_at: new Date().toISOString() })) }
+                                showToast(error ? 'Failed to update password' : 'Password updated!')
+                              }}>Update</BtnAccent>
+                            </div>
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  </Card>
+
+                  <div style={{ background: 'rgba(224,48,48,0.04)', border: '1px solid rgba(224,48,48,0.15)', borderRadius: 14, padding: 22 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: '#e03030', marginBottom: 4 }}>Session</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>Sign out of your current session on this device.</div>
+                    <BtnGhost onClick={handleLogout}>← Log Out</BtnGhost>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
         </div>
       </div>
+
+      {/* ── ADD LINK MODAL ── */}
+      <div className={`modal-overlay ${showAddLinkModal ? 'open' : ''}`} onClick={() => setShowAddLinkModal(false)}>
+        <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
+          <button onClick={() => setShowAddLinkModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Add <span style={{ color: '#e03030' }}>Link</span></h2>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Add a new social or custom link to your profile</p>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Label</label>
+            <Input placeholder="e.g. Twitter, GitHub, Portfolio…" value={newLinkLabel} onChange={e => setNewLinkLabel(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
+            <Input type="url" placeholder="https://…" value={newLinkUrl} onChange={e => setNewLinkUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addLink()} />
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <BtnGhost onClick={() => setShowAddLinkModal(false)}>Cancel</BtnGhost>
+            <BtnAccent onClick={addLink}>Add Link</BtnAccent>
+          </div>
+        </div>
+      </div>
+
+      {/* ── ADD BUTTON MODAL ── */}
+      <div className={`modal-overlay ${showAddBtnModal ? 'open' : ''}`} onClick={() => setShowAddBtnModal(false)}>
+        <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
+          <button onClick={() => setShowAddBtnModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Custom <span style={{ color: '#e03030' }}>Button</span></h2>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Create a call-to-action button on your profile</p>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Button Label</label>
+            <Input placeholder="e.g. Hire Me, Buy Now…" value={newBtnLabel} onChange={e => setNewBtnLabel(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
+            <Input type="url" placeholder="https://…" value={newBtnUrl} onChange={e => setNewBtnUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addButton()} />
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <BtnGhost onClick={() => setShowAddBtnModal(false)}>Cancel</BtnGhost>
+            <BtnAccent onClick={addButton}>Create Button</BtnAccent>
+          </div>
+        </div>
+      </div>
+
+      {/* ── TOAST ── */}
+      {toastVisible && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#1a0808', border: '1px solid rgba(224,48,48,0.22)', color: '#fff', fontSize: 13, padding: '10px 18px', borderRadius: 100, zIndex: 2000, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', animation: 'toastIn .3s ease' }}>
+          <svg width="14" height="14" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+          {toast}
+        </div>
+      )}
     </div>
   )
 }
