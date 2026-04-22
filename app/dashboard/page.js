@@ -1278,7 +1278,7 @@ export default function Dashboard() {
             <>
               <PageHeader breadcrumb="Dashboard · Premium" title='Go <span style="color:#e03030">Premium</span>' subtitle="Unlock exclusive features" />
               <div style={{ background: 'linear-gradient(135deg,rgba(224,48,48,0.08),rgba(100,0,0,0.08))', border: '1px solid rgba(224,48,48,0.22)', borderRadius: 14, padding: 28, textAlign: 'center' }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>💀</div>
+                <div style={{ fontSize: 36, marginBottom: 12 }}></div>
                 <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, marginBottom: 8 }}>fate.rip <span style={{ color: '#e03030' }}>Premium</span></div>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', maxWidth: 340, margin: '0 auto 20px' }}>Unlock custom domains, advanced analytics, exclusive effects, and priority support.</p>
                 <BtnAccent style={{ padding: '12px 28px', fontSize: 14 }} onClick={() => showToast('Redirecting to checkout…')}>Upgrade Now</BtnAccent>
