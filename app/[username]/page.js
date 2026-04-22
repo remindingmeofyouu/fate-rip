@@ -4,19 +4,39 @@ import { useParams } from 'next/navigation'
 import { supabase } from '../../lib/supabase'
 import { trackView } from '../../lib/trackView'
 
-// ─── Typewriter hook ───────────────────────────────────────────────────────────
+// ─── Typewriter hook (loops: type → pause → delete → pause → repeat) ──────────
 function useTypewriter(text, enabled) {
   const [displayed, setDisplayed] = useState(enabled ? '' : text)
   useEffect(() => {
     if (!enabled || !text) { setDisplayed(text || ''); return }
     setDisplayed('')
     let i = 0
-    const timer = setInterval(() => {
-      i++
-      setDisplayed(text.slice(0, i))
-      if (i >= text.length) clearInterval(timer)
-    }, 45)
-    return () => clearInterval(timer)
+    let deleting = false
+    let timeout
+
+    const tick = () => {
+      if (!deleting) {
+        i++
+        setDisplayed(text.slice(0, i))
+        if (i >= text.length) {
+          timeout = setTimeout(() => { deleting = true; tick() }, 2000)
+        } else {
+          timeout = setTimeout(tick, 55)
+        }
+      } else {
+        i--
+        setDisplayed(text.slice(0, i))
+        if (i <= 0) {
+          deleting = false
+          timeout = setTimeout(tick, 800)
+        } else {
+          timeout = setTimeout(tick, 30)
+        }
+      }
+    }
+
+    timeout = setTimeout(tick, 800)
+    return () => clearTimeout(timeout)
   }, [text, enabled])
   return displayed
 }
@@ -45,11 +65,9 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
   const [entered, setEntered] = useState(false)
-  const [enterVisible, setEnterVisible] = useState(true)
   const [isPlaying, setIsPlaying] = useState(false)
   const audioRef = useRef(null)
 
-  // ── Click effect particles ──────────────────────────────────────────────────
   const spawnClickEffect = useCallback((e, type) => {
     if (type === 'None' || !type) return
     const symbols = { Sparks: ['✦','✧','⋆'], Hearts: ['♥','❤','💕'], Stars: ['★','✦','✧'], Explosion: ['💥','✦','●'], Ripple: ['○','◎','●'] }
@@ -82,32 +100,18 @@ export default function ProfilePage() {
     if (username) trackView(username)
   }, [username])
 
-  // ── Cursor, title animation, favicon ────────────────────────────────────────
   useEffect(() => {
     if (!profile) return
-
-    // favicon
     let link = document.querySelector("link[rel~='icon']")
     if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
     link.href = '/scythe.png'
-
-    // custom cursor
     if (profile.cursor_url) {
       document.body.style.cursor = `url('${profile.cursor_url}'), auto`
     } else {
       const settings = profile.settings || {}
-      const cursorStyle = settings.cursorStyle || 'Default'
-      const cursorMap = {
-        'Dot': 'crosshair',
-        'Ring': 'cell',
-        'Crosshair': 'crosshair',
-        'Arrow': 'default',
-        'Default': 'auto',
-      }
-      document.body.style.cursor = cursorMap[cursorStyle] || 'auto'
+      const cursorMap = { 'Dot': 'crosshair', 'Ring': 'cell', 'Crosshair': 'crosshair', 'Arrow': 'default', 'Default': 'auto' }
+      document.body.style.cursor = cursorMap[settings.cursorStyle] || 'auto'
     }
-
-    // animated title
     const fullText = `@${profile.username}`
     let i = 0, deleting = false, timeout
     const tick = () => {
@@ -127,14 +131,12 @@ export default function ProfilePage() {
     return () => { clearTimeout(timeout); document.body.style.cursor = '' }
   }, [profile])
 
-  // ── Audio autoplay ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!profile) return
     const settings = profile.settings || {}
     const music = settings.music || {}
     const audioSrc = music.enabled ? music.url : profile.audio_url
     if (!audioSrc) return
-
     const vol = music.volume !== undefined ? music.volume / 100 : 0.4
     const tryPlay = () => {
       if (audioRef.current) {
@@ -167,45 +169,41 @@ export default function ProfilePage() {
     </div>
   )
 
-  // ── Parse all settings ──────────────────────────────────────────────────────
   const settings = profile.settings || {}
-  const fontFamily   = settings.font || 'Nunito'
-  const accentColor  = settings.accentColor || '#CC0000'
+  const fontFamily     = settings.font || 'Nunito'
+  const accentColor    = settings.accentColor || '#CC0000'
   const bgColorSetting = settings.bgColor || '#080808'
-  const glowIntensity = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
+  const glowIntensity  = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
   const particleEnabled = settings.particleEnabled || false
-  const particleStyle = settings.particleStyle || 'Dots'
-  const clickEffect  = settings.clickEffect || 'None'
-  const entranceAnim = settings.entranceAnim || 'Fade In'
-  const music        = settings.music || {}
-  const layout       = settings.layout || {}
-  const entrance     = settings.entrance || {}
-  const btns         = Array.isArray(settings.buttons) ? settings.buttons : []
-  const typingBio    = layout.typingBio || false
+  const particleStyle  = settings.particleStyle || 'Dots'
+  const clickEffect    = settings.clickEffect || 'None'
+  const entranceAnim   = settings.entranceAnim || 'Fade In'
+  const music          = settings.music || {}
+  const layout         = settings.layout || {}
+  const entrance       = settings.entrance || {}
+  const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
+  const typingBio      = layout.typingBio || false
   const showAvatarPref = layout.showAvatar !== false
-  const avatarPos    = layout.avatarPos || 'center'
-  const panelSize    = layout.panelSize || 'medium'
+  const avatarPos      = layout.avatarPos || 'center'
+  const panelSize      = layout.panelSize || 'medium'
   const entranceEnabled = entrance.enabled !== false
+  const panelMaxW      = { compact: 380, medium: 480, wide: 580, full: 680 }[panelSize] || 480
 
-  const panelMaxW = { compact: 380, medium: 480, wide: 580, full: 680 }[panelSize] || 480
-
-  // Direct fields
-  const initial    = profile.username[0].toUpperCase()
-  const links      = Array.isArray(profile.links) ? profile.links : []
-  const opacity    = profile.opacity ?? 100
-  const blur       = profile.blur ?? 0
-  const usernameFx = profile.username_fx || ''
-  const bgFx       = profile.bg_fx || 'none'
-  const location   = profile.location || ''
-  const glowState  = profile.glow_settings || { username: true, socials: true, badges: false }
-  const avatarUrl  = profile.avatar_url || null
-  const bgUrl      = profile.bg_url || null
+  const initial     = profile.username[0].toUpperCase()
+  const links       = Array.isArray(profile.links) ? profile.links : []
+  const opacity     = profile.opacity ?? 100
+  const blur        = profile.blur ?? 0
+  const usernameFx  = profile.username_fx || ''
+  const bgFx        = profile.bg_fx || 'none'
+  const location    = profile.location || ''
+  const glowState   = profile.glow_settings || { username: true, socials: true, badges: false }
+  const avatarUrl   = profile.avatar_url || null
+  const bgUrl       = profile.bg_url || null
   const displayName = profile.display_name || ''
-  const audioSrc   = music.enabled && music.url ? music.url : profile.audio_url || null
-  const fontQuery  = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
-  const glowAlpha  = glowIntensity / 100
+  const audioSrc    = music.enabled && music.url ? music.url : profile.audio_url || null
+  const fontQuery   = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
+  const glowAlpha   = glowIntensity / 100
 
-  // ── Name style ──────────────────────────────────────────────────────────────
   const nameStyle = (() => {
     if (usernameFx === 'rainbow') return { background: 'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
     if (usernameFx === 'gold')    return { background: 'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }
@@ -215,7 +213,6 @@ export default function ProfilePage() {
     return { color: '#fff' }
   })()
 
-  // ── BG overlay ─────────────────────────────────────────────────────────────
   const overlayStyle = (() => {
     if (bgFx === 'nighttime') return { background: 'linear-gradient(180deg, rgba(5,5,12,0.5) 0%, rgba(20,0,40,0.6) 100%)' }
     if (bgFx === 'particles') return { background: `radial-gradient(circle at 20% 80%, ${accentColor}33 0%, transparent 50%), radial-gradient(circle at 80% 20%, ${accentColor}1a 0%, transparent 40%)` }
@@ -225,44 +222,31 @@ export default function ProfilePage() {
     return {}
   })()
 
-  // ── Entrance animation class name / style ───────────────────────────────────
   const entranceAnimStyle = (() => {
     if (!entered) return {}
-    if (entranceAnim === 'Slide Up')  return { animation: 'slideUp 0.5s ease forwards' }
-    if (entranceAnim === 'Zoom In')   return { animation: 'zoomIn 0.4s ease forwards' }
-    if (entranceAnim === 'Glitch')    return { animation: 'glitchIn 0.5s ease forwards' }
-    return { animation: 'fadeIn 0.4s ease forwards' } // Fade In default
+    if (entranceAnim === 'Slide Up') return { animation: 'slideUp 0.5s ease forwards' }
+    if (entranceAnim === 'Zoom In')  return { animation: 'zoomIn 0.4s ease forwards' }
+    if (entranceAnim === 'Glitch')   return { animation: 'glitchIn 0.5s ease forwards' }
+    return { animation: 'fadeIn 0.4s ease forwards' }
   })()
 
-  // ── Entrance screen ─────────────────────────────────────────────────────────
   if (!entered && entranceEnabled) {
     const enterTitle    = entrance.title    || profile.username
     const enterSubtitle = entrance.subtitle || 'Click anywhere to enter'
-    const showAvtr      = entrance.showAvatar    !== false
-    const showTtl       = entrance.showTitle     !== false
-    const showSub       = entrance.showSubtitle  !== false
-
+    const showAvtr      = entrance.showAvatar   !== false
+    const showTtl       = entrance.showTitle    !== false
+    const showSub       = entrance.showSubtitle !== false
     return (
-      <div
-        onClick={() => { setEntered(true) }}
-        style={{ background: bgColorSetting, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative', overflow: 'hidden', fontFamily: `'${fontFamily}', sans-serif` }}
-      >
+      <div onClick={() => setEntered(true)} style={{ background: bgColorSetting, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', position: 'relative', overflow: 'hidden', fontFamily: `'${fontFamily}', sans-serif` }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
-        {bgUrl && (
-          bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
-            ? <video src={bgUrl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${blur}px)` : 'none' }} autoPlay loop muted playsInline />
-            : <img src={bgUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+        {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
+          ? <video src={bgUrl} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${blur}px)` : 'none' }} autoPlay loop muted playsInline />
+          : <img src={bgUrl} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
         )}
         <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1 }} />
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, textAlign: 'center', padding: '0 24px', animation: 'entrancePulse 2s ease-in-out infinite' }}>
-          {showAvtr && avatarUrl && (
-            <div style={{ width: 88, height: 88, borderRadius: '50%', border: `3px solid ${accentColor}88`, overflow: 'hidden', marginBottom: 4 }}>
-              <img src={avatarUrl} alt={profile.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-          )}
-          {showAvtr && !avatarUrl && (
-            <div style={{ width: 88, height: 88, borderRadius: '50%', background: `${accentColor}22`, border: `3px solid ${accentColor}88`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900, color: accentColor }}>{initial}</div>
-          )}
+          {showAvtr && avatarUrl && <div style={{ width: 88, height: 88, borderRadius: '50%', border: `3px solid ${accentColor}88`, overflow: 'hidden', marginBottom: 4 }}><img src={avatarUrl} alt={profile.username} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>}
+          {showAvtr && !avatarUrl && <div style={{ width: 88, height: 88, borderRadius: '50%', background: `${accentColor}22`, border: `3px solid ${accentColor}88`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, fontWeight: 900, color: accentColor }}>{initial}</div>}
           {showTtl && <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: '-0.5px' }}>{enterTitle}</div>}
           {showSub && <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>{enterSubtitle}</div>}
           <div style={{ marginTop: 8, width: 32, height: 2, borderRadius: 1, background: accentColor, animation: 'lineGrow 1.5s ease-in-out infinite' }} />
@@ -277,47 +261,20 @@ export default function ProfilePage() {
 
   return (
     <ProfileContent
-      profile={profile}
-      settings={settings}
-      fontFamily={fontFamily}
-      fontQuery={fontQuery}
-      accentColor={accentColor}
-      bgColorSetting={bgColorSetting}
-      glowIntensity={glowIntensity}
-      particleEnabled={particleEnabled}
-      particleStyle={particleStyle}
-      clickEffect={clickEffect}
-      music={music}
-      layout={layout}
-      btns={btns}
-      typingBio={typingBio}
-      showAvatarPref={showAvatarPref}
-      avatarPos={avatarPos}
-      panelMaxW={panelMaxW}
-      initial={initial}
-      links={links}
-      opacity={opacity}
-      blur={blur}
-      usernameFx={usernameFx}
-      bgFx={bgFx}
-      location={location}
-      glowState={glowState}
-      avatarUrl={avatarUrl}
-      bgUrl={bgUrl}
-      displayName={displayName}
-      audioSrc={audioSrc}
-      nameStyle={nameStyle}
-      overlayStyle={overlayStyle}
-      entranceAnimStyle={entranceAnimStyle}
-      audioRef={audioRef}
-      isPlaying={isPlaying}
-      setIsPlaying={setIsPlaying}
-      spawnClickEffect={spawnClickEffect}
+      profile={profile} settings={settings} fontFamily={fontFamily} fontQuery={fontQuery}
+      accentColor={accentColor} bgColorSetting={bgColorSetting} glowIntensity={glowIntensity}
+      particleEnabled={particleEnabled} particleStyle={particleStyle} clickEffect={clickEffect}
+      music={music} layout={layout} btns={btns} typingBio={typingBio}
+      showAvatarPref={showAvatarPref} avatarPos={avatarPos} panelMaxW={panelMaxW}
+      initial={initial} links={links} opacity={opacity} blur={blur} usernameFx={usernameFx}
+      bgFx={bgFx} location={location} glowState={glowState} avatarUrl={avatarUrl} bgUrl={bgUrl}
+      displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
+      entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
+      setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
     />
   )
 }
 
-// ─── Main profile content ──────────────────────────────────────────────────────
 function ProfileContent({
   profile, settings, fontFamily, fontQuery, accentColor, bgColorSetting,
   glowIntensity, particleEnabled, particleStyle, clickEffect,
@@ -327,31 +284,20 @@ function ProfileContent({
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
-  const glowAlpha = glowIntensity / 100
-  const accentAlpha = (a) => `${accentColor}${Math.round(a * 255).toString(16).padStart(2, '0')}`
-
-  const alignItems  = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
-  const textAlign   = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
-
-  const handleClick = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
+  const glowAlpha    = glowIntensity / 100
+  const alignItems   = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
+  const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
+  const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
   return (
-    <div
-      onClick={handleClick}
-      style={{ background: bgColorSetting, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: `'${fontFamily}', sans-serif`, padding: '40px 16px', position: 'relative', overflow: 'hidden' }}
-    >
+    <div onClick={handleClick} style={{ background: bgColorSetting, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: `'${fontFamily}', sans-serif`, padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
       <link rel="icon" href="/scythe.png" />
       {audioSrc && <audio ref={audioRef} src={audioSrc} loop style={{ display: 'none' }} />}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        @keyframes glitch {
-          0%,100%{text-shadow:2px 0 #ff0000,-2px 0 #0000ff}
-          25%{text-shadow:-2px 0 #ff0000,2px 0 #0000ff}
-          50%{text-shadow:2px 2px #ff0000,-2px -2px #0000ff}
-          75%{text-shadow:-2px 2px #ff0000,2px -2px #0000ff}
-        }
+        @keyframes glitch { 0%,100%{text-shadow:2px 0 #ff0000,-2px 0 #0000ff} 25%{text-shadow:-2px 0 #ff0000,2px 0 #0000ff} 50%{text-shadow:2px 2px #ff0000,-2px -2px #0000ff} 75%{text-shadow:-2px 2px #ff0000,2px -2px #0000ff} }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         @keyframes slideUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
         @keyframes zoomIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
@@ -393,16 +339,13 @@ function ProfileContent({
         @media(max-width:480px){ .profile-wrap { max-width:100% !important; } }
       `}</style>
 
-      {/* Background */}
-      {bgUrl && (
-        bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
-          ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
-          : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+      {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
+        ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
+        : <img src={bgUrl} className="bg-img" alt="" style={{ filter: blur > 0 ? `blur(${blur}px)` : 'none' }} />
       )}
 
       <div className="bg-overlay" style={overlayStyle} />
 
-      {/* Particle effects */}
       {(bgFx === 'particles' || (particleEnabled && particleStyle === 'Dots')) && (
         <div className="fx-layer">
           {Array.from({ length: 20 }).map((_, i) => (
@@ -455,18 +398,14 @@ function ProfileContent({
         </div>
       )}
 
-      {/* Music player */}
       {audioSrc && (
-        <div
-          className="music-player"
-          onClick={e => {
-            e.stopPropagation()
-            if (audioRef.current) {
-              if (audioRef.current.paused) { audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {}) }
-              else { audioRef.current.pause(); setIsPlaying(false) }
-            }
-          }}
-        >
+        <div className="music-player" onClick={e => {
+          e.stopPropagation()
+          if (audioRef.current) {
+            if (audioRef.current.paused) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+            else { audioRef.current.pause(); setIsPlaying(false) }
+          }
+        }}>
           <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${accentColor}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             {isPlaying
               ? <div className="music-bars"><div className="music-bar" style={{ height: 8 }}/><div className="music-bar" style={{ height: 12 }}/><div className="music-bar" style={{ height: 6 }}/><div className="music-bar" style={{ height: 10 }}/></div>
@@ -483,112 +422,55 @@ function ProfileContent({
         </div>
       )}
 
-      {/* Profile card */}
-      <div
-        className="profile-wrap"
-        style={{
-          maxWidth: panelMaxW,
-          alignItems,
-          opacity: opacity / 100,
-          ...entranceAnimStyle,
-        }}
-      >
-        {/* Avatar */}
+      <div className="profile-wrap" style={{ maxWidth: panelMaxW, alignItems, opacity: opacity / 100, ...entranceAnimStyle }}>
         {showAvatarPref && (
-          <div
-            className="avatar-ring"
-            style={{
-              width: 90, height: 90,
-              background: `linear-gradient(135deg, ${accentColor}, ${accentColor}88)`,
-              marginBottom: 16,
-              alignSelf: alignItems,
-            }}
-          >
+          <div className="avatar-ring" style={{ width: 90, height: 90, background: `linear-gradient(135deg, ${accentColor}, ${accentColor}88)`, marginBottom: 16, alignSelf: alignItems }}>
             <div className="avatar-inner" style={{ background: bgColorSetting, color: accentColor }}>
               {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
             </div>
           </div>
         )}
 
-        {/* Name */}
-        <div
-          style={{
-            fontSize: 22,
-            fontWeight: 900,
-            letterSpacing: '-0.5px',
-            marginBottom: 6,
-            textAlign,
-            ...nameStyle,
-          }}
-        >
+        <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 6, textAlign, ...nameStyle }}>
           {displayName || `@${profile.username}`}
         </div>
 
-        {/* Sub-username if display name is set */}
         {displayName && (
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, textAlign }}>
             @{profile.username}
           </div>
         )}
 
-        {/* Bio */}
         {profile.bio && (
-          <div style={{ fontSize: 13, color: '#888', fontWeight: 600, textAlign, maxWidth: 320, lineHeight: 1.6, marginBottom: 10 }}>
+          <div style={{ fontSize: 13, color: '#888', fontWeight: 600, textAlign, maxWidth: 320, lineHeight: 1.6, marginBottom: 10, minHeight: '1.6em' }}>
             {typingBio ? bioDisplayed : profile.bio}
+            {typingBio && <span style={{ borderRight: `2px solid ${accentColor}`, marginLeft: 1, animation: 'cursorBlink 0.8s step-end infinite' }} />}
           </div>
         )}
 
-        {/* Location */}
         {location && (
           <div style={{ fontSize: 12, color: '#555', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 20, alignSelf: alignItems }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-              <circle cx="12" cy="9" r="2.5"/>
-            </svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
             {location}
           </div>
         )}
 
-        {/* Links */}
         {links.length > 0 && (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {links.map((link, i) => (
-              <a
-                key={i}
-                href={link.url}
-                className="link-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  background: 'rgba(17,17,17,0.85)',
-                  border: `1px solid ${accentColor}22`,
-                  color: '#888',
-                  boxShadow: glowState.socials ? `0 0 ${8 + glowIntensity * 0.1}px ${accentColor}${Math.round(glowAlpha * 0.3 * 255).toString(16).padStart(2,'0')}` : 'none',
-                }}
-              >
-                {link.title}
-                <span className="link-arrow">↗</span>
+              <a key={i} href={link.url} className="link-btn" target="_blank" rel="noopener noreferrer"
+                style={{ background: 'rgba(17,17,17,0.85)', border: `1px solid ${accentColor}22`, color: '#888', boxShadow: glowState.socials ? `0 0 ${8 + glowIntensity * 0.1}px ${accentColor}${Math.round(glowAlpha * 0.3 * 255).toString(16).padStart(2,'00')}` : 'none' }}>
+                {link.title}<span className="link-arrow">↗</span>
               </a>
             ))}
           </div>
         )}
 
-        {/* Custom Buttons */}
         {btns.length > 0 && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: links.length > 0 ? 10 : 10 }}>
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
             {btns.map((btn, i) => (
-              <a
-                key={i}
-                href={btn.url}
-                className="action-btn"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  background: accentColor,
-                  color: '#fff',
-                  boxShadow: `0 4px 20px ${accentColor}44`,
-                }}
-              >
+              <a key={i} href={btn.url} className="action-btn" target="_blank" rel="noopener noreferrer"
+                style={{ background: accentColor, color: '#fff', boxShadow: `0 4px 20px ${accentColor}44` }}>
                 {btn.label}
               </a>
             ))}
@@ -601,6 +483,8 @@ function ProfileContent({
 
         <div className="footer">powered by <a href="/">fate.rip</a></div>
       </div>
+
+      <style>{`@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
     </div>
   )
 }
