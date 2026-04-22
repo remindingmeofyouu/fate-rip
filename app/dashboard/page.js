@@ -574,10 +574,11 @@ export default function Dashboard() {
     showToast('Link added! Remember to save.')
   }
 
-  // FIX: was using wrong filter logic before
-  const deleteLink = (idx) => {
-    setLinks(prev => prev.filter((_, i) => i !== idx))
-    showToast('Link removed')
+  const deleteLink = async (idx) => {
+    const updated = links.filter((_, i) => i !== idx)
+    setLinks(updated)
+    const { error } = await supabase.from('users').update({ links: updated }).eq('username', username)
+    showToast(error ? 'Failed to remove' : 'Link removed!')
   }
 
   const addButton = () => {
