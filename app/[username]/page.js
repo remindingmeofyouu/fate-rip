@@ -99,12 +99,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!username) return
-    const init = async () => {
-      await trackView(username)
+    // Track the view first, then fetch count after a short delay
+    // so the insert has time to land before we count
+    trackView(username)
+    const fetchViews = async () => {
+      await new Promise(r => setTimeout(r, 600))
       const { count } = await supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('username', username)
       setViewCount(count || 0)
     }
-    init()
+    fetchViews()
   }, [username])
 
   useEffect(() => {
@@ -465,7 +468,7 @@ function ProfileContent({
           )}
 
           {/* View count — top right of panel */}
-          {viewCount !== null && viewCount > 0 && (
+          {viewCount !== null && (
             <div style={{ position: 'absolute', top: 14, right: 16, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600, userSelect: 'none' }}>
               <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ display: 'block', flexShrink: 0 }}>
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
