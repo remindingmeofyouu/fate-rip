@@ -130,6 +130,122 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   )
 }
 
+// ─── Shared UI components (MUST be outside Dashboard to prevent remount on every keystroke) ───
+function PageHeader({ breadcrumb, title, subtitle }) {
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>{breadcrumb}</div>
+      <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, fontFamily: 'Syne, sans-serif' }} dangerouslySetInnerHTML={{ __html: title }} />
+      {subtitle && <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{subtitle}</p>}
+    </div>
+  )
+}
+
+function Card({ children, style }) {
+  return <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', ...style }}>{children}</div>
+}
+
+function CardHeader({ icon, title, sub, action }) {
+  return (
+    <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {icon && <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(224,48,48,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</div>}
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{title}</div>
+          {sub && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{sub}</div>}
+        </div>
+      </div>
+      {action}
+    </div>
+  )
+}
+
+function Input({ style, ...props }) {
+  return <input style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box', ...style }} {...props} />
+}
+
+function Textarea({ style, ...props }) {
+  return <textarea style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', resize: 'vertical', boxSizing: 'border-box', ...style }} {...props} />
+}
+
+function BtnAccent({ children, onClick, style, disabled }) {
+  return <button onClick={onClick} disabled={disabled} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: disabled ? 'not-allowed' : 'pointer', border: 'none', background: disabled ? 'rgba(224,48,48,0.4)' : '#e03030', color: '#fff', fontFamily: 'inherit', transition: 'all .15s', opacity: disabled ? 0.6 : 1, ...style }}>{children}</button>
+}
+
+function BtnGhost({ children, onClick, style }) {
+  return <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontFamily: 'inherit', transition: 'all .15s', ...style }}>{children}</button>
+}
+
+// saving is passed as a prop so SaveBar doesn't need to live inside Dashboard
+function SaveBar({ onSave, onDiscard, saving }) {
+  return (
+    <div style={{ position: 'sticky', bottom: 0, background: 'rgba(5,2,2,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+      {onDiscard && <BtnGhost onClick={onDiscard}>Discard</BtnGhost>}
+      <BtnAccent onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</BtnAccent>
+    </div>
+  )
+}
+
+function Toggle({ checked, onChange }) {
+  return (
+    <label style={{ position: 'relative', width: 34, height: 20, flexShrink: 0, cursor: 'pointer', display: 'inline-block' }}>
+      <input type="checkbox" checked={checked} onChange={onChange} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
+      <div style={{ position: 'absolute', inset: 0, borderRadius: 20, background: checked ? '#e03030' : 'rgba(255,255,255,0.1)', transition: 'background .2s' }} />
+      <div style={{ position: 'absolute', top: 3, left: checked ? 17 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
+    </label>
+  )
+}
+
+function ToggleRow({ label, sub, checked, onChange }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
+      <div>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0 }}>{label}</p>
+        {sub && <small style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', display: 'block', marginTop: 1 }}>{sub}</small>}
+      </div>
+      <Toggle checked={checked} onChange={onChange} />
+    </div>
+  )
+}
+
+function TabBar({ tabs, active, onSelect, cols }) {
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols || tabs.length},1fr)`, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 4, gap: 2 }}>
+      {tabs.map(t => (
+        <button key={t} onClick={() => onSelect(t)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 12px', borderRadius: 9, border: active === t ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent', background: active === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: active === t ? '#fff' : 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>{t}</button>
+      ))}
+    </div>
+  )
+}
+
+// PreviewPanel receives state as props so it can live outside Dashboard
+function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPos, selectedFont, showAvatar, avatarPreview, initial, displayName, username, appBio, links }) {
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="15" height="15" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Live Preview
+        </span>
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e03030', display: 'inline-block' }} />
+      </div>
+      <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bgColor || '#0a0202', position: 'relative', overflow: 'hidden' }}>
+        {bgPreview && <img src={bgPreview} alt="bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur/8)}px)` : 'none' }} />}
+        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: `1px solid ${accentColor}33`, borderRadius: 16, padding: 20, textAlign: avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center', display: 'flex', flexDirection: 'column', alignItems: avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center', gap: 10, opacity: opacity / 100, fontFamily: selectedFont }}>
+          {showAvatar && (
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${accentColor}22`, border: `2px solid ${accentColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: accentColor, overflow: 'hidden' }}>
+              {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+            </div>
+          )}
+          <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
+          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
+          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main Dashboard ────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const router = useRouter()
@@ -519,103 +635,6 @@ export default function Dashboard() {
     ]},
   ]
 
-  const PageHeader = ({ breadcrumb, title, subtitle }) => (
-    <div style={{ marginBottom: 28 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>{breadcrumb}</div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, fontFamily: 'Syne, sans-serif' }} dangerouslySetInnerHTML={{ __html: title }} />
-      {subtitle && <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>{subtitle}</p>}
-    </div>
-  )
-
-  const Card = ({ children, style }) => (
-    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', ...style }}>{children}</div>
-  )
-
-  const CardHeader = ({ icon, title, sub, action }) => (
-    <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {icon && <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(224,48,48,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{icon}</div>}
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>{title}</div>
-          {sub && <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{sub}</div>}
-        </div>
-      </div>
-      {action}
-    </div>
-  )
-
-  const Input = ({ style, ...props }) => (
-    <input style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box', ...style }} {...props} />
-  )
-
-  const Textarea = ({ style, ...props }) => (
-    <textarea style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', resize: 'vertical', boxSizing: 'border-box', ...style }} {...props} />
-  )
-
-  const BtnAccent = ({ children, onClick, style, disabled }) => (
-    <button onClick={onClick} disabled={disabled} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: disabled ? 'not-allowed' : 'pointer', border: 'none', background: disabled ? 'rgba(224,48,48,0.4)' : '#e03030', color: '#fff', fontFamily: 'inherit', transition: 'all .15s', opacity: disabled ? 0.6 : 1, ...style }}>{children}</button>
-  )
-
-  const BtnGhost = ({ children, onClick, style }) => (
-    <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontFamily: 'inherit', transition: 'all .15s', ...style }}>{children}</button>
-  )
-
-  const SaveBar = ({ onSave, onDiscard }) => (
-    <div style={{ position: 'sticky', bottom: 0, background: 'rgba(5,2,2,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-      {onDiscard && <BtnGhost onClick={onDiscard}>Discard</BtnGhost>}
-      <BtnAccent onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</BtnAccent>
-    </div>
-  )
-
-  const Toggle = ({ checked, onChange }) => (
-    <label style={{ position: 'relative', width: 34, height: 20, flexShrink: 0, cursor: 'pointer', display: 'inline-block' }}>
-      <input type="checkbox" checked={checked} onChange={onChange} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
-      <div style={{ position: 'absolute', inset: 0, borderRadius: 20, background: checked ? '#e03030' : 'rgba(255,255,255,0.1)', transition: 'background .2s' }} />
-      <div style={{ position: 'absolute', top: 3, left: checked ? 17 : 3, width: 14, height: 14, borderRadius: '50%', background: '#fff', transition: 'left .2s' }} />
-    </label>
-  )
-
-  const ToggleRow = ({ label, sub, checked, onChange }) => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
-      <div>
-        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 500, margin: 0 }}>{label}</p>
-        {sub && <small style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', display: 'block', marginTop: 1 }}>{sub}</small>}
-      </div>
-      <Toggle checked={checked} onChange={onChange} />
-    </div>
-  )
-
-  const TabBar = ({ tabs, active, onSelect, cols }) => (
-    <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols || tabs.length},1fr)`, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: 4, gap: 2 }}>
-      {tabs.map(t => (
-        <button key={t} onClick={() => onSelect(t)} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '8px 12px', borderRadius: 9, border: active === t ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent', background: active === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: active === t ? '#fff' : 'rgba(255,255,255,0.35)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>{t}</button>
-      ))}
-    </div>
-  )
-
-  const PreviewPanel = () => (
-    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#fff', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <svg width="15" height="15" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Live Preview
-        </span>
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e03030', display: 'inline-block' }} />
-      </div>
-      <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bgColor || '#0a0202', position: 'relative', overflow: 'hidden' }}>
-        {bgPreview && <img src={bgPreview} alt="bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur/8)}px)` : 'none' }} />}
-        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: `1px solid ${accentColor}33`, borderRadius: 16, padding: 20, textAlign: avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center', display: 'flex', flexDirection: 'column', alignItems: avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center', gap: 10, opacity: opacity / 100, fontFamily: selectedFont }}>
-          {showAvatar && <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${accentColor}22`, border: `2px solid ${accentColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: accentColor, overflow: 'hidden' }}>
-            {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
-          </div>}
-          <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
-          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
-          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
-        </div>
-      </div>
-    </div>
-  )
-
   return (
     <div style={{ margin: 0, background: '#050202', fontFamily: 'Inter, sans-serif', color: '#fff', display: 'flex', minHeight: '100vh' }}>
       <title>fate.rip | Dashboard</title>
@@ -883,9 +902,9 @@ export default function Dashboard() {
                     </Card>
                   )}
 
-                  <SaveBar onSave={saveProfile} onDiscard={() => { setAppBio(bio); setDisplayName(dbUser?.display_name || ''); setLocation(dbUser?.location || '') }} />
+                  <SaveBar onSave={saveProfile} onDiscard={() => { setAppBio(bio); setDisplayName(dbUser?.display_name || ''); setLocation(dbUser?.location || '') }} saving={saving} />
                 </div>
-                <PreviewPanel />
+                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} />
               </div>
             </>
           )}
@@ -1004,9 +1023,9 @@ export default function Dashboard() {
                     </Card>
                   )}
 
-                  <SaveBar onSave={saveAppearance} onDiscard={() => showToast('Changes discarded')} />
+                  <SaveBar onSave={saveAppearance} onDiscard={() => showToast('Changes discarded')} saving={saving} />
                 </div>
-                <PreviewPanel />
+                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} />
               </div>
             </>
           )}
@@ -1093,7 +1112,7 @@ export default function Dashboard() {
                   ))}
                 </div>
               </Card>
-              <SaveBar onSave={saveButtons} />
+              <SaveBar onSave={saveButtons} saving={saving} />
             </>
           )}
 
@@ -1162,7 +1181,7 @@ export default function Dashboard() {
                 )}
 
                 {/* FIX: now actually calls saveEffects */}
-                <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} />
+                <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
           )}
@@ -1230,7 +1249,7 @@ export default function Dashboard() {
                 )}
 
                 {/* FIX: now actually calls saveMusic */}
-                <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} />
+                <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
           )}
