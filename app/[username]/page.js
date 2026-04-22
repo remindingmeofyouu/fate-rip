@@ -452,6 +452,7 @@ function ProfileContent({
         {/* Glass card */}
         <div className="profile-panel" style={{
           alignItems,
+          position: 'relative',
           paddingTop: showAvatarPref ? 64 : 28,
         }}>
           {/* Name */}
@@ -466,11 +467,11 @@ function ProfileContent({
             </div>
           )}
 
-          {/* View count */}
+          {/* View count — top right of panel */}
           {viewCount !== null && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginBottom: 10, alignSelf: alignItems }}>
-              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              {viewCount >= 1000 ? `${(viewCount / 1000).toFixed(1)}k` : viewCount} views
+            <div style={{ position: 'absolute', top: 14, right: 16, display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 600 }}>
+              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {viewCount >= 1000 ? `${(viewCount / 1000).toFixed(1)}k` : viewCount}
             </div>
           )}
 
