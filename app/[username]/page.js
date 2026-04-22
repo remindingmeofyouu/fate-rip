@@ -66,6 +66,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true)
   const [entered, setEntered] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [viewCount, setViewCount] = useState(null)
   const audioRef = useRef(null)
 
   const spawnClickEffect = useCallback((e, type) => {
@@ -98,6 +99,15 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (username) trackView(username)
+  }, [username])
+
+  useEffect(() => {
+    if (!username) return
+    const fetchViews = async () => {
+      const { count } = await supabase.from('profile_views').select('*', { count: 'exact', head: true }).eq('username', username)
+      setViewCount(count || 0)
+    }
+    fetchViews()
   }, [username])
 
   useEffect(() => {
@@ -282,6 +292,7 @@ function ProfileContent({
   initial, links, opacity, blur, usernameFx, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
+  viewCount,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
   const glowAlpha    = glowIntensity / 100
@@ -311,8 +322,10 @@ function ProfileContent({
         @keyframes firefly { 0%,100%{transform:translate(0,0);opacity:0.2} 25%{transform:translate(20px,-30px);opacity:1} 50%{transform:translate(-10px,-60px);opacity:0.5} 75%{transform:translate(30px,-40px);opacity:0.8} }
         @keyframes clickFly { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
         @keyframes musicPulse { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
-        .profile-wrap { width:100%; display:flex; flex-direction:column; position:relative; z-index:2; }
-        .avatar-ring { border-radius:50%; padding:2px; flex-shrink:0; }
+        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
+        .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
+        .profile-panel { width:100%; background:rgba(10,10,10,0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06); }
+        .avatar-ring { border-radius:50%; padding:3px; flex-shrink:0; }
         .avatar-inner { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; overflow:hidden; }
         .avatar-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
         .link-btn { width:100%; padding:14px 20px; border-radius:14px; font-family:inherit; font-size:14px; font-weight:700; text-align:center; text-decoration:none; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:10px; position:relative; backdrop-filter:blur(8px); cursor:pointer; }
@@ -336,7 +349,7 @@ function ProfileContent({
         .music-bar:nth-child(2){animation:musicPulse 0.7s ease-in-out 0.2s infinite}
         .music-bar:nth-child(3){animation:musicPulse 0.7s ease-in-out 0.1s infinite}
         .music-bar:nth-child(4){animation:musicPulse 0.7s ease-in-out 0.3s infinite}
-        @media(max-width:480px){ .profile-wrap { max-width:100% !important; } }
+        @media(max-width:480px){ .profile-outer { max-width:100% !important; padding:0 12px; } }
       `}</style>
 
       {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
@@ -422,66 +435,96 @@ function ProfileContent({
         </div>
       )}
 
-      <div className="profile-wrap" style={{ maxWidth: panelMaxW, alignItems, opacity: opacity / 100, ...entranceAnimStyle }}>
+      {/* ── Glass panel with floating avatar ── */}
+      <div className="profile-outer" style={{ width: '100%', maxWidth: panelMaxW, opacity: opacity / 100, ...entranceAnimStyle }}>
+
+        {/* Avatar floats above panel */}
         {showAvatarPref && (
-          <div className="avatar-ring" style={{ width: 90, height: 90, background: `linear-gradient(135deg, ${accentColor}, ${accentColor}88)`, marginBottom: 16, alignSelf: alignItems }}>
-            <div className="avatar-inner" style={{ background: bgColorSetting, color: accentColor }}>
-              {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+          <div className="profile-avatar-float" style={{ alignSelf: alignItems === 'flex-start' ? 'flex-start' : alignItems === 'flex-end' ? 'flex-end' : 'center', marginLeft: avatarPos === 'left' ? 28 : 0, marginRight: avatarPos === 'right' ? 28 : 0 }}>
+            <div className="avatar-ring" style={{ width: 90, height: 90, background: `linear-gradient(135deg, ${accentColor}, ${accentColor}66)`, boxShadow: `0 0 0 4px rgba(10,10,10,0.6), 0 4px 20px ${accentColor}44` }}>
+              <div className="avatar-inner" style={{ background: '#0a0a0a', color: accentColor }}>
+                {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+              </div>
             </div>
           </div>
         )}
 
-        <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 6, textAlign, ...nameStyle }}>
-          {displayName || `@${profile.username}`}
+        {/* Glass card */}
+        <div className="profile-panel" style={{
+          alignItems,
+          paddingTop: showAvatarPref ? 64 : 28,
+        }}>
+          {/* Name */}
+          <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 4, textAlign, ...nameStyle }}>
+            {displayName || `@${profile.username}`}
+          </div>
+
+          {/* Sub-username */}
+          {displayName && (
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginBottom: 6, textAlign }}>
+              @{profile.username}
+            </div>
+          )}
+
+          {/* View count */}
+          {viewCount !== null && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, marginBottom: 10, alignSelf: alignItems }}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {viewCount >= 1000 ? `${(viewCount / 1000).toFixed(1)}k` : viewCount} views
+            </div>
+          )}
+
+          {/* Bio */}
+          {profile.bio && (
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 600, textAlign, lineHeight: 1.6, marginBottom: 12, minHeight: '1.6em' }}>
+              {typingBio ? bioDisplayed : profile.bio}
+              {typingBio && <span style={{ borderRight: `2px solid ${accentColor}`, marginLeft: 1, animation: 'cursorBlink 0.8s step-end infinite' }} />}
+            </div>
+          )}
+
+          {/* Location */}
+          {location && (
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 16, alignSelf: alignItems }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+              {location}
+            </div>
+          )}
+
+          {/* Divider if there are links */}
+          {(links.length > 0 || btns.length > 0) && (
+            <div style={{ width: '100%', height: 1, background: 'rgba(255,255,255,0.06)', margin: '8px 0 16px' }} />
+          )}
+
+          {/* Links */}
+          {links.length > 0 && (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {links.map((link, i) => (
+                <a key={i} href={link.url} className="link-btn" target="_blank" rel="noopener noreferrer"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.07)`, color: 'rgba(255,255,255,0.7)', boxShadow: glowState.socials ? `0 0 ${8 + glowIntensity * 0.1}px ${accentColor}${Math.round(glowAlpha * 0.3 * 255).toString(16).padStart(2,'0')}` : 'none' }}>
+                  {link.title}<span className="link-arrow">↗</span>
+                </a>
+              ))}
+            </div>
+          )}
+
+          {/* Custom Buttons */}
+          {btns.length > 0 && (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: links.length > 0 ? 8 : 0 }}>
+              {btns.map((btn, i) => (
+                <a key={i} href={btn.url} className="action-btn" target="_blank" rel="noopener noreferrer"
+                  style={{ background: accentColor, color: '#fff', boxShadow: `0 4px 20px ${accentColor}44` }}>
+                  {btn.label}
+                </a>
+              ))}
+            </div>
+          )}
+
+          {links.length === 0 && btns.length === 0 && (
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.15)', fontWeight: 600, marginTop: 4 }}>No links yet.</div>
+          )}
+
+          <div className="footer" style={{ alignSelf: 'center', marginTop: 20 }}>powered by <a href="/">fate.rip</a></div>
         </div>
-
-        {displayName && (
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 600, marginBottom: 6, textAlign }}>
-            @{profile.username}
-          </div>
-        )}
-
-        {profile.bio && (
-          <div style={{ fontSize: 13, color: '#888', fontWeight: 600, textAlign, maxWidth: 320, lineHeight: 1.6, marginBottom: 10, minHeight: '1.6em' }}>
-            {typingBio ? bioDisplayed : profile.bio}
-            {typingBio && <span style={{ borderRight: `2px solid ${accentColor}`, marginLeft: 1, animation: 'cursorBlink 0.8s step-end infinite' }} />}
-          </div>
-        )}
-
-        {location && (
-          <div style={{ fontSize: 12, color: '#555', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 5, marginBottom: 20, alignSelf: alignItems }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            {location}
-          </div>
-        )}
-
-        {links.length > 0 && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
-            {links.map((link, i) => (
-              <a key={i} href={link.url} className="link-btn" target="_blank" rel="noopener noreferrer"
-                style={{ background: 'rgba(17,17,17,0.85)', border: `1px solid ${accentColor}22`, color: '#888', boxShadow: glowState.socials ? `0 0 ${8 + glowIntensity * 0.1}px ${accentColor}${Math.round(glowAlpha * 0.3 * 255).toString(16).padStart(2,'00')}` : 'none' }}>
-                {link.title}<span className="link-arrow">↗</span>
-              </a>
-            ))}
-          </div>
-        )}
-
-        {btns.length > 0 && (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}>
-            {btns.map((btn, i) => (
-              <a key={i} href={btn.url} className="action-btn" target="_blank" rel="noopener noreferrer"
-                style={{ background: accentColor, color: '#fff', boxShadow: `0 4px 20px ${accentColor}44` }}>
-                {btn.label}
-              </a>
-            ))}
-          </div>
-        )}
-
-        {links.length === 0 && btns.length === 0 && (
-          <div style={{ fontSize: 13, color: '#333', fontWeight: 600, marginTop: 10 }}>No links yet.</div>
-        )}
-
-        <div className="footer">powered by <a href="/">fate.rip</a></div>
       </div>
 
       <style>{`@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
