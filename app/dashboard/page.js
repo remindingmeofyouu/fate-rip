@@ -60,9 +60,7 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
           <h1 style={{ fontSize: 22, fontWeight: 700, fontFamily: 'Syne, sans-serif', margin: 0 }}>View <span style={{ color: '#e03030' }}>Analytics</span></h1>
           <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Track your profile performance</p>
         </div>
-        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-          ← Back
-        </button>
+        <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -152,7 +150,6 @@ export default function Dashboard() {
   const [showPassword, setShowPassword] = useState(false)
   const [profileViews, setProfileViews] = useState(0)
   const [viewsToday, setViewsToday] = useState(0)
-  const [saveMsg, setSaveMsg] = useState('')
 
   // Appearance state
   const [appBio, setAppBio] = useState('')
@@ -168,7 +165,6 @@ export default function Dashboard() {
   const [cursorPreview, setCursorPreview] = useState(null)
   const [audioName, setAudioName] = useState(null)
   const [uploadingType, setUploadingType] = useState(null)
-  const [appSaveMsg, setAppSaveMsg] = useState('')
 
   // Appearance tabs
   const [appearTab, setAppearTab] = useState('Presets')
@@ -203,7 +199,6 @@ export default function Dashboard() {
   const [panelSize, setPanelSize] = useState('medium')
   const [showAvatar, setShowAvatar] = useState(true)
   const [avatarPos, setAvatarPos] = useState('center')
-  const [avatarPlacement, setAvatarPlacement] = useState('outside')
   const [typingBio, setTypingBio] = useState(false)
   const [enterEnabled, setEnterEnabled] = useState(true)
   const [enterTitle, setEnterTitle] = useState('')
@@ -235,6 +230,90 @@ export default function Dashboard() {
     setTimeout(() => setToastVisible(false), 2500)
   }
 
+  // ── Build settings object from current state ──────────────────────────────
+  const buildSettings = () => ({
+    font: selectedFont,
+    accentColor,
+    bgColor,
+    bgType,
+    glowIntensity,
+    particleEnabled,
+    particleStyle,
+    cursorStyle,
+    entranceAnim,
+    clickEffect,
+    music: {
+      enabled: musicEnabled,
+      type: musicType,
+      url: musicUrl,
+      title: musicTitle,
+      artist: musicArtist,
+      autoplay: musicAutoplay,
+      volume: musicVolume,
+      showTitle: musicShowTitle,
+      showArtist: musicShowArtist,
+    },
+    layout: {
+      panelSize,
+      showAvatar,
+      avatarPos,
+      typingBio,
+    },
+    entrance: {
+      enabled: enterEnabled,
+      title: enterTitle,
+      subtitle: enterSubtitle,
+      showAvatar: enterShowAvatar,
+      showTitle: enterShowTitle,
+      showSubtitle: enterShowSubtitle,
+    },
+    buttons,
+  })
+
+  // ── Load settings from DB settings JSONB ─────────────────────────────────
+  const applySettings = (s) => {
+    if (!s) return
+    if (s.font) setSelectedFont(s.font)
+    if (s.accentColor) setAccentColor(s.accentColor)
+    if (s.bgColor) setBgColor(s.bgColor)
+    if (s.bgType) setBgType(s.bgType)
+    if (s.glowIntensity !== undefined) setGlowIntensity(s.glowIntensity)
+    if (s.particleEnabled !== undefined) setParticleEnabled(s.particleEnabled)
+    if (s.particleStyle) setParticleStyle(s.particleStyle)
+    if (s.cursorStyle) setCursorStyle(s.cursorStyle)
+    if (s.entranceAnim) setEntranceAnim(s.entranceAnim)
+    if (s.clickEffect) setClickEffect(s.clickEffect)
+    if (s.music) {
+      const m = s.music
+      if (m.enabled !== undefined) setMusicEnabled(m.enabled)
+      if (m.type) setMusicType(m.type)
+      if (m.url) setMusicUrl(m.url)
+      if (m.title) setMusicTitle(m.title)
+      if (m.artist) setMusicArtist(m.artist)
+      if (m.autoplay !== undefined) setMusicAutoplay(m.autoplay)
+      if (m.volume !== undefined) setMusicVolume(m.volume)
+      if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle)
+      if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist)
+    }
+    if (s.layout) {
+      const l = s.layout
+      if (l.panelSize) setPanelSize(l.panelSize)
+      if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar)
+      if (l.avatarPos) setAvatarPos(l.avatarPos)
+      if (l.typingBio !== undefined) setTypingBio(l.typingBio)
+    }
+    if (s.entrance) {
+      const e = s.entrance
+      if (e.enabled !== undefined) setEnterEnabled(e.enabled)
+      if (e.title) setEnterTitle(e.title)
+      if (e.subtitle) setEnterSubtitle(e.subtitle)
+      if (e.showAvatar !== undefined) setEnterShowAvatar(e.showAvatar)
+      if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle)
+      if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle)
+    }
+    if (Array.isArray(s.buttons)) setButtons(s.buttons)
+  }
+
   useEffect(() => {
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -260,7 +339,9 @@ export default function Dashboard() {
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
         setUid(data.id ? String(data.id) : '')
-        setEnterTitle(data.username || '')
+        // Load settings JSONB
+        if (data.settings) applySettings(data.settings)
+        else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
       }
       setLoading(false)
@@ -307,9 +388,18 @@ export default function Dashboard() {
     showToast('Removed')
   }
 
+  // ── Save functions ────────────────────────────────────────────────────────
+
   const saveProfile = async () => {
     setSaving(true)
-    const { error } = await supabase.from('users').update({ bio: appBio, links, display_name: displayName, location }).eq('username', username)
+    const settings = buildSettings()
+    const { error } = await supabase.from('users').update({
+      bio: appBio,
+      links,
+      display_name: displayName,
+      location,
+      settings,
+    }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
     showToast(error ? 'Failed to save' : 'Profile saved!')
@@ -317,29 +407,69 @@ export default function Dashboard() {
 
   const saveAppearance = async () => {
     setSaving(true)
+    const settings = buildSettings()
     const { error } = await supabase.from('users').update({
-      bio: appBio, opacity, blur, username_fx: usernameFx,
-      bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence,
+      bio: appBio,
+      opacity,
+      blur,
+      username_fx: usernameFx,
+      bg_fx: bgFx,
+      location,
+      glow_settings: glowState,
+      discord_presence: discordPresence,
+      settings,
     }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
     showToast(error ? 'Failed to save' : 'Appearance saved!')
   }
 
+  const saveEffects = async () => {
+    setSaving(true)
+    const settings = buildSettings()
+    const { error } = await supabase.from('users').update({ settings }).eq('username', username)
+    setSaving(false)
+    showToast(error ? 'Failed to save' : 'Effects saved!')
+  }
+
+  const saveMusic = async () => {
+    setSaving(true)
+    const settings = buildSettings()
+    // If direct URL provided, also update audio_url column for backwards compat
+    const extraUpdate = musicEnabled && musicType === 'direct' && musicUrl ? { audio_url: musicUrl } : {}
+    const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username)
+    setSaving(false)
+    showToast(error ? 'Failed to save' : 'Music saved!')
+  }
+
+  const saveButtons = async () => {
+    setSaving(true)
+    const settings = buildSettings()
+    const { error } = await supabase.from('users').update({ settings }).eq('username', username)
+    setSaving(false)
+    showToast(error ? 'Failed to save' : 'Buttons saved!')
+  }
+
   const addLink = () => {
     if (!newLinkLabel.trim() || !newLinkUrl.trim()) { showToast('Please fill in both fields'); return }
     const url = newLinkUrl.trim().startsWith('http') ? newLinkUrl.trim() : `https://${newLinkUrl.trim()}`
-    setLinks([...links, { title: newLinkLabel.trim(), url, id: Date.now() }])
+    setLinks(prev => [...prev, { title: newLinkLabel.trim(), url, id: Date.now() }])
     setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(false)
-    showToast('Link added!')
+    showToast('Link added! Remember to save.')
   }
-  const deleteLink = (id) => { setLinks(links.filter(l => l.id !== id || l.title !== id)); showToast('Link removed') }
+
+  // FIX: was using wrong filter logic before
+  const deleteLink = (idx) => {
+    setLinks(prev => prev.filter((_, i) => i !== idx))
+    showToast('Link removed')
+  }
+
   const addButton = () => {
     if (!newBtnLabel.trim() || !newBtnUrl.trim()) { showToast('Please fill in both fields'); return }
     const url = newBtnUrl.trim().startsWith('http') ? newBtnUrl.trim() : `https://${newBtnUrl.trim()}`
-    setButtons([...buttons, { label: newBtnLabel.trim(), url, id: Date.now() }])
+    setButtons(prev => [...prev, { label: newBtnLabel.trim(), url, id: Date.now() }])
     setNewBtnLabel(''); setNewBtnUrl(''); setShowAddBtnModal(false)
-    showToast('Button created!')
+    showToast('Button added! Remember to save.')
   }
 
   const navTo = (page) => { setActivePage(page); setSidebarOpen(false); setNotifOpen(false); setAvatarDDOpen(false) }
@@ -432,7 +562,7 @@ export default function Dashboard() {
 
   const SaveBar = ({ onSave, onDiscard }) => (
     <div style={{ position: 'sticky', bottom: 0, background: 'rgba(5,2,2,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
-      <BtnGhost onClick={onDiscard}>Discard</BtnGhost>
+      {onDiscard && <BtnGhost onClick={onDiscard}>Discard</BtnGhost>}
       <BtnAccent onClick={onSave} disabled={saving}>{saving ? 'Saving…' : 'Save Changes'}</BtnAccent>
     </div>
   )
@@ -463,7 +593,6 @@ export default function Dashboard() {
     </div>
   )
 
-  // ── Preview Panel (used in Profile editor) ──────────────────────────────────
   const PreviewPanel = () => (
     <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -471,17 +600,17 @@ export default function Dashboard() {
           <svg width="15" height="15" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           Live Preview
         </span>
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e03030', animation: 'pulse2 1.5s infinite', display: 'inline-block' }} />
+        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#e03030', display: 'inline-block' }} />
       </div>
-      <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0202', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bgColor || '#0a0202', position: 'relative', overflow: 'hidden' }}>
         {bgPreview && <img src={bgPreview} alt="bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur/8)}px)` : 'none' }} />}
-        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 20, textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, opacity: opacity / 100 }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(224,48,48,0.12)', border: '2px solid rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: '#e03030', overflow: 'hidden' }}>
+        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: `1px solid ${accentColor}33`, borderRadius: 16, padding: 20, textAlign: avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center', display: 'flex', flexDirection: 'column', alignItems: avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center', gap: 10, opacity: opacity / 100, fontFamily: selectedFont }}>
+          {showAvatar && <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${accentColor}22`, border: `2px solid ${accentColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: accentColor, overflow: 'hidden' }}>
             {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
-          </div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{displayName || username}</div>
-          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio}</div>}
-          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
+          </div>}
+          <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
+          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
+          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
         </div>
       </div>
     </div>
@@ -497,7 +626,6 @@ export default function Dashboard() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(224,48,48,0.2); border-radius: 2px; }
-        body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
         .nav-link-btn { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:500; color:rgba(255,255,255,0.35); cursor:pointer; border:none; background:transparent; width:100%; text-align:left; transition:background .15s, color .15s; font-family:inherit; }
         .nav-link-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
         .nav-link-btn.active { background:rgba(224,48,48,0.10); color:#e03030; }
@@ -518,7 +646,6 @@ export default function Dashboard() {
         .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
         .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
         .modal-overlay.open { display:flex; }
-        @keyframes pulse2 { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
         @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
         @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} }
         @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} }
@@ -526,14 +653,11 @@ export default function Dashboard() {
 
       {/* ── SIDEBAR ── */}
       <div className="sidebar-desktop" style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.97)', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', zIndex: 20 }}>
-        {/* Logo */}
         <div style={{ height: 64, display: 'flex', alignItems: 'center', gap: 8, padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>
             fate<span style={{ color: 'rgba(255,255,255,0.18)' }}>.</span><span style={{ color: '#e03030' }}>rip</span>
           </span>
         </div>
-
-        {/* Nav */}
         <nav style={{ flex: 1, padding: 12, paddingTop: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {navLinks.map(({ section, items }) => (
             <div key={section || 'root'}>
@@ -549,10 +673,8 @@ export default function Dashboard() {
             </div>
           ))}
         </nav>
-
-        {/* Footer */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: 12 }}>
-          <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(224,48,48,0.22)', background: 'rgba(224,48,48,0.10)', color: '#e03030', fontSize: 13, fontWeight: 500, textDecoration: 'none', marginBottom: 8, transition: 'background .15s' }}>
+          <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(224,48,48,0.22)', background: 'rgba(224,48,48,0.10)', color: '#e03030', fontSize: 13, fontWeight: 500, textDecoration: 'none', marginBottom: 8 }}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             View Profile
           </a>
@@ -561,19 +683,18 @@ export default function Dashboard() {
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#e03030' }}>{initial}</div>
               <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{username || 'User'}</span>
             </div>
-            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit', transition: 'color .15s' }}>Log out</button>
+            <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>Log out</button>
           </div>
         </div>
       </div>
 
       {/* ── MAIN AREA ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', minWidth: 0, position: 'relative', zIndex: 1 }}>
-        {/* Topbar */}
         <header style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.88)', backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 10, gap: 8 }}>
-          <button onClick={() => { navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : 'https://fate.rip'}/${username}`); showToast('Profile URL copied!') }} style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background .15s, color .15s' }} title="Copy profile URL">
+          <button onClick={() => { navigator.clipboard.writeText(`${typeof window !== 'undefined' ? window.location.origin : 'https://fate.rip'}/${username}`); showToast('Profile URL copied!') }} style={{ width: 36, height: 36, borderRadius: 10, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Copy profile URL">
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
           </button>
-          <button onClick={() => { setAvatarDDOpen(!avatarDDOpen); setNotifOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px 4px 4px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', transition: 'background .15s', position: 'relative' }}>
+          <button onClick={() => { setAvatarDDOpen(!avatarDDOpen); setNotifOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 8px 4px 4px', borderRadius: 10, border: 'none', background: 'transparent', cursor: 'pointer', position: 'relative' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#e03030', overflow: 'hidden' }}>
               {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
             </div>
@@ -582,7 +703,7 @@ export default function Dashboard() {
             {avatarDDOpen && (
               <div style={{ position: 'absolute', top: 48, right: 0, width: 200, background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, overflow: 'hidden', zIndex: 50 }} onClick={e => e.stopPropagation()}>
                 {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => (
-                  <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit', transition: 'background .12s' }}>{label}</button>
+                  <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit' }}>{label}</button>
                 ))}
                 <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: '#e03030', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}>Log out</button>
               </div>
@@ -590,7 +711,6 @@ export default function Dashboard() {
           </button>
         </header>
 
-        {/* Content */}
         <div style={{ flex: 1, padding: 32, maxWidth: 1100, width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 28 }} onClick={() => { setNotifOpen(false); setAvatarDDOpen(false) }}>
 
           {/* ═══ OVERVIEW ═══ */}
@@ -601,8 +721,6 @@ export default function Dashboard() {
                 <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, fontFamily: 'Syne, sans-serif' }}>Welcome back, <span style={{ color: '#e03030' }}>{username}</span></h1>
                 <p style={{ marginTop: 4, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Here&apos;s what&apos;s happening with your profile</p>
               </div>
-
-              {/* Profile URL card */}
               <div style={{ border: '1px solid rgba(224,48,48,0.22)', background: 'rgba(224,48,48,0.05)', borderRadius: 12, padding: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
                   <div>
@@ -614,15 +732,13 @@ export default function Dashboard() {
                       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
                       Copy
                     </BtnGhost>
-                    <a href={`/${username}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none', background: '#e03030', color: '#fff', textDecoration: 'none', transition: 'all .15s' }}>
+                    <a href={`/${username}`} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, border: 'none', background: '#e03030', color: '#fff', textDecoration: 'none' }}>
                       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                       View
                     </a>
                   </div>
                 </div>
               </div>
-
-              {/* Stats */}
               <div className="stats-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                 {[
                   { label: 'Total Views', value: profileViews.toLocaleString(), color: '#e03030' },
@@ -635,15 +751,13 @@ export default function Dashboard() {
                         <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)' }}>{s.label}</div>
                         <div style={{ fontSize: 24, fontWeight: 700, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.value}</div>
                       </div>
-                      <div style={{ width: 48, height: 48, borderRadius: 12, background: `linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <div style={{ width: 48, height: 48, borderRadius: 12, background: 'linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <svg width="24" height="24" fill="none" stroke={s.color} strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-
-              {/* Quick actions */}
               <div>
                 <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Quick Actions</div>
                 <div className="actions-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
@@ -688,7 +802,6 @@ export default function Dashboard() {
                     <Card>
                       <CardHeader title="Profile Identity" sub="Your public-facing info" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
                       <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        {/* Avatar upload */}
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: 24, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12, textAlign: 'center' }}>
                           <input type="file" ref={fileAvatarRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('avatar', e.target.files[0])} />
                           <div style={{ position: 'relative', width: 96, height: 96, cursor: 'pointer' }} onClick={() => fileAvatarRef.current.click()}>
@@ -696,13 +809,10 @@ export default function Dashboard() {
                               {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
                             </div>
                           </div>
-                          <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>
-                            {uploadingType === 'avatar' ? 'Uploading…' : 'Click to change avatar'}
-                          </p>
+                          <p style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.75)' }}>{uploadingType === 'avatar' ? 'Uploading…' : 'Click to change avatar'}</p>
                           <small style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)' }}>JPG, PNG, GIF or WebP · Max 5MB</small>
                           {avatarPreview && <BtnGhost onClick={() => removeAsset('avatar')} style={{ fontSize: 11 }}>Remove</BtnGhost>}
                         </div>
-
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                             <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Display Name</label>
@@ -749,7 +859,8 @@ export default function Dashboard() {
 
                   {profileTab === 'Entrance' && (
                     <Card>
-                      <CardHeader title="Entrance Screen" sub="Show a splash screen before visitors see your profile" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>}
+                      <CardHeader title="Entrance Screen" sub="Show a splash screen before visitors see your profile"
+                        icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>}
                         action={<Toggle checked={enterEnabled} onChange={e => setEnterEnabled(e.target.checked)} />}
                       />
                       {enterEnabled && (
@@ -794,7 +905,7 @@ export default function Dashboard() {
                       <div style={{ padding: 24 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8 }}>
                           {presets.map(([name, bg, acc]) => (
-                            <button key={name} className={`preset-btn ${selectedPreset === name ? 'selected' : ''}`} onClick={() => { setSelectedPreset(name); setAccentColor(acc); setBgColor(bg); showToast(`${name} applied!`) }}>
+                            <button key={name} className={`preset-btn ${selectedPreset === name ? 'selected' : ''}`} onClick={() => { setSelectedPreset(name); setAccentColor(acc); setBgColor(bg); showToast(`${name} applied! Save to keep it.`) }}>
                               <div style={{ width: '100%', height: 36, borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
                                 <div style={{ flex: 1, background: bg }} />
                                 <div style={{ width: 20, background: acc }} />
@@ -809,15 +920,15 @@ export default function Dashboard() {
 
                   {appearTab === 'Colors' && (
                     <Card>
-                      <CardHeader title="Color Settings" sub="Customize accent, background, text and card colors" />
+                      <CardHeader title="Color Settings" sub="Customize accent and background colors" />
                       <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        {[['Accent Color', accentColor, setAccentColor],['Background Color', bgColor, setBgColor],['Text Color','#ffffff',()=>{}],['Card Color','#1a0000',()=>{}]].map(([lbl, val, setter]) => (
+                        {[['Accent Color', accentColor, setAccentColor],['Background Color', bgColor, setBgColor]].map(([lbl, val, setter]) => (
                           <div key={lbl} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                             <div>
                               <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{lbl}</div>
                               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono, monospace', marginTop: 4 }}>{val}</div>
                             </div>
-                            <input type="color" value={val} onChange={e => { setter(e.target.value); showToast(`${lbl} updated`) }} style={{ width: 44, height: 44, border: 'none', borderRadius: 10, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', padding: 4 }} />
+                            <input type="color" value={val} onChange={e => setter(e.target.value)} style={{ width: 44, height: 44, border: 'none', borderRadius: 10, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', padding: 4 }} />
                           </div>
                         ))}
                       </div>
@@ -830,7 +941,7 @@ export default function Dashboard() {
                       <div style={{ padding: 24 }}>
                         <div className="effect-grid">
                           {fonts.map(f => (
-                            <button key={f} className={`effect-btn ${selectedFont === f ? 'active' : ''}`} style={{ fontFamily: `'${f}', sans-serif` }} onClick={() => { setSelectedFont(f); showToast(`Font set to ${f}`) }}>{f}</button>
+                            <button key={f} className={`effect-btn ${selectedFont === f ? 'active' : ''}`} style={{ fontFamily: `'${f}', sans-serif` }} onClick={() => setSelectedFont(f)}>{f}</button>
                           ))}
                         </div>
                       </div>
@@ -863,7 +974,7 @@ export default function Dashboard() {
                           <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Blur — {blur}px</label>
                           <input type="range" min={0} max={80} value={blur} onChange={e => setBlur(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
                         </div>
-                        <div onClick={() => fileBgRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '32px 24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'rgba(255,255,255,0.01)', transition: 'all .15s' }}>
+                        <div onClick={() => fileBgRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '32px 24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'rgba(255,255,255,0.01)' }}>
                           <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
                           {uploadingType === 'bg' ? 'Uploading…' : bgPreview ? 'Replace background media' : 'Upload background media (max 25MB)'}
                         </div>
@@ -904,8 +1015,6 @@ export default function Dashboard() {
           {activePage === 'links' && (
             <>
               <PageHeader breadcrumb="Dashboard · Links" title='Manage <span style="color:#e03030">Links</span>' subtitle="Add or edit your social links" />
-
-              {/* Platform quick-add */}
               <Card>
                 <CardHeader title="Quick Add" sub="Click a platform to add your link" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>} />
                 <div style={{ padding: 24 }}>
@@ -919,8 +1028,6 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Card>
-
-              {/* Links list */}
               <Card>
                 <CardHeader title="Your Links" sub={`${links.length} link${links.length !== 1 ? 's' : ''}`}
                   action={<BtnAccent onClick={() => { setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(true) }}>
@@ -939,17 +1046,22 @@ export default function Dashboard() {
                         <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{l.title}</div>
                         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.url}</div>
                       </div>
-                      <button onClick={() => { setLinks(links.filter((_, idx) => idx !== i)); showToast('Link removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .15s', flexShrink: 0 }}>
+                      {/* FIX: use index-based delete */}
+                      <button onClick={() => deleteLink(i)} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       </button>
                     </div>
                   ))}
                 </div>
               </Card>
-
               {links.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                  <BtnAccent onClick={async () => { const { error } = await supabase.from('users').update({ links }).eq('username', username); showToast(error ? 'Failed to save' : 'Links saved!') }} disabled={saving}>Save Links</BtnAccent>
+                  <BtnAccent onClick={async () => {
+                    setSaving(true)
+                    const { error } = await supabase.from('users').update({ links }).eq('username', username)
+                    setSaving(false)
+                    showToast(error ? 'Failed to save' : 'Links saved!')
+                  }} disabled={saving}>Save Links</BtnAccent>
                 </div>
               )}
             </>
@@ -974,13 +1086,14 @@ export default function Dashboard() {
                         <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{b.label}</div>
                         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace' }}>{b.url}</div>
                       </div>
-                      <button onClick={() => { setButtons(buttons.filter((_, idx) => idx !== i)); showToast('Button removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <button onClick={() => { setButtons(prev => prev.filter((_, idx) => idx !== i)); showToast('Button removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                       </button>
                     </div>
                   ))}
                 </div>
               </Card>
+              <SaveBar onSave={saveButtons} />
             </>
           )}
 
@@ -997,12 +1110,10 @@ export default function Dashboard() {
                       action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />}
                     />
                     {particleEnabled && (
-                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Style</label>
-                          <div className="effect-grid">
-                            {particles.map(p => <button key={p} className={`effect-btn ${particleStyle === p ? 'active' : ''}`} onClick={() => setParticleStyle(p)}>{p}</button>)}
-                          </div>
+                      <div style={{ padding: 24 }}>
+                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Style</label>
+                        <div className="effect-grid">
+                          {particles.map(p => <button key={p} className={`effect-btn ${particleStyle === p ? 'active' : ''}`} onClick={() => setParticleStyle(p)}>{p}</button>)}
                         </div>
                       </div>
                     )}
@@ -1014,14 +1125,14 @@ export default function Dashboard() {
                     <CardHeader title="Custom Cursor" sub="Replace the default cursor on your profile" />
                     <div style={{ padding: 24 }}>
                       <div className="effect-grid">
-                        {cursors.map(c => <button key={c} className={`effect-btn ${cursorStyle === c ? 'active' : ''}`} onClick={() => { setCursorStyle(c); showToast(`Cursor set to ${c}`) }}>{c}</button>)}
+                        {cursors.map(c => <button key={c} className={`effect-btn ${cursorStyle === c ? 'active' : ''}`} onClick={() => setCursorStyle(c)}>{c}</button>)}
                       </div>
                     </div>
                     <div style={{ padding: '0 24px 24px' }}>
                       <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
-                      <div onClick={() => fileCursorRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', transition: 'all .15s' }}>
+                      <div onClick={() => fileCursorRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
                         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-                        {uploadingType === 'cursor' ? 'Uploading…' : cursorPreview ? 'Replace custom cursor image' : 'Upload a custom cursor image'}
+                        {uploadingType === 'cursor' ? 'Uploading…' : cursorPreview ? 'Replace cursor image' : 'Upload a custom cursor image'}
                       </div>
                       {cursorPreview && <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}><img src={cursorPreview} alt="cursor" style={{ width: 32, height: 32, objectFit: 'contain' }} /><BtnGhost onClick={() => removeAsset('cursor')}>Remove</BtnGhost></div>}
                     </div>
@@ -1033,7 +1144,7 @@ export default function Dashboard() {
                     <CardHeader title="Entrance Animation" sub="How your profile animates in for visitors" />
                     <div style={{ padding: 24 }}>
                       <div className="effect-grid">
-                        {entranceAnims.map(a => <button key={a} className={`effect-btn ${entranceAnim === a ? 'active' : ''}`} onClick={() => { setEntranceAnim(a); showToast(`Entrance: ${a}`) }}>{a}</button>)}
+                        {entranceAnims.map(a => <button key={a} className={`effect-btn ${entranceAnim === a ? 'active' : ''}`} onClick={() => setEntranceAnim(a)}>{a}</button>)}
                       </div>
                     </div>
                   </Card>
@@ -1044,13 +1155,14 @@ export default function Dashboard() {
                     <CardHeader title="Click Effects" sub="What happens when visitors click on your profile" />
                     <div style={{ padding: 24 }}>
                       <div className="effect-grid">
-                        {clickEffects.map(e => <button key={e} className={`effect-btn ${clickEffect === e ? 'active' : ''}`} onClick={() => { setClickEffect(e); showToast(`Click effect: ${e}`) }}>{e}</button>)}
+                        {clickEffects.map(e => <button key={e} className={`effect-btn ${clickEffect === e ? 'active' : ''}`} onClick={() => setClickEffect(e)}>{e}</button>)}
                       </div>
                     </div>
                   </Card>
                 )}
 
-                <SaveBar onSave={() => showToast('Effects saved!')} onDiscard={() => {}} />
+                {/* FIX: now actually calls saveEffects */}
+                <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} />
               </div>
             </>
           )}
@@ -1069,13 +1181,13 @@ export default function Dashboard() {
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
                       <div style={{ display: 'flex', gap: 8 }}>
                         {['direct','spotify','soundcloud'].map(t => (
-                          <button key={t} onClick={() => setMusicType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${musicType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: musicType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: musicType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>
+                          <button key={t} onClick={() => setMusicType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${musicType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: musicType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: musicType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
                             {{ direct: 'Direct URL', spotify: 'Spotify', soundcloud: 'SoundCloud' }[t]}
                           </button>
                         ))}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{musicType === 'direct' ? 'Audio URL' : 'Track URL'}</label>
+                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{musicType === 'direct' ? 'Audio URL (.mp3, .ogg, etc.)' : 'Track URL'}</label>
                         <Input placeholder={musicType === 'direct' ? 'https://example.com/song.mp3' : musicType === 'spotify' ? 'https://open.spotify.com/track/…' : 'https://soundcloud.com/…'} value={musicUrl} onChange={e => setMusicUrl(e.target.value)} />
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -1088,6 +1200,16 @@ export default function Dashboard() {
                           <Input placeholder="Artist name" value={musicArtist} onChange={e => setMusicArtist(e.target.value)} />
                         </div>
                       </div>
+                      {/* File upload for direct audio */}
+                      {musicType === 'direct' && (
+                        <div>
+                          <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
+                          <div onClick={() => fileAudioRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
+                            {uploadingType === 'audio' ? 'Uploading…' : audioName ? `Uploaded: ${audioName}` : 'Or upload an audio file (max 10MB)'}
+                          </div>
+                        </div>
+                      )}
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Volume — {musicVolume}%</label>
                         <input type="range" min={0} max={100} value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
@@ -1107,7 +1229,8 @@ export default function Dashboard() {
                   </Card>
                 )}
 
-                <SaveBar onSave={() => showToast('Music settings saved!')} onDiscard={() => {}} />
+                {/* FIX: now actually calls saveMusic */}
+                <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} />
               </div>
             </>
           )}
@@ -1157,110 +1280,69 @@ export default function Dashboard() {
               <PageHeader breadcrumb="Dashboard · Settings" title='Account <span style="color:#e03030">Settings</span>' subtitle="Manage your account" />
               <div style={{ maxWidth: 680 }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-
-                  {/* Username */}
                   <Card>
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                      {[
-                        {
-                          label: 'Username', cooldownDays: 7, cooldownField: 'username_changed_at',
-                          value: username, setValue: setUsername,
-                          onSave: async () => {
-                            if (!username.trim()) { showToast('Username cannot be empty'); return }
-                            const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).single()
-                            if (existing) { showToast('Username already taken'); return }
-                            const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
-                            if (!error) setDbUser(p => ({ ...p, username_changed_at: new Date().toISOString() }))
-                            showToast(error ? 'Failed to save' : 'Username updated!')
-                          }
-                        },
-                        {
-                          label: 'Display Name', cooldownDays: 0, cooldownField: null,
-                          value: displayName, setValue: setDisplayName,
-                          onSave: async () => {
-                            const { error } = await supabase.from('users').update({ display_name: displayName }).eq('email', user.email)
-                            showToast(error ? 'Failed to save' : 'Display name saved!')
-                          }
-                        }
-                      ].map(({ label, cooldownDays, cooldownField, value, setValue, onSave }) => {
-                        const lastChanged = cooldownField && dbUser?.[cooldownField] ? new Date(dbUser[cooldownField]) : null
-                        const daysLeft = lastChanged ? Math.max(0, cooldownDays - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
-                        const locked = daysLeft > 0
-                        return (
-                          <div key={label}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{label}</span>
-                              {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {daysLeft}d</span>
-                                : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
-                            </div>
-                            <div style={{ display: 'flex', gap: 10 }}>
-                              <Input value={value} disabled={locked} onChange={e => setValue(e.target.value)} placeholder={label} style={{ opacity: locked ? 0.5 : 1 }} />
-                              <BtnAccent onClick={onSave} disabled={locked}>Save</BtnAccent>
-                            </div>
-                          </div>
-                        )
-                      })}
-
-                      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
-
-                      {/* Email */}
+                      {/* Username */}
                       {(() => {
-                        const [newEmail, setNewEmail] = useState('')
-                        const lastChanged = dbUser?.email_changed_at ? new Date(dbUser.email_changed_at) : null
-                        const daysLeft = lastChanged ? Math.max(0, 3 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
+                        const lastChanged = dbUser?.username_changed_at ? new Date(dbUser.username_changed_at) : null
+                        const daysLeft = lastChanged ? Math.max(0, 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
                         const locked = daysLeft > 0
                         return (
                           <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>Email</span>
+                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>Username</span>
                               {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {daysLeft}d</span>
                                 : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
                             </div>
-                            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Current: {user?.email}</div>
                             <div style={{ display: 'flex', gap: 10 }}>
-                              <Input type="email" placeholder="New email address" value={newEmail} disabled={locked} onChange={e => setNewEmail(e.target.value)} style={{ opacity: locked ? 0.5 : 1 }} />
-                              <BtnAccent disabled={locked} onClick={async () => {
-                                if (!newEmail || !newEmail.includes('@')) { showToast('Enter a valid email'); return }
-                                const { error } = await supabase.auth.updateUser({ email: newEmail })
-                                if (!error) { await supabase.from('users').update({ email_changed_at: new Date().toISOString() }).eq('username', username); setDbUser(p => ({ ...p, email_changed_at: new Date().toISOString() })); setNewEmail('') }
-                                showToast(error ? 'Failed to update email' : 'Confirmation sent! Check your inbox.')
-                              }}>Save</BtnAccent>
+                              <Input value={username} disabled={locked} onChange={e => setUsername(e.target.value)} placeholder="Username" style={{ opacity: locked ? 0.5 : 1 }} />
+                              <BtnAccent onClick={async () => {
+                                if (!username.trim()) { showToast('Username cannot be empty'); return }
+                                const { data: existing } = await supabase.from('users').select('username').eq('username', username.trim()).neq('email', user.email).maybeSingle()
+                                if (existing) { showToast('Username already taken'); return }
+                                const { error } = await supabase.from('users').update({ username: username.trim(), username_changed_at: new Date().toISOString() }).eq('email', user.email)
+                                if (!error) setDbUser(p => ({ ...p, username_changed_at: new Date().toISOString() }))
+                                showToast(error ? 'Failed to save' : 'Username updated!')
+                              }} disabled={locked}>Save</BtnAccent>
                             </div>
                           </div>
                         )
                       })()}
+
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
+
+                      {/* Display Name */}
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Display Name</div>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Display name" />
+                          <BtnAccent onClick={async () => {
+                            const { error } = await supabase.from('users').update({ display_name: displayName }).eq('email', user.email)
+                            showToast(error ? 'Failed to save' : 'Display name saved!')
+                          }}>Save</BtnAccent>
+                        </div>
+                      </div>
 
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
 
                       {/* Password */}
-                      {(() => {
-                        const lastChanged = dbUser?.password_changed_at ? new Date(dbUser.password_changed_at) : null
-                        const hoursLeft = lastChanged ? Math.max(0, 1 - Math.floor((Date.now() - lastChanged.getTime()) / 3600000)) : 0
-                        const locked = hoursLeft > 0
-                        return (
-                          <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                              <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>Password</span>
-                              {locked ? <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#f59e0b', fontWeight: 600 }}>Locked {hoursLeft}h</span>
-                                : <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 600 }}>Available</span>}
-                            </div>
-                            <div style={{ display: 'flex', gap: 10 }}>
-                              <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, paddingRight: 10 }}>
-                                <Input type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} disabled={locked} onChange={e => setNewPassword(e.target.value)} style={{ border: 'none', background: 'transparent', flex: 1, opacity: locked ? 0.5 : 1 }} />
-                                <button onClick={() => setShowPassword(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, display: 'flex' }}>
-                                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                </button>
-                              </div>
-                              <BtnAccent disabled={locked} onClick={async () => {
-                                if (!newPassword || newPassword.length < 6) { showToast('Password must be 6+ characters'); return }
-                                const { error } = await supabase.auth.updateUser({ password: newPassword })
-                                if (!error) { setNewPassword(''); await supabase.from('users').update({ password_changed_at: new Date().toISOString() }).eq('username', username); setDbUser(p => ({ ...p, password_changed_at: new Date().toISOString() })) }
-                                showToast(error ? 'Failed to update password' : 'Password updated!')
-                              }}>Update</BtnAccent>
-                            </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Password</div>
+                        <div style={{ display: 'flex', gap: 10 }}>
+                          <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, paddingRight: 10 }}>
+                            <Input type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{ border: 'none', background: 'transparent', flex: 1 }} />
+                            <button onClick={() => setShowPassword(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, display: 'flex' }}>
+                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
                           </div>
-                        )
-                      })()}
+                          <BtnAccent onClick={async () => {
+                            if (!newPassword || newPassword.length < 6) { showToast('Password must be 6+ characters'); return }
+                            const { error } = await supabase.auth.updateUser({ password: newPassword })
+                            if (!error) setNewPassword('')
+                            showToast(error ? 'Failed to update password' : 'Password updated!')
+                          }}>Update</BtnAccent>
+                        </div>
+                      </div>
                     </div>
                   </Card>
 
