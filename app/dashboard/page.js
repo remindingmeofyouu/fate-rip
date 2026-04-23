@@ -16,7 +16,7 @@ const PLATFORMS = [
   { id:'applemusic',  name:'Apple Music',      color:'#FA2D48', prefix:'music.apple.com/',    placeholder:'profile URL' },
   { id:'youtube',     name:'YouTube',          color:'#FF0000', prefix:'youtube.com/@',       placeholder:'handle' },
   { id:'twitch',      name:'Twitch',           color:'#9146FF', prefix:'twitch.tv/',          placeholder:'username' },
-  { id:'tiktok',      name:'TikTok',           color:'#000000', prefix:'tiktok.com/@',        placeholder:'username' },
+  { id:'tiktok',      name:'TikTok',           color:'#010101', prefix:'tiktok.com/@',        placeholder:'username' },
   { id:'snapchat',    name:'Snapchat',         color:'#FFFC00', prefix:'snapchat.com/add/',   placeholder:'username' },
   { id:'linkedin',    name:'LinkedIn',         color:'#0A66C2', prefix:'linkedin.com/in/',    placeholder:'username' },
   { id:'reddit',      name:'Reddit',           color:'#FF4500', prefix:'reddit.com/u/',       placeholder:'username' },
@@ -47,6 +47,90 @@ const PLATFORM_ABBR = {
   deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa',
   kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ',
   solana:'◎', custom:'✦',
+}
+
+// Light-text platforms (dark text needed on their bg color)
+const LIGHT_PLATFORMS = new Set(['snapchat', 'buymeacoffee', 'bitcoin'])
+
+function getTextColor(platformId) {
+  return LIGHT_PLATFORMS.has(platformId) ? '#1a1a1a' : '#fff'
+}
+
+// ─── Link Icon Tile ────────────────────────────────────────────────────────────
+function LinkIconTile({ link, platform, abbr, onDelete }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    const text = link.url || link.title || ''
+    if (!text) return
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
+
+  return (
+    <div
+      onClick={handleCopy}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', position: 'relative', width: 72 }}
+      className="link-icon-tile"
+    >
+      {/* Delete × badge */}
+      <div
+        className="link-del-btn"
+        onClick={e => { e.stopPropagation(); onDelete() }}
+        title="Remove"
+        style={{
+          position: 'absolute', top: -5, right: 2,
+          width: 18, height: 18, borderRadius: '50%',
+          background: '#e03030', border: '2px solid #050202',
+          color: '#fff', fontSize: 11, fontWeight: 700,
+          display: 'none', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer', zIndex: 2, lineHeight: 1,
+        }}
+      >×</div>
+
+      {/* Icon square */}
+      <div
+        className="link-icon-wrap"
+        style={{
+          width: 56, height: 56, borderRadius: 14,
+          background: platform.color,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: `0 4px 16px ${platform.color}55`,
+          transition: 'transform .15s, box-shadow .15s',
+          overflow: 'hidden', flexShrink: 0,
+        }}
+      >
+        {link.iconDataUrl
+          ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
+        }
+      </div>
+
+      {/* Label */}
+      <span style={{
+        fontSize: 10, color: 'rgba(255,255,255,0.45)',
+        textAlign: 'center', lineHeight: 1.3,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        maxWidth: 72,
+      }}>
+        {link.title || platform.name}
+      </span>
+
+      {/* Copied feedback */}
+      {copied && (
+        <span style={{
+          position: 'absolute', bottom: -22, left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(0,0,0,0.85)', border: '1px solid rgba(224,48,48,0.3)',
+          color: '#fff', fontSize: 9, padding: '2px 7px', borderRadius: 99,
+          whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10,
+          animation: 'fadeInUp .2s ease',
+        }}>Copied!</span>
+      )}
+    </div>
+  )
 }
 
 // ─── Analytics Sub-Page ───────────────────────────────────────────────────────
@@ -283,11 +367,19 @@ function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPo
           )}
           <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
           {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
-          {links.slice(0,2).map((l, i) => (
-            <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
-              {l.title}
+          {/* Preview: show mini icon tiles */}
+          {links.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
+              {links.slice(0, 4).map((l, i) => {
+                const p = l.platform || { id: 'custom', color: '#e03030' }
+                return (
+                  <div key={i} style={{ width: 28, height: 28, borderRadius: 7, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${p.color}55` }}>
+                    <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
+                  </div>
+                )
+              })}
             </div>
-          ))}
+          )}
         </div>
       </div>
     </div>
@@ -328,7 +420,6 @@ function AddLinkModal({ platform, onClose, onAdd }) {
   }
 
   const abbr = PLATFORM_ABBR[platform.id] || platform.name[0]
-  const snapText = platform.id === 'snapchat' ? '#b8a800' : platform.color
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
@@ -337,35 +428,32 @@ function AddLinkModal({ platform, onClose, onAdd }) {
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
 
-        {/* Modal header with platform icon */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 9, background: `${platform.color}22`, border: `1px solid ${platform.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: platform.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 12px ${platform.color}55` }}>
             {iconDataUrl
-              ? <img src={iconDataUrl} alt="icon" style={{ width: 22, height: 22, objectFit: 'cover', borderRadius: 5 }} />
-              : <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
+              ? <img src={iconDataUrl} alt="icon" style={{ width: 24, height: 24, objectFit: 'cover', borderRadius: 5 }} />
+              : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
             }
           </div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, margin: 0 }}>
             Add <span style={{ color: '#e03030' }}>{platform.name}</span>
           </h2>
         </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, paddingLeft: 44 }}>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, paddingLeft: 48 }}>
           {platform.id === 'custom' ? 'Add a custom link to your profile' : `Add your ${platform.name} to your profile`}
         </p>
 
-        {/* Link / Text tabs */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 18, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 4, border: '1px solid rgba(255,255,255,0.06)' }}>
           {['link','text'].map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: 7, borderRadius: 7, border: tab === t ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent', background: tab === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: tab === t ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', textTransform: 'capitalize' }}>{t}</button>
           ))}
         </div>
 
-        {/* Custom icon upload — only for custom platform */}
         {platform.id === 'custom' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Custom Icon (optional)</label>
             <input type="file" ref={fileRef} accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
-            <div onClick={() => fileRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.4)', transition: 'border-color .15s' }}>
+            <div onClick={() => fileRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
               {iconDataUrl
                 ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 7 }} />
                 : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -375,7 +463,6 @@ function AddLinkModal({ platform, onClose, onAdd }) {
           </div>
         )}
 
-        {/* Link input */}
         {tab === 'link' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>
@@ -397,20 +484,17 @@ function AddLinkModal({ platform, onClose, onAdd }) {
           </div>
         )}
 
-        {/* Text input */}
         {tab === 'text' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Display Text</label>
-            <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10 }}>
-              <input
-                autoFocus
-                value={textValue}
-                onChange={e => setTextValue(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleConfirm()}
-                placeholder="What should visitors see?"
-                style={{ width: '100%', background: 'transparent', border: 'none', padding: '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
-              />
-            </div>
+            <input
+              autoFocus
+              value={textValue}
+              onChange={e => setTextValue(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+              placeholder="What should visitors see?"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
+            />
           </div>
         )}
 
@@ -678,7 +762,6 @@ export default function Dashboard() {
     showToast('Removed')
   }
 
-  // ── Save functions ─────────────────────────────────────────────────────────
   const saveProfile = async () => {
     setSaving(true)
     const settings = buildSettings()
@@ -734,7 +817,6 @@ export default function Dashboard() {
     showToast(error ? 'Failed to save' : 'Links saved!')
   }
 
-  // Called when AddLinkModal confirms
   const handleAddLink = (linkObj) => {
     setLinks(prev => [...prev, { ...linkObj, id: Date.now() }])
     showToast('Link added! Remember to save.')
@@ -820,14 +902,25 @@ export default function Dashboard() {
         .effect-btn { padding:10px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; text-align:center; font-family:inherit; }
         .effect-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
         .effect-btn.active { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); color:#e03030; }
+
+        /* ── Link icon tiles ── */
+        .link-icon-tile:hover .link-icon-wrap { transform: scale(1.1); box-shadow: 0 8px 28px rgba(0,0,0,0.45) !important; }
+        .link-icon-tile:hover .link-del-btn { display: flex !important; }
+
+        /* ── Platform picker buttons ── */
         .plat-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:12px 6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); cursor:pointer; transition:all .15s; font-size:10px; color:rgba(255,255,255,0.5); font-family:inherit; }
         .plat-btn:hover { border-color:rgba(224,48,48,0.3); background:rgba(224,48,48,0.06); color:#fff; }
+        .platforms-grid { grid-template-columns: repeat(8, 1fr); }
+        @media(max-width:700px){ .platforms-grid { grid-template-columns: repeat(6, 1fr) !important; } }
+        @media(max-width:480px){ .platforms-grid { grid-template-columns: repeat(4, 1fr) !important; } }
+
         .link-item-row { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:11px; padding:10px 14px; transition:border-color .15s; }
         .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
         .preset-btn { display:flex; flex-direction:column; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:10px; cursor:pointer; transition:all .15s; font-family:inherit; }
         .preset-btn:hover { border-color:rgba(255,255,255,0.09); background:rgba(255,255,255,0.04); }
         .preset-btn.selected { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); }
         @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+        @keyframes fadeInUp { from{opacity:0;transform:translateX(-50%) translateY(4px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
         @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} .platforms-grid{grid-template-columns:repeat(5,1fr)!important;} }
         @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} .platforms-grid{grid-template-columns:repeat(4,1fr)!important;} }
       `}</style>
@@ -1192,66 +1285,80 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* ═══ LINKS — REDESIGNED ═══ */}
+          {/* ═══ LINKS ═══ */}
           {activePage === 'links' && (
             <>
-              <PageHeader breadcrumb="Dashboard · Links" title='Social <span style="color:#e03030">Links</span>' subtitle="Add your social media profiles and custom links" />
+              <PageHeader
+                breadcrumb="Dashboard · Links"
+                title='Social <span style="color:#e03030">Links</span>'
+                subtitle="Add your social media profiles and custom links"
+              />
 
-              {/* Your Links */}
+              {/* Your Links — icon tile grid */}
               <Card>
                 <CardHeader
                   title="Your Links"
-                  sub="Click any link to edit it"
-                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>}
+                  sub="Hover to remove · visitors click icons to copy"
+                  icon={
+                    <svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M9 17H7A5 5 0 0 1 7 7h2"/>
+                      <path d="M15 7h2a5 5 0 1 1 0 10h-2"/>
+                      <line x1="8" x2="16" y1="12" y2="12"/>
+                    </svg>
+                  }
                 />
-                <div style={{ padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {links.length === 0 && (
+                <div style={{ padding: '20px 24px 28px' }}>
+                  {links.length === 0 ? (
                     <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
                       No links yet — pick a platform below to add one!
                     </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
+                      {links.map((l, i) => {
+                        const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
+                        const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
+                        return (
+                          <LinkIconTile
+                            key={l.id || i}
+                            link={l}
+                            platform={p}
+                            abbr={abbr}
+                            onDelete={() => deleteLink(i)}
+                          />
+                        )
+                      })}
+                    </div>
                   )}
-                  {links.map((l, i) => {
-                    const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
-                    const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
-                    const snapText = p.id === 'snapchat' ? '#b8a800' : p.color
-                    return (
-                      <div key={l.id || i} className="link-item-row">
-                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${p.color}22`, border: `1px solid ${p.color}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
-                          {l.iconDataUrl
-                            ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 9 }} />
-                            : <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
-                          }
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{l.title}</div>
-                          {l.url && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>{l.url}</div>}
-                        </div>
-                        <button onClick={() => deleteLink(i)} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'color .15s, background .15s' }}
-                          onMouseEnter={e => { e.currentTarget.style.color = '#e03030'; e.currentTarget.style.background = 'rgba(224,48,48,0.1)' }}
-                          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'transparent' }}>
-                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                        </button>
-                      </div>
-                    )
-                  })}
                 </div>
               </Card>
 
-              {/* Platform grid */}
+              {/* Platform picker */}
               <Card>
                 <CardHeader
                   title="Add New Link"
                   sub="Choose a platform or create a custom link"
-                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>}
+                  icon={
+                    <svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M12 5v14"/><path d="M5 12h14"/>
+                    </svg>
+                  }
                 />
-                <div className="platforms-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 8, padding: '16px 22px 22px' }}>
+                <div
+                  className="platforms-grid"
+                  style={{ display: 'grid', gap: 8, padding: '16px 22px 22px' }}
+                >
                   {PLATFORMS.map(p => {
                     const abbr = PLATFORM_ABBR[p.id] || p.name[0]
-                    const snapText = p.id === 'snapchat' ? '#b8a800' : p.color
                     return (
                       <button key={p.id} className="plat-btn" onClick={() => setActiveLinkPlatform(p)}>
-                        <div style={{ width: 32, height: 32, borderRadius: 9, background: `${p.color}22`, border: `1px solid ${p.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 10,
+                          background: p.color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: `0 3px 10px ${p.color}55`,
+                          flexShrink: 0,
+                        }}>
+                          <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(p.id) }}>{abbr}</span>
                         </div>
                         <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: 'center' }}>{p.name}</span>
                       </button>
@@ -1262,11 +1369,12 @@ export default function Dashboard() {
 
               {links.length > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <BtnAccent onClick={saveLinks} disabled={saving}>{saving ? 'Saving…' : 'Save Links'}</BtnAccent>
+                  <BtnAccent onClick={saveLinks} disabled={saving}>
+                    {saving ? 'Saving…' : 'Save Links'}
+                  </BtnAccent>
                 </div>
               )}
 
-              {/* Add Link Modal */}
               <AddLinkModal
                 platform={activeLinkPlatform}
                 onClose={() => setActiveLinkPlatform(null)}
