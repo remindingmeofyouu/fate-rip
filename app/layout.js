@@ -14,6 +14,9 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "fate.rip | Home",
   description: "Claim your unique profile link today.",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }) {
