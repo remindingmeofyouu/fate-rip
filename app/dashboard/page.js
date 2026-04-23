@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 
 // ─── Platform definitions ──────────────────────────────────────────────────────
 const PLATFORMS = [
-  { id:'discord',     name:'Discord',          color:'#5865F2', prefix:'discord.com/users/', placeholder:'username' },
+  { id:'discord',     name:'Discord',          color:'#5865F2', prefix:'',                   placeholder:'https://discord.gg/...' },
   { id:'twitter',     name:'Twitter / X',      color:'#000000', prefix:'x.com/',             placeholder:'username' },
   { id:'github',      name:'GitHub',           color:'#24292e', prefix:'github.com/',         placeholder:'username' },
   { id:'gitlab',      name:'GitLab',           color:'#FC6D26', prefix:'gitlab.com/',         placeholder:'username' },
