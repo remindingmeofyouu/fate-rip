@@ -633,8 +633,8 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
         </div>
 
         {/* ── Music Player — directly below the panel ─────────────────────────── */}
-        {audioSrc && (
-          <div className="music-player" style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }} onClick={e=>e.stopPropagation()}>
+        {audioSrc && music.showPlayer !== false && (
+          <div className="music-player" style={{ marginTop:10 }} onClick={e=>e.stopPropagation()}>
             {/* Track info row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
               <div style={{ minWidth:0, flex:1, paddingRight:12 }}>

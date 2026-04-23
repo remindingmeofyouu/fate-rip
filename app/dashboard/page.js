@@ -589,6 +589,7 @@ export default function Dashboard() {
   const [musicAutoplay, setMusicAutoplay] = useState(false)
   const [musicVolume, setMusicVolume] = useState(50)
   const [musicShowTitle, setMusicShowTitle] = useState(true)
+  const [musicShowPlayer, setMusicShowPlayer] = useState(true)
   const [musicShowArtist, setMusicShowArtist] = useState(true)
 
   const [profileTab, setProfileTab] = useState('Identity')
@@ -645,6 +646,7 @@ export default function Dashboard() {
       volume: musicVolume,
       showTitle: musicShowTitle,
       showArtist: musicShowArtist,
+      showPlayer: musicShowPlayer,
     },
     layout: {
       panelSize,
@@ -687,6 +689,7 @@ export default function Dashboard() {
       if (m.volume !== undefined) setMusicVolume(m.volume)
       if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle)
       if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist)
+      if (m.showPlayer !== undefined) setMusicShowPlayer(m.showPlayer)
     }
     if (s.layout) {
       const l = s.layout
@@ -1535,6 +1538,7 @@ export default function Dashboard() {
                       <ToggleRow label="Autoplay" sub="Start playing when visitors arrive" checked={musicAutoplay} onChange={e => setMusicAutoplay(e.target.checked)} />
                       <ToggleRow label="Show Track Title" sub="Display song name in player" checked={musicShowTitle} onChange={e => setMusicShowTitle(e.target.checked)} />
                       <ToggleRow label="Show Artist" sub="Display artist name in player" checked={musicShowArtist} onChange={e => setMusicShowArtist(e.target.checked)} />
+                      <ToggleRow label="Show Player" sub="Display the music player on your profile" checked={musicShowPlayer} onChange={e => setMusicShowPlayer(e.target.checked)} />
                     </div>
                   </Card>
                 )}
