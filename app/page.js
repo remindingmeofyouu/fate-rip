@@ -67,7 +67,7 @@ nav{position:fixed;top:0;left:0;right:0;display:flex;align-items:center;justify-
 
 <nav>
   <a href="#" class="logo">
-    <img src="https://media.discordapp.net/attachments/1492245469785755840/1492688630685106347/scythe.png?ex=69dc3e1e&is=69daec9e&hm=ff8a4b2ed25f7a8b663564ff4c1526d69b7469e999a7e8ea4722dfae6b2c640e&=&format=webp&quality=lossless" alt="scythe" onerror="this.style.display='none'"/>
+    <img src="/favicon.ico" alt="logo"/>
     fate.rip
   </a>
   <ul class="nav-links">
