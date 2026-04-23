@@ -76,7 +76,8 @@ export default function ProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [loading, setLoading] = useState(true)
   const [entered, setEntered] = useState(false)
-  const [isPlaying, setIsPlaying] = useState(false)
+  // isPlaying now represents "unmuted" — audio is always playing in background
+  const [isPlaying, setIsPlaying] = useState(true)
   const [viewCount, setViewCount] = useState(null)
   const audioRef = useRef(null)
 
@@ -150,24 +151,31 @@ export default function ProfilePage() {
     return () => { clearTimeout(timeout); document.body.style.cursor = '' }
   }, [profile])
 
-  // ─── AUTOPLAY: try immediately, fall back to first click ─────────────────────
+  // ─── AUTOPLAY at max volume, fall back to first click unlock ─────────────────
   useEffect(() => {
     if (!profile) return
     const settings = profile.settings || {}
     const music = settings.music || {}
     const audioSrc = music.enabled ? music.url : profile.audio_url
     if (!audioSrc) return
-    const vol = music.volume !== undefined ? music.volume / 100 : 0.4
+
     if (audioRef.current) {
-      audioRef.current.volume = vol
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {
-        // Browser blocked autoplay — unlock on first user interaction
-        const unlock = () => {
-          audioRef.current?.play().then(() => setIsPlaying(true)).catch(() => {})
-          document.removeEventListener('click', unlock)
-        }
-        document.addEventListener('click', unlock)
-      })
+      audioRef.current.volume = 1 // always max volume
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {
+          // Browser blocked autoplay — unlock on first user interaction anywhere on page
+          const unlock = () => {
+            if (audioRef.current) {
+              audioRef.current.volume = 1
+              audioRef.current.play()
+                .then(() => setIsPlaying(true))
+                .catch(() => {})
+            }
+            document.removeEventListener('click', unlock)
+          }
+          document.addEventListener('click', unlock)
+        })
     }
   }, [profile])
 
@@ -219,7 +227,8 @@ export default function ProfilePage() {
   const avatarUrl   = profile.avatar_url || null
   const bgUrl       = profile.bg_url || null
   const displayName = profile.display_name || ''
-  const audioSrc    = music.enabled && music.url ? music.url : profile.audio_url || null
+  // audioSrc: always use the url regardless of music.enabled toggle in dashboard
+  const audioSrc    = (music.url) || profile.audio_url || null
   const fontQuery   = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
   const glowAlpha   = glowIntensity / 100
 
@@ -310,6 +319,22 @@ function ProfileContent({
   const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
+  // Toggle mute/unmute — audio keeps playing, we just set volume to 0 or 1
+  const handleMuteToggle = (e) => {
+    e.stopPropagation()
+    if (!audioRef.current) return
+    if (isPlaying) {
+      // Mute: set volume to 0 but keep audio running
+      audioRef.current.volume = 0
+      setIsPlaying(false)
+    } else {
+      // Unmute: restore volume to max and ensure playback
+      audioRef.current.volume = 1
+      audioRef.current.play().catch(() => {})
+      setIsPlaying(true)
+    }
+  }
+
   return (
     <div onClick={handleClick} style={{ background: bgColorSetting, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: `'${fontFamily}', sans-serif`, padding: '40px 16px', position: 'relative', overflow: 'hidden' }}>
       <link rel="icon" href="/scythe.png" />
@@ -351,13 +376,39 @@ function ProfileContent({
         .bg-img { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
         .bg-overlay { position:fixed; inset:0; z-index:1; pointer-events:none; }
         .fx-layer { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-        .music-widget { position:fixed; top:16px; left:16px; z-index:50; display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.45); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:999px; padding:6px 14px 6px 10px; border:1px solid rgba(255,255,255,0.08); transition:all .2s; }
-        .music-widget:hover { background:rgba(0,0,0,0.65); border-color:rgba(255,255,255,0.15); }
-        .music-widget button { background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; color:#fff; opacity:0.8; transition:opacity .15s; }
-        .music-widget button:hover { opacity:1; }
-        .music-widget input[type=range] { width:70px; cursor:pointer; opacity:0.7; accent-color:#fff; }
-        .music-widget input[type=range]:hover { opacity:1; }
-        .music-bars { display:flex; align-items:flex-end; gap:2px; height:14px; }
+        .music-widget {
+          position: fixed;
+          top: 16px;
+          left: 16px;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          background: rgba(0,0,0,0.45);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-radius: 999px;
+          padding: 8px 14px;
+          border: 1px solid rgba(255,255,255,0.08);
+          transition: all .2s;
+          cursor: pointer;
+        }
+        .music-widget:hover {
+          background: rgba(0,0,0,0.65);
+          border-color: rgba(255,255,255,0.18);
+        }
+        .music-widget-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          display: flex;
+          align-items: center;
+          color: #fff;
+          opacity: 0.85;
+          transition: opacity .15s, transform .15s;
+        }
+        .music-widget-btn:hover { opacity: 1; transform: scale(1.1); }
+        .music-bars { display:flex; align-items:flex-end; gap:2px; height:14px; margin-right: 8px; }
         .music-bar { width:3px; border-radius:2px; background:#fff; }
         .music-bar:nth-child(1){animation:musicPulse 0.7s ease-in-out 0s infinite}
         .music-bar:nth-child(2){animation:musicPulse 0.7s ease-in-out 0.2s infinite}
@@ -425,25 +476,37 @@ function ProfileContent({
         </div>
       )}
 
-      {/* ── Top-left music widget ── */}
+      {/* ── Mute / Unmute toggle widget ── */}
       {audioSrc && (
-        <div className="music-widget" onClick={e => e.stopPropagation()}>
-          <button onClick={() => {
-            if (audioRef.current) {
-              if (audioRef.current.paused) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
-              else { audioRef.current.pause(); setIsPlaying(false) }
-            }
-          }}>
-            {isPlaying
-              ? <div className="music-bars"><div className="music-bar" style={{ height: 8 }}/><div className="music-bar" style={{ height: 12 }}/><div className="music-bar" style={{ height: 6 }}/><div className="music-bar" style={{ height: 10 }}/></div>
-              : <svg width="16" height="16" fill="#fff" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-            }
+        <div className="music-widget" onClick={handleMuteToggle} title={isPlaying ? 'Mute music' : 'Unmute music'}>
+          {/* Animated bars shown when unmuted */}
+          {isPlaying && (
+            <div className="music-bars">
+              <div className="music-bar" style={{ height: 8 }} />
+              <div className="music-bar" style={{ height: 12 }} />
+              <div className="music-bar" style={{ height: 6 }} />
+              <div className="music-bar" style={{ height: 10 }} />
+            </div>
+          )}
+          <button className="music-widget-btn">
+            {isPlaying ? (
+              /* Speaker ON */
+              <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            ) : (
+              /* Speaker MUTED (X) */
+              <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+              </svg>
+            )}
           </button>
-          <input
-            type="range" min={0} max={1} step={0.01}
-            defaultValue={(music.volume !== undefined ? music.volume / 100 : 0.4)}
-            onChange={e => { if (audioRef.current) audioRef.current.volume = parseFloat(e.target.value) }}
-          />
         </div>
       )}
 
