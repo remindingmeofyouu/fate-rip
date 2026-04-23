@@ -378,17 +378,22 @@ function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPo
             </div>
           )}
           <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
-          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
-          {/* Preview: show mini icon tiles */}
-          {links.length > 0 && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
-              {links.slice(0, 4).map((l, i) => {
-                const p = l.platform || { id: 'custom', color: '#e03030' }
-                return (
-                  <div key={i} style={{ width: 28, height: 28, borderRadius: 7, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${p.color}55` }}>
-                    <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
-                  </div>
-                )
+{appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
+{/* Preview: show mini icon tiles */}
+{links.length > 0 && (
+  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
+    {links.slice(0, 4).map((l, i) => {
+      const p = l.platform || { id: 'custom', color: '#e03030' }
+      return (
+        <div key={i} style={{ width: 28, height: 28, borderRadius: 7, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${p.color}55`, overflow: 'hidden' }}>
+          {l.iconDataUrl
+            ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : SIMPLE_ICONS[p.id]
+              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+              : <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
+          }
+        </div>
+      )
               })}
             </div>
           )}
@@ -598,6 +603,7 @@ export default function Dashboard() {
 
   // Links modal state
   const [activeLinkPlatform, setActiveLinkPlatform] = useState(null)
+  const [iconSize, setIconSize] = useState(44)
 
   // Buttons modals
   const [showAddBtnModal, setShowAddBtnModal] = useState(false)
@@ -655,6 +661,7 @@ export default function Dashboard() {
       showTitle: enterShowTitle,
       showSubtitle: enterShowSubtitle,
     },
+    iconSize,
     buttons,
   })
 
@@ -698,6 +705,7 @@ export default function Dashboard() {
       if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle)
       if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle)
     }
+    if (s.iconSize) setIconSize(s.iconSize)
     if (Array.isArray(s.buttons)) setButtons(s.buttons)
   }
 
@@ -1379,13 +1387,19 @@ export default function Dashboard() {
                 </div>
               </Card>
 
-              {links.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <BtnAccent onClick={saveLinks} disabled={saving}>
-                    {saving ? 'Saving…' : 'Save Links'}
-                  </BtnAccent>
-                </div>
-              )}
+              <Card>
+  <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
+  <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 6 }}>
+    <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size — {iconSize}px</label>
+    <input type="range" min={32} max={72} value={iconSize} onChange={e => setIconSize(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
+  </div>
+</Card>
+
+<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <BtnAccent onClick={saveLinks} disabled={saving}>
+                  {saving ? 'Saving…' : 'Save Links'}
+                </BtnAccent>
+              </div>
 
               <AddLinkModal
                 platform={activeLinkPlatform}

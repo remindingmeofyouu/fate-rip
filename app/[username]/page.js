@@ -208,6 +208,7 @@ export default function ProfilePage() {
   const panelSize      = layout.panelSize || 'medium'
   const entranceEnabled = entrance.enabled !== false
   const panelMaxW      = { compact: 380, medium: 480, wide: 580, full: 680 }[panelSize] || 480
+  const iconSize       = settings.iconSize || 44
 
   const initial     = profile.username[0].toUpperCase()
   const links       = Array.isArray(profile.links) ? profile.links : []
@@ -521,7 +522,7 @@ function ProfileContent({
       return (
         <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer"
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none', width: 64 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
+          <div style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
             onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
             onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
             {link.iconDataUrl
