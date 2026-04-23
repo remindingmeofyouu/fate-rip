@@ -3,6 +3,52 @@ import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
+// ─── Platform definitions ──────────────────────────────────────────────────────
+const PLATFORMS = [
+  { id:'discord',     name:'Discord',          color:'#5865F2', prefix:'discord.com/users/', placeholder:'username' },
+  { id:'twitter',     name:'Twitter / X',      color:'#000000', prefix:'x.com/',             placeholder:'username' },
+  { id:'github',      name:'GitHub',           color:'#24292e', prefix:'github.com/',         placeholder:'username' },
+  { id:'gitlab',      name:'GitLab',           color:'#FC6D26', prefix:'gitlab.com/',         placeholder:'username' },
+  { id:'instagram',   name:'Instagram',        color:'#E1306C', prefix:'instagram.com/',      placeholder:'username' },
+  { id:'facebook',    name:'Facebook',         color:'#1877F2', prefix:'facebook.com/',       placeholder:'username' },
+  { id:'spotify',     name:'Spotify',          color:'#1DB954', prefix:'open.spotify.com/user/', placeholder:'username' },
+  { id:'soundcloud',  name:'SoundCloud',       color:'#FF5500', prefix:'soundcloud.com/',     placeholder:'username' },
+  { id:'applemusic',  name:'Apple Music',      color:'#FA2D48', prefix:'music.apple.com/',    placeholder:'profile URL' },
+  { id:'youtube',     name:'YouTube',          color:'#FF0000', prefix:'youtube.com/@',       placeholder:'handle' },
+  { id:'twitch',      name:'Twitch',           color:'#9146FF', prefix:'twitch.tv/',          placeholder:'username' },
+  { id:'tiktok',      name:'TikTok',           color:'#000000', prefix:'tiktok.com/@',        placeholder:'username' },
+  { id:'snapchat',    name:'Snapchat',         color:'#FFFC00', prefix:'snapchat.com/add/',   placeholder:'username' },
+  { id:'linkedin',    name:'LinkedIn',         color:'#0A66C2', prefix:'linkedin.com/in/',    placeholder:'username' },
+  { id:'reddit',      name:'Reddit',           color:'#FF4500', prefix:'reddit.com/u/',       placeholder:'username' },
+  { id:'telegram',    name:'Telegram',         color:'#26A5E4', prefix:'t.me/',               placeholder:'username' },
+  { id:'bluesky',     name:'Bluesky',          color:'#0085FF', prefix:'bsky.app/profile/',   placeholder:'handle' },
+  { id:'vk',          name:'VK',               color:'#4680C2', prefix:'vk.com/',             placeholder:'username' },
+  { id:'pinterest',   name:'Pinterest',        color:'#E60023', prefix:'pinterest.com/',      placeholder:'username' },
+  { id:'dribbble',    name:'Dribbble',         color:'#EA4C89', prefix:'dribbble.com/',       placeholder:'username' },
+  { id:'deviantart',  name:'DeviantArt',       color:'#05CC47', prefix:'deviantart.com/',     placeholder:'username' },
+  { id:'steam',       name:'Steam',            color:'#1B2838', prefix:'steamcommunity.com/id/', placeholder:'username' },
+  { id:'itchio',      name:'itch.io',          color:'#FA5C5C', prefix:'itch.io/profile/',    placeholder:'username' },
+  { id:'kickstarter', name:'Kickstarter',      color:'#05CE78', prefix:'kickstarter.com/profile/', placeholder:'username' },
+  { id:'patreon',     name:'Patreon',          color:'#FF424D', prefix:'patreon.com/',        placeholder:'username' },
+  { id:'kofi',        name:'Ko-fi',            color:'#FF5E5B', prefix:'ko-fi.com/',          placeholder:'username' },
+  { id:'buymeacoffee',name:'Buy Me a Coffee',  color:'#FFDD02', prefix:'buymeacoffee.com/',   placeholder:'username' },
+  { id:'paypal',      name:'PayPal',           color:'#003087', prefix:'paypal.me/',          placeholder:'username' },
+  { id:'bitcoin',     name:'Bitcoin',          color:'#F7931A', prefix:'',                    placeholder:'wallet address' },
+  { id:'ethereum',    name:'Ethereum',         color:'#627EEA', prefix:'',                    placeholder:'wallet address' },
+  { id:'solana',      name:'Solana',           color:'#9945FF', prefix:'',                    placeholder:'wallet address' },
+  { id:'custom',      name:'Custom',           color:'#e03030', prefix:'',                    placeholder:'https://...' },
+]
+
+const PLATFORM_ABBR = {
+  discord:'Di', twitter:'X', github:'Gh', gitlab:'Gl', instagram:'Ig',
+  facebook:'Fb', spotify:'Sp', soundcloud:'Sc', applemusic:'♪', youtube:'Yt',
+  twitch:'Tv', tiktok:'Tt', snapchat:'Sn', linkedin:'Li', reddit:'Re',
+  telegram:'Tg', bluesky:'Bs', vk:'VK', pinterest:'Pi', dribbble:'Dr',
+  deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa',
+  kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ',
+  solana:'◎', custom:'✦',
+}
+
 // ─── Analytics Sub-Page ───────────────────────────────────────────────────────
 function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   const [weekData, setWeekData] = useState([])
@@ -130,7 +176,7 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   )
 }
 
-// ─── Shared UI components (MUST be outside Dashboard to prevent remount on every keystroke) ───
+// ─── Shared UI components ──────────────────────────────────────────────────────
 function PageHeader({ breadcrumb, title, subtitle }) {
   return (
     <div style={{ marginBottom: 28 }}>
@@ -176,7 +222,6 @@ function BtnGhost({ children, onClick, style }) {
   return <button onClick={onClick} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontFamily: 'inherit', transition: 'all .15s', ...style }}>{children}</button>
 }
 
-// saving is passed as a prop so SaveBar doesn't need to live inside Dashboard
 function SaveBar({ onSave, onDiscard, saving }) {
   return (
     <div style={{ position: 'sticky', bottom: 0, background: 'rgba(5,2,2,0.92)', backdropFilter: 'blur(16px)', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '14px 0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
@@ -218,7 +263,6 @@ function TabBar({ tabs, active, onSelect, cols }) {
   )
 }
 
-// PreviewPanel receives state as props so it can live outside Dashboard
 function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPos, selectedFont, showAvatar, avatarPreview, initial, displayName, username, appBio, links }) {
   return (
     <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
@@ -239,7 +283,140 @@ function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPo
           )}
           <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
           {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
-          {links.slice(0,2).map((l, i) => <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>{l.title}</div>)}
+          {links.slice(0,2).map((l, i) => (
+            <div key={i} style={{ width: '100%', padding: 8, background: `${accentColor}11`, border: `1px solid ${accentColor}22`, borderRadius: 8, fontSize: 10, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+              {l.title}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Add Link Modal ────────────────────────────────────────────────────────────
+function AddLinkModal({ platform, onClose, onAdd }) {
+  const [tab, setTab] = useState('link')
+  const [value, setValue] = useState('')
+  const [textValue, setTextValue] = useState('')
+  const [iconDataUrl, setIconDataUrl] = useState(null)
+  const [iconName, setIconName] = useState('')
+  const fileRef = useRef()
+
+  if (!platform) return null
+
+  const handleIconUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => { setIconDataUrl(ev.target.result); setIconName(file.name) }
+    reader.readAsDataURL(file)
+  }
+
+  const handleConfirm = () => {
+    if (tab === 'link') {
+      if (!value.trim()) return
+      const url = platform.prefix
+        ? `https://${platform.prefix}${value.trim()}`
+        : value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`
+      onAdd({ platform, title: platform.name, url, type: 'link', iconDataUrl })
+    } else {
+      if (!textValue.trim()) return
+      onAdd({ platform, title: textValue.trim(), url: '', type: 'text', iconDataUrl })
+    }
+    onClose()
+  }
+
+  const abbr = PLATFORM_ABBR[platform.id] || platform.name[0]
+  const snapText = platform.id === 'snapchat' ? '#b8a800' : platform.color
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: '#0f0505', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: 26, width: 400, maxWidth: '95vw', position: 'relative' }}>
+        <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+
+        {/* Modal header with platform icon */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 9, background: `${platform.color}22`, border: `1px solid ${platform.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            {iconDataUrl
+              ? <img src={iconDataUrl} alt="icon" style={{ width: 22, height: 22, objectFit: 'cover', borderRadius: 5 }} />
+              : <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
+            }
+          </div>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, margin: 0 }}>
+            Add <span style={{ color: '#e03030' }}>{platform.name}</span>
+          </h2>
+        </div>
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, paddingLeft: 44 }}>
+          {platform.id === 'custom' ? 'Add a custom link to your profile' : `Add your ${platform.name} to your profile`}
+        </p>
+
+        {/* Link / Text tabs */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 18, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 4, border: '1px solid rgba(255,255,255,0.06)' }}>
+          {['link','text'].map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: 7, borderRadius: 7, border: tab === t ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent', background: tab === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: tab === t ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', textTransform: 'capitalize' }}>{t}</button>
+          ))}
+        </div>
+
+        {/* Custom icon upload — only for custom platform */}
+        {platform.id === 'custom' && (
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Custom Icon (optional)</label>
+            <input type="file" ref={fileRef} accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
+            <div onClick={() => fileRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.4)', transition: 'border-color .15s' }}>
+              {iconDataUrl
+                ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 7 }} />
+                : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              }
+              <span>{iconDataUrl ? iconName : 'Upload icon image (PNG, SVG, etc.)'}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Link input */}
+        {tab === 'link' && (
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>
+              {platform.prefix ? 'Username' : 'URL'}
+            </label>
+            <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
+              {platform.prefix && (
+                <span style={{ padding: '0 8px 0 12px', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>{platform.prefix}</span>
+              )}
+              <input
+                autoFocus
+                value={value}
+                onChange={e => setValue(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+                placeholder={platform.placeholder || 'username'}
+                style={{ flex: 1, background: 'transparent', border: 'none', padding: platform.prefix ? '11px 12px 11px 0' : '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Text input */}
+        {tab === 'text' && (
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Display Text</label>
+            <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10 }}>
+              <input
+                autoFocus
+                value={textValue}
+                onChange={e => setTextValue(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleConfirm()}
+                placeholder="What should visitors see?"
+                style={{ width: '100%', background: 'transparent', border: 'none', padding: '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
+          <BtnGhost onClick={onClose}>Cancel</BtnGhost>
+          <BtnAccent onClick={handleConfirm}>+ Add Link</BtnAccent>
         </div>
       </div>
     </div>
@@ -323,11 +500,11 @@ export default function Dashboard() {
   const [enterShowTitle, setEnterShowTitle] = useState(true)
   const [enterShowSubtitle, setEnterShowSubtitle] = useState(true)
 
-  // Links/Buttons modals
-  const [showAddLinkModal, setShowAddLinkModal] = useState(false)
+  // Links modal state
+  const [activeLinkPlatform, setActiveLinkPlatform] = useState(null)
+
+  // Buttons modals
   const [showAddBtnModal, setShowAddBtnModal] = useState(false)
-  const [newLinkLabel, setNewLinkLabel] = useState('')
-  const [newLinkUrl, setNewLinkUrl] = useState('')
   const [newBtnLabel, setNewBtnLabel] = useState('')
   const [newBtnUrl, setNewBtnUrl] = useState('')
 
@@ -346,7 +523,6 @@ export default function Dashboard() {
     setTimeout(() => setToastVisible(false), 2500)
   }
 
-  // ── Build settings object from current state ──────────────────────────────
   const buildSettings = () => ({
     font: selectedFont,
     accentColor,
@@ -386,7 +562,6 @@ export default function Dashboard() {
     buttons,
   })
 
-  // ── Load settings from DB settings JSONB ─────────────────────────────────
   const applySettings = (s) => {
     if (!s) return
     if (s.font) setSelectedFont(s.font)
@@ -455,7 +630,6 @@ export default function Dashboard() {
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
         setUid(data.id ? String(data.id) : '')
-        // Load settings JSONB
         if (data.settings) applySettings(data.settings)
         else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
@@ -504,17 +678,12 @@ export default function Dashboard() {
     showToast('Removed')
   }
 
-  // ── Save functions ────────────────────────────────────────────────────────
-
+  // ── Save functions ─────────────────────────────────────────────────────────
   const saveProfile = async () => {
     setSaving(true)
     const settings = buildSettings()
     const { error } = await supabase.from('users').update({
-      bio: appBio,
-      links,
-      display_name: displayName,
-      location,
-      settings,
+      bio: appBio, links, display_name: displayName, location, settings,
     }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
@@ -525,15 +694,8 @@ export default function Dashboard() {
     setSaving(true)
     const settings = buildSettings()
     const { error } = await supabase.from('users').update({
-      bio: appBio,
-      opacity,
-      blur,
-      username_fx: usernameFx,
-      bg_fx: bgFx,
-      location,
-      glow_settings: glowState,
-      discord_presence: discordPresence,
-      settings,
+      bio: appBio, opacity, blur, username_fx: usernameFx, bg_fx: bgFx,
+      location, glow_settings: glowState, discord_presence: discordPresence, settings,
     }).eq('username', username)
     setSaving(false)
     if (!error) setBio(appBio)
@@ -551,7 +713,6 @@ export default function Dashboard() {
   const saveMusic = async () => {
     setSaving(true)
     const settings = buildSettings()
-    // If direct URL provided, also update audio_url column for backwards compat
     const extraUpdate = musicEnabled && musicType === 'direct' && musicUrl ? { audio_url: musicUrl } : {}
     const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username)
     setSaving(false)
@@ -566,19 +727,22 @@ export default function Dashboard() {
     showToast(error ? 'Failed to save' : 'Buttons saved!')
   }
 
-  const addLink = () => {
-    if (!newLinkLabel.trim() || !newLinkUrl.trim()) { showToast('Please fill in both fields'); return }
-    const url = newLinkUrl.trim().startsWith('http') ? newLinkUrl.trim() : `https://${newLinkUrl.trim()}`
-    setLinks(prev => [...prev, { title: newLinkLabel.trim(), url, id: Date.now() }])
-    setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(false)
+  const saveLinks = async () => {
+    setSaving(true)
+    const { error } = await supabase.from('users').update({ links }).eq('username', username)
+    setSaving(false)
+    showToast(error ? 'Failed to save' : 'Links saved!')
+  }
+
+  // Called when AddLinkModal confirms
+  const handleAddLink = (linkObj) => {
+    setLinks(prev => [...prev, { ...linkObj, id: Date.now() }])
     showToast('Link added! Remember to save.')
   }
 
-  const deleteLink = async (idx) => {
-    const updated = links.filter((_, i) => i !== idx)
-    setLinks(updated)
-    const { error } = await supabase.from('users').update({ links: updated }).eq('username', username)
-    showToast(error ? 'Failed to remove' : 'Link removed!')
+  const deleteLink = (idx) => {
+    setLinks(prev => prev.filter((_, i) => i !== idx))
+    showToast('Link removed')
   }
 
   const addButton = () => {
@@ -605,7 +769,6 @@ export default function Dashboard() {
   const cursors = ['Default','Dot','Ring','Crosshair','Skull','Star','Heart','Arrow']
   const entranceAnims = ['Fade In','Slide Up','Zoom In','Glitch','None']
   const clickEffects = ['None','Sparks','Hearts','Stars','Explosion','Ripple']
-  const platforms = ['Twitter','GitHub','Instagram','Discord','YouTube','TikTok','Twitch','Spotify','LinkedIn','Reddit','Steam','Kick']
 
   if (loading) return (
     <div style={{ background: '#050202', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -657,18 +820,16 @@ export default function Dashboard() {
         .effect-btn { padding:10px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; text-align:center; font-family:inherit; }
         .effect-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
         .effect-btn.active { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); color:#e03030; }
-        .platform-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:12px 8px; cursor:pointer; transition:all .15s; font-size:11px; color:rgba(255,255,255,0.5); font-family:inherit; }
-        .platform-btn:hover { border-color:rgba(224,48,48,0.3); background:rgba(224,48,48,0.06); color:#fff; }
+        .plat-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:12px 6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); cursor:pointer; transition:all .15s; font-size:10px; color:rgba(255,255,255,0.5); font-family:inherit; }
+        .plat-btn:hover { border-color:rgba(224,48,48,0.3); background:rgba(224,48,48,0.06); color:#fff; }
+        .link-item-row { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:11px; padding:10px 14px; transition:border-color .15s; }
+        .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
         .preset-btn { display:flex; flex-direction:column; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:10px; cursor:pointer; transition:all .15s; font-family:inherit; }
         .preset-btn:hover { border-color:rgba(255,255,255,0.09); background:rgba(255,255,255,0.04); }
         .preset-btn.selected { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); }
-        .link-item-row { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:10px; padding:10px 14px; transition:border-color .15s; }
-        .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
-        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
-        .modal-overlay.open { display:flex; }
         @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
-        @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} }
-        @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} }
+        @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} .platforms-grid{grid-template-columns:repeat(5,1fr)!important;} }
+        @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} .platforms-grid{grid-template-columns:repeat(4,1fr)!important;} }
       `}</style>
 
       {/* ── SIDEBAR ── */}
@@ -1031,59 +1192,86 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* ═══ LINKS ═══ */}
+          {/* ═══ LINKS — REDESIGNED ═══ */}
           {activePage === 'links' && (
             <>
-              <PageHeader breadcrumb="Dashboard · Links" title='Manage <span style="color:#e03030">Links</span>' subtitle="Add or edit your social links" />
+              <PageHeader breadcrumb="Dashboard · Links" title='Social <span style="color:#e03030">Links</span>' subtitle="Add your social media profiles and custom links" />
+
+              {/* Your Links */}
               <Card>
-                <CardHeader title="Quick Add" sub="Click a platform to add your link" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>} />
-                <div style={{ padding: 24 }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6,1fr)', gap: 8 }}>
-                    {platforms.map(p => (
-                      <button key={p} className="platform-btn" onClick={() => { setNewLinkLabel(p); setNewLinkUrl(''); setShowAddLinkModal(true) }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(224,48,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#e03030', fontWeight: 700 }}>{p[0]}</div>
-                        <span>{p}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </Card>
-              <Card>
-                <CardHeader title="Your Links" sub={`${links.length} link${links.length !== 1 ? 's' : ''}`}
-                  action={<BtnAccent onClick={() => { setNewLinkLabel(''); setNewLinkUrl(''); setShowAddLinkModal(true) }}>
-                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                    Add Link
-                  </BtnAccent>}
+                <CardHeader
+                  title="Your Links"
+                  sub="Click any link to edit it"
+                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>}
                 />
-                <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {links.length === 0 && <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No links yet — add one above!</div>}
-                  {links.map((l, i) => (
-                    <div key={i} className="link-item-row">
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(224,48,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e03030', flexShrink: 0 }}>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{l.title}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{l.url}</div>
-                      </div>
-                      {/* FIX: use index-based delete */}
-                      <button onClick={() => deleteLink(i)} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                      </button>
+                <div style={{ padding: '16px 22px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {links.length === 0 && (
+                    <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
+                      No links yet — pick a platform below to add one!
                     </div>
-                  ))}
+                  )}
+                  {links.map((l, i) => {
+                    const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
+                    const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
+                    const snapText = p.id === 'snapchat' ? '#b8a800' : p.color
+                    return (
+                      <div key={l.id || i} className="link-item-row">
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: `${p.color}22`, border: `1px solid ${p.color}33`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                          {l.iconDataUrl
+                            ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 9 }} />
+                            : <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
+                          }
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>{l.title}</div>
+                          {l.url && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>{l.url}</div>}
+                        </div>
+                        <button onClick={() => deleteLink(i)} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'color .15s, background .15s' }}
+                          onMouseEnter={e => { e.currentTarget.style.color = '#e03030'; e.currentTarget.style.background = 'rgba(224,48,48,0.1)' }}
+                          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.2)'; e.currentTarget.style.background = 'transparent' }}>
+                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               </Card>
+
+              {/* Platform grid */}
+              <Card>
+                <CardHeader
+                  title="Add New Link"
+                  sub="Choose a platform or create a custom link"
+                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>}
+                />
+                <div className="platforms-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 8, padding: '16px 22px 22px' }}>
+                  {PLATFORMS.map(p => {
+                    const abbr = PLATFORM_ABBR[p.id] || p.name[0]
+                    const snapText = p.id === 'snapchat' ? '#b8a800' : p.color
+                    return (
+                      <button key={p.id} className="plat-btn" onClick={() => setActiveLinkPlatform(p)}>
+                        <div style={{ width: 32, height: 32, borderRadius: 9, background: `${p.color}22`, border: `1px solid ${p.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: snapText }}>{abbr}</span>
+                        </div>
+                        <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: 'center' }}>{p.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+
               {links.length > 0 && (
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                  <BtnAccent onClick={async () => {
-                    setSaving(true)
-                    const { error } = await supabase.from('users').update({ links }).eq('username', username)
-                    setSaving(false)
-                    showToast(error ? 'Failed to save' : 'Links saved!')
-                  }} disabled={saving}>Save Links</BtnAccent>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <BtnAccent onClick={saveLinks} disabled={saving}>{saving ? 'Saving…' : 'Save Links'}</BtnAccent>
                 </div>
               )}
+
+              {/* Add Link Modal */}
+              <AddLinkModal
+                platform={activeLinkPlatform}
+                onClose={() => setActiveLinkPlatform(null)}
+                onAdd={handleAddLink}
+              />
             </>
           )}
 
@@ -1181,7 +1369,6 @@ export default function Dashboard() {
                   </Card>
                 )}
 
-                {/* FIX: now actually calls saveEffects */}
                 <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
@@ -1220,7 +1407,6 @@ export default function Dashboard() {
                           <Input placeholder="Artist name" value={musicArtist} onChange={e => setMusicArtist(e.target.value)} />
                         </div>
                       </div>
-                      {/* File upload for direct audio */}
                       {musicType === 'direct' && (
                         <div>
                           <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
@@ -1249,7 +1435,6 @@ export default function Dashboard() {
                   </Card>
                 )}
 
-                {/* FIX: now actually calls saveMusic */}
                 <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
@@ -1302,7 +1487,6 @@ export default function Dashboard() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <Card>
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                      {/* Username */}
                       {(() => {
                         const lastChanged = dbUser?.username_changed_at ? new Date(dbUser.username_changed_at) : null
                         const daysLeft = lastChanged ? Math.max(0, 7 - Math.floor((Date.now() - lastChanged.getTime()) / 86400000)) : 0
@@ -1331,7 +1515,6 @@ export default function Dashboard() {
 
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
 
-                      {/* Display Name */}
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Display Name</div>
                         <div style={{ display: 'flex', gap: 10 }}>
@@ -1345,7 +1528,6 @@ export default function Dashboard() {
 
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
 
-                      {/* Password */}
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Password</div>
                         <div style={{ display: 'flex', gap: 10 }}>
@@ -1379,51 +1561,30 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ── ADD LINK MODAL ── */}
-      <div className={`modal-overlay ${showAddLinkModal ? 'open' : ''}`} onClick={() => setShowAddLinkModal(false)}>
-        <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
-          <button onClick={() => setShowAddLinkModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Add <span style={{ color: '#e03030' }}>Link</span></h2>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Add a new social or custom link to your profile</p>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Label</label>
-            <Input placeholder="e.g. Twitter, GitHub, Portfolio…" value={newLinkLabel} onChange={e => setNewLinkLabel(e.target.value)} />
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
-            <Input type="url" placeholder="https://…" value={newLinkUrl} onChange={e => setNewLinkUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addLink()} />
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <BtnGhost onClick={() => setShowAddLinkModal(false)}>Cancel</BtnGhost>
-            <BtnAccent onClick={addLink}>Add Link</BtnAccent>
-          </div>
-        </div>
-      </div>
-
       {/* ── ADD BUTTON MODAL ── */}
-      <div className={`modal-overlay ${showAddBtnModal ? 'open' : ''}`} onClick={() => setShowAddBtnModal(false)}>
-        <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
-          <button onClick={() => setShowAddBtnModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-          </button>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Custom <span style={{ color: '#e03030' }}>Button</span></h2>
-          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Create a call-to-action button on your profile</p>
-          <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Button Label</label>
-            <Input placeholder="e.g. Hire Me, Buy Now…" value={newBtnLabel} onChange={e => setNewBtnLabel(e.target.value)} />
-          </div>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
-            <Input type="url" placeholder="https://…" value={newBtnUrl} onChange={e => setNewBtnUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addButton()} />
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <BtnGhost onClick={() => setShowAddBtnModal(false)}>Cancel</BtnGhost>
-            <BtnAccent onClick={addButton}>Create Button</BtnAccent>
+      {showAddBtnModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowAddBtnModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
+            <button onClick={() => setShowAddBtnModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Custom <span style={{ color: '#e03030' }}>Button</span></h2>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Create a call-to-action button on your profile</p>
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Button Label</label>
+              <Input placeholder="e.g. Hire Me, Buy Now…" value={newBtnLabel} onChange={e => setNewBtnLabel(e.target.value)} />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
+              <Input type="url" placeholder="https://…" value={newBtnUrl} onChange={e => setNewBtnUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addButton()} />
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <BtnGhost onClick={() => setShowAddBtnModal(false)}>Cancel</BtnGhost>
+              <BtnAccent onClick={addButton}>Create Button</BtnAccent>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* ── TOAST ── */}
       {toastVisible && (
