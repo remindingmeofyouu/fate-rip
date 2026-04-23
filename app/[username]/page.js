@@ -135,26 +135,34 @@ export default function ProfilePage() {
     return () => { clearTimeout(timeout); document.body.style.cursor = '' }
   }, [profile])
 
-  // Try silent autoplay on load (works sometimes depending on browser policy)
+  // Try silent autoplay on load (works if user has interacted with the page before)
   useEffect(() => {
-    if (!profile || !audioRef.current) return
+    if (!profile) return
     const s   = profile.settings || {}
     const m   = s.music || {}
     const src = m.url || profile.audio_url
     if (!src) return
-    audioRef.current.volume = 1
-    audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {
-      // Blocked — handleEnter below will unlock it on the entrance click
-    })
+    // Wait for audio element to be ready
+    const tryPlay = () => {
+      if (audioRef.current) {
+        audioRef.current.volume = 1
+        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+      }
+    }
+    const t = setTimeout(tryPlay, 300)
+    return () => clearTimeout(t)
   }, [profile])
 
   // The entrance-screen click IS a user gesture — safe to play audio here
   const handleEnter = useCallback(() => {
     setEntered(true)
-    if (audioRef.current) {
-      audioRef.current.volume = 1
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
-    }
+    // Delay slightly so React finishes re-rendering before we call play()
+    setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.volume = 1
+        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+      }
+    }, 100)
   }, [])
 
   if (loading) return (
