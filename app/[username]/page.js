@@ -58,6 +58,16 @@ const FONT_MAP = {
   'Nunito': 'Nunito:wght@400;600;700;800;900',
 }
 
+const SIMPLE_ICONS = {
+  discord:'discord', twitter:'x', github:'github', gitlab:'gitlab',
+  instagram:'instagram', facebook:'facebook', spotify:'spotify', soundcloud:'soundcloud',
+  applemusic:'applemusic', youtube:'youtube', twitch:'twitch', tiktok:'tiktok',
+  snapchat:'snapchat', linkedin:'linkedin', reddit:'reddit', telegram:'telegram',
+  bluesky:'bluesky', vk:'vk', pinterest:'pinterest', dribbble:'dribbble',
+  deviantart:'deviantart', steam:'steam', itchio:'itchio', kickstarter:'kickstarter',
+  patreon:'patreon', kofi:'kofi', buymeacoffee:'buymeacoffee', paypal:'paypal',
+  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana',
+}
 export default function ProfilePage() {
   const params = useParams()
   const username = params?.username
@@ -511,12 +521,14 @@ function ProfileContent({
       return (
         <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer"
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none', width: 64 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
             onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
             onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
             {link.iconDataUrl
               ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : <span style={{ fontSize: 14, fontWeight: 800, color: textColor }}>{abbr}</span>
+              : SIMPLE_ICONS[p.id]
+  ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+  : <span style={{ fontSize: 14, fontWeight: 800, color: textColor }}>{abbr}</span>
             }
           </div>
           <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 64 }}>

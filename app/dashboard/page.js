@@ -51,6 +51,16 @@ const PLATFORM_ABBR = {
 
 // Light-text platforms (dark text needed on their bg color)
 const LIGHT_PLATFORMS = new Set(['snapchat', 'buymeacoffee', 'bitcoin'])
+const SIMPLE_ICONS = {
+  discord:'discord', twitter:'x', github:'github', gitlab:'gitlab',
+  instagram:'instagram', facebook:'facebook', spotify:'spotify', soundcloud:'soundcloud',
+  applemusic:'applemusic', youtube:'youtube', twitch:'twitch', tiktok:'tiktok',
+  snapchat:'snapchat', linkedin:'linkedin', reddit:'reddit', telegram:'telegram',
+  bluesky:'bluesky', vk:'vk', pinterest:'pinterest', dribbble:'dribbble',
+  deviantart:'deviantart', steam:'steam', itchio:'itchio', kickstarter:'kickstarter',
+  patreon:'patreon', kofi:'kofi', buymeacoffee:'buymeacoffee', paypal:'paypal',
+  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana',
+}
 
 function getTextColor(platformId) {
   return LIGHT_PLATFORMS.has(platformId) ? '#1a1a1a' : '#fff'
@@ -94,17 +104,19 @@ function LinkIconTile({ link, platform, abbr, onDelete }) {
       <div
         className="link-icon-wrap"
         style={{
-          width: 56, height: 56, borderRadius: 14,
+          width: 44, height: 44, borderRadius: 12,
           background: platform.color,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: `0 4px 16px ${platform.color}55`,
           transition: 'transform .15s, box-shadow .15s',
           overflow: 'hidden', flexShrink: 0,
         }}
-      >
+>
         {link.iconDataUrl
           ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
+          : SIMPLE_ICONS[platform.id]
+            ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+            : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
         }
       </div>
 
