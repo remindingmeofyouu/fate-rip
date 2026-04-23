@@ -468,8 +468,23 @@ function ProfileContent({
           paddingTop: showAvatarPref ? 64 : 28,
         }}>
           {/* Name */}
-          <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 4, textAlign, ...nameStyle }}>
-            {displayName || `@${profile.username}`}
+          <div style={{ position: 'relative', display: 'inline-block' }} className="uid-hover-wrap">
+            <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: '-0.5px', marginBottom: 4, textAlign, cursor: 'default', ...nameStyle }}>
+              {displayName || `@${profile.username}`}
+            </div>
+            {profile.id && (
+              <div className="uid-tooltip" style={{
+                position: 'absolute', left: '50%', top: '110%',
+                transform: 'translateX(-50%)',
+                background: 'rgba(10,10,10,0.92)', border: `1px solid ${accentColor}44`,
+                borderRadius: 8, padding: '4px 10px', fontSize: 11, fontWeight: 700,
+                color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap',
+                pointerEvents: 'none', zIndex: 10, backdropFilter: 'blur(8px)',
+                opacity: 0, transition: 'opacity .15s',
+              }}>
+                UID {profile.id}
+              </div>
+            )}
           </div>
 
           {/* Sub-username */}
@@ -562,7 +577,6 @@ function ProfileContent({
         </div>
       </div>
 
-      <style>{`@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
-    </div>
+      <style>{`.uid-hover-wrap:hover .uid-tooltip { opacity: 1 !important; } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
   )
 }
