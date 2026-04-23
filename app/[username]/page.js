@@ -304,6 +304,14 @@ function ProfileContent({
   viewCount, iconSize,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
+  const hexToRgb = (hex) => {
+  const r = parseInt(hex.slice(1,3),16)
+  const g = parseInt(hex.slice(3,5),16)
+  const b = parseInt(hex.slice(5,7),16)
+  return `${r},${g},${b}`
+}
+const accentRgb = hexToRgb(accentColor || '#CC0000')
+const bgRgb = hexToRgb(bgColorSetting || '#080808')
   const alignItems   = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
   const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
@@ -392,7 +400,7 @@ function ProfileContent({
         @keyframes barPulse  { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
         .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
-        .profile-panel { width:100%; background:rgba(10,10,10,0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
+        .profile-panel { width:100%; background:rgba(${bgRgb},0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
         .avatar-inner { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; overflow:hidden; }
         .avatar-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
@@ -626,7 +634,7 @@ function ProfileContent({
 
         {/* ── Music Player — directly below the panel ─────────────────────────── */}
         {audioSrc && (
-          <div className="music-player" style={{ marginTop:10 }} onClick={e=>e.stopPropagation()}>
+          <div className="music-player" style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }} onClick={e=>e.stopPropagation()}>
             {/* Track info row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
               <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
