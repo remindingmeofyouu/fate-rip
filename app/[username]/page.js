@@ -244,7 +244,7 @@ export default function ProfilePage() {
     return (
       <div onClick={handleEnter} style={{ background:bgColor, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', cursor:'pointer', position:'relative', overflow:'hidden', fontFamily:`'${fontFamily}', sans-serif` }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
-        {/* Audio loaded here so it's ready to play the instant the user clicks */}
+        {/* Audio element always rendered here so the ref is ready the instant the user clicks */}
         {audioSrc && <audio ref={audioRef} src={audioSrc} loop preload="auto" style={{ display:'none' }} />}
         {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
           ? <video src={bgUrl} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:opacity/100, filter:blur>0?`blur(${blur}px)`:'none' }} autoPlay loop muted playsInline />
@@ -361,7 +361,7 @@ function ProfileContent({
   return (
     <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden' }}>
       <link rel="icon" href="/scythe.png" />
-      {audioSrc && <audio ref={audioRef} src={audioSrc} loop preload="auto" style={{ display:'none' }} />}
+      {/* NOTE: No <audio> tag here — it lives in the entrance screen so autoplay works on click */}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');
