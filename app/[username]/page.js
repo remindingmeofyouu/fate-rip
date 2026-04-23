@@ -66,8 +66,9 @@ const SIMPLE_ICONS = {
   bluesky:'bluesky', vk:'vk', pinterest:'pinterest', dribbble:'dribbble',
   deviantart:'deviantart', steam:'steam', itchio:'itchio', kickstarter:'kickstarter',
   patreon:'patreon', kofi:'kofi', buymeacoffee:'buymeacoffee', paypal:'paypal',
-  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana',
+  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana', roblox:'roblox',
 }
+
 export default function ProfilePage() {
   const params = useParams()
   const username = params?.username
@@ -109,8 +110,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!username) return
-    // Track the view first, then fetch count after a short delay
-    // so the insert has time to land before we count
     trackView(username)
     const fetchViews = async () => {
       await new Promise(r => setTimeout(r, 600))
@@ -151,6 +150,7 @@ export default function ProfilePage() {
     return () => { clearTimeout(timeout); document.body.style.cursor = '' }
   }, [profile])
 
+  // ─── AUTOPLAY: try immediately, fall back to first click ─────────────────────
   useEffect(() => {
     if (!profile) return
     const settings = profile.settings || {}
@@ -158,19 +158,17 @@ export default function ProfilePage() {
     const audioSrc = music.enabled ? music.url : profile.audio_url
     if (!audioSrc) return
     const vol = music.volume !== undefined ? music.volume / 100 : 0.4
-    const tryPlay = () => {
-      if (audioRef.current) {
-        audioRef.current.volume = vol
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
-      }
-      document.removeEventListener('click', tryPlay)
-    }
-    document.addEventListener('click', tryPlay)
     if (audioRef.current) {
       audioRef.current.volume = vol
-      if (music.autoplay) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {
+        // Browser blocked autoplay — unlock on first user interaction
+        const unlock = () => {
+          audioRef.current?.play().then(() => setIsPlaying(true)).catch(() => {})
+          document.removeEventListener('click', unlock)
+        }
+        document.addEventListener('click', unlock)
+      })
     }
-    return () => document.removeEventListener('click', tryPlay)
   }, [profile])
 
   if (loading) return (
@@ -292,7 +290,7 @@ export default function ProfilePage() {
       displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
       entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
       setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
-      iconSize={iconSize}
+      iconSize={iconSize} viewCount={viewCount}
     />
   )
 }
@@ -353,10 +351,14 @@ function ProfileContent({
         .bg-img { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
         .bg-overlay { position:fixed; inset:0; z-index:1; pointer-events:none; }
         .fx-layer { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-        .music-player { position:fixed; bottom:20px; right:20px; z-index:10; display:flex; align-items:center; gap:10px; background:rgba(10,10,10,0.85); border:1px solid ${accentColor}44; border-radius:999px; padding:8px 16px 8px 10px; backdrop-filter:blur(12px); cursor:pointer; transition:all .2s; }
-        .music-player:hover { background:rgba(20,20,20,0.95); border-color:${accentColor}88; transform:translateY(-2px); }
+        .music-widget { position:fixed; top:16px; left:16px; z-index:50; display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.45); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:999px; padding:6px 14px 6px 10px; border:1px solid rgba(255,255,255,0.08); transition:all .2s; }
+        .music-widget:hover { background:rgba(0,0,0,0.65); border-color:rgba(255,255,255,0.15); }
+        .music-widget button { background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; color:#fff; opacity:0.8; transition:opacity .15s; }
+        .music-widget button:hover { opacity:1; }
+        .music-widget input[type=range] { width:70px; cursor:pointer; opacity:0.7; accent-color:#fff; }
+        .music-widget input[type=range]:hover { opacity:1; }
         .music-bars { display:flex; align-items:flex-end; gap:2px; height:14px; }
-        .music-bar { width:3px; border-radius:2px; background:${accentColor}; }
+        .music-bar { width:3px; border-radius:2px; background:#fff; }
         .music-bar:nth-child(1){animation:musicPulse 0.7s ease-in-out 0s infinite}
         .music-bar:nth-child(2){animation:musicPulse 0.7s ease-in-out 0.2s infinite}
         .music-bar:nth-child(3){animation:musicPulse 0.7s ease-in-out 0.1s infinite}
@@ -374,7 +376,7 @@ function ProfileContent({
       {(bgFx === 'particles' || (particleEnabled && particleStyle === 'Dots')) && (
         <div className="fx-layer">
           {Array.from({ length: 20 }).map((_, i) => (
-            <div key={i} style={{ position: 'absolute', left: `${Math.random() * 100}%`, width: `${2 + Math.random() * 4}px`, height: `${2 + Math.random() * 4}px`, borderRadius: '50%', background: `${accentColor}${Math.round((0.3 + Math.random() * 0.5) * 255).toString(16).padStart(2,'0')}`, animation: `floatParticle ${4 + Math.random() * 6}s linear ${Math.random() * 5}s infinite`, bottom: '-10px' }} />
+            <div key={i} style={{ position: 'absolute', left: `${Math.random() * 100}%`, width: `${2 + Math.random() * 4}px`, height: `${2 + Math.random() * 4}px`, borderRadius: '50%', background: `${accentColor}${Math.round((0.3 + Math.random() * 0.5) * 255).toString(16).padStart(2,'00')}`, animation: `floatParticle ${4 + Math.random() * 6}s linear ${Math.random() * 5}s infinite`, bottom: '-10px' }} />
           ))}
         </div>
       )}
@@ -423,27 +425,25 @@ function ProfileContent({
         </div>
       )}
 
+      {/* ── Top-left music widget ── */}
       {audioSrc && (
-        <div className="music-player" onClick={e => {
-          e.stopPropagation()
-          if (audioRef.current) {
-            if (audioRef.current.paused) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
-            else { audioRef.current.pause(); setIsPlaying(false) }
-          }
-        }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${accentColor}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div className="music-widget" onClick={e => e.stopPropagation()}>
+          <button onClick={() => {
+            if (audioRef.current) {
+              if (audioRef.current.paused) audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+              else { audioRef.current.pause(); setIsPlaying(false) }
+            }
+          }}>
             {isPlaying
               ? <div className="music-bars"><div className="music-bar" style={{ height: 8 }}/><div className="music-bar" style={{ height: 12 }}/><div className="music-bar" style={{ height: 6 }}/><div className="music-bar" style={{ height: 10 }}/></div>
-              : <svg width="10" height="10" fill={accentColor} viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              : <svg width="16" height="16" fill="#fff" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
             }
-          </div>
-          {(music.showTitle !== false || music.showArtist !== false) && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {music.showTitle !== false && music.title && <div style={{ fontSize: 11, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{music.title}</div>}
-              {music.showArtist !== false && music.artist && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.2 }}>{music.artist}</div>}
-              {!music.title && !music.artist && <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.6)' }}>{isPlaying ? 'Playing' : 'Paused'}</div>}
-            </div>
-          )}
+          </button>
+          <input
+            type="range" min={0} max={1} step={0.01}
+            defaultValue={(music.volume !== undefined ? music.volume / 100 : 0.4)}
+            onChange={e => { if (audioRef.current) audioRef.current.volume = parseFloat(e.target.value) }}
+          />
         </div>
       )}
 
@@ -527,35 +527,37 @@ function ProfileContent({
           )}
 
           {/* Links */}
-{links.length > 0 && (
-  <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start' }}>
-    {links.map((link, i) => {
-      const p = link.platform || { id: 'custom', name: link.title, color: '#e03030' }
-      const ABBR = { discord:'Di', twitter:'X', github:'Gh', gitlab:'Gl', instagram:'Ig', facebook:'Fb', spotify:'Sp', soundcloud:'Sc', applemusic:'♪', youtube:'Yt', twitch:'Tv', tiktok:'Tt', snapchat:'Sn', linkedin:'Li', reddit:'Re', telegram:'Tg', bluesky:'Bs', vk:'VK', pinterest:'Pi', dribbble:'Dr', deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa', kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ', solana:'◎', custom:'✦' }
-      const LIGHT = new Set(['snapchat','buymeacoffee','bitcoin'])
-      const abbr = ABBR[p.id] || p.name?.[0] || '?'
-      const textColor = LIGHT.has(p.id) ? '#1a1a1a' : '#fff'
-      return (
-        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none', width: 64 }}>
-          <div style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
-            onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
-            onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
-            {link.iconDataUrl
-              ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              : SIMPLE_ICONS[p.id]
-  ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
-  : <span style={{ fontSize: 14, fontWeight: 800, color: textColor }}>{abbr}</span>
-            }
-          </div>
-          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 64 }}>
-            {link.title || p.name}
-          </span>
-        </a>
-      )
-    })}
-  </div>
-)}
+          {links.length > 0 && (
+            <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start' }}>
+              {links.map((link, i) => {
+                const p = link.platform || { id: 'custom', name: link.title, color: '#e03030' }
+                const ABBR = { discord:'Di', twitter:'X', github:'Gh', gitlab:'Gl', instagram:'Ig', facebook:'Fb', spotify:'Sp', soundcloud:'Sc', applemusic:'♪', youtube:'Yt', twitch:'Tv', tiktok:'Tt', snapchat:'Sn', linkedin:'Li', reddit:'Re', telegram:'Tg', bluesky:'Bs', vk:'VK', pinterest:'Pi', dribbble:'Dr', deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa', kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ', solana:'◎', roblox:'R', email:'✉', custom:'✦' }
+                const LIGHT = new Set(['snapchat','buymeacoffee','bitcoin'])
+                const abbr = ABBR[p.id] || p.name?.[0] || '?'
+                const textColor = LIGHT.has(p.id) ? '#1a1a1a' : '#fff'
+                return (
+                  <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer"
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none', width: Math.max(iconSize, 48) }}>
+                    <div style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: link.iconDataUrl ? 'transparent' : p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: link.iconDataUrl ? 'none' : glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
+                      onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
+                      onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+                      {link.iconDataUrl
+                        ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        : p.id === 'email'
+                          ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                          : SIMPLE_ICONS[p.id]
+                            ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+                            : <span style={{ fontSize: 14, fontWeight: 800, color: textColor }}>{abbr}</span>
+                      }
+                    </div>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: Math.max(iconSize, 48) }}>
+                      {link.title || p.name}
+                    </span>
+                  </a>
+                )
+              })}
+            </div>
+          )}
 
           {/* Custom Buttons */}
           {btns.length > 0 && (
@@ -577,7 +579,7 @@ function ProfileContent({
         </div>
       </div>
 
-<style dangerouslySetInnerHTML={{ __html: `.uid-hover-wrap:hover .uid-tooltip { opacity: 1 !important; } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `.uid-hover-wrap:hover .uid-tooltip { opacity: 1 !important; } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }` }} />
     </div>
   )
 }
