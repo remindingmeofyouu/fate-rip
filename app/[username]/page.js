@@ -373,8 +373,8 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
   }
 
   const progress      = duration ? (currentTime / duration) * 100 : 0
-  const trackTitle    = music.title  || music.musicTitle  || 'Unknown'
-  const trackArtist   = music.artist || music.musicArtist || 'Unknown'
+  const trackTitle    = music.showTitle !== false ? (music.title || music.musicTitle || 'Unknown') : ''
+  const trackArtist   = music.showArtist !== false ? (music.artist || music.musicArtist || 'Unknown') : ''
 
   return (
     <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden' }}>
@@ -634,7 +634,7 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
 
         {/* ── Music Player — directly below the panel ─────────────────────────── */}
         {audioSrc && music.showPlayer !== false && (
-          <div className="music-player" style={{ marginTop:10 }} onClick={e=>e.stopPropagation()}>
+          <div className="music-player" style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }} onClick={e=>e.stopPropagation()}>
             {/* Track info row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
               <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
