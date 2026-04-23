@@ -5,38 +5,40 @@ import { useRouter } from 'next/navigation'
 
 // ─── Platform definitions ──────────────────────────────────────────────────────
 const PLATFORMS = [
-  { id:'discord',     name:'Discord',          color:'#5865F2', prefix:'',                   placeholder:'https://discord.gg/...' },
-  { id:'twitter',     name:'Twitter / X',      color:'#000000', prefix:'x.com/',             placeholder:'username' },
-  { id:'github',      name:'GitHub',           color:'#24292e', prefix:'github.com/',         placeholder:'username' },
-  { id:'gitlab',      name:'GitLab',           color:'#FC6D26', prefix:'gitlab.com/',         placeholder:'username' },
-  { id:'instagram',   name:'Instagram',        color:'#E1306C', prefix:'instagram.com/',      placeholder:'username' },
-  { id:'facebook',    name:'Facebook',         color:'#1877F2', prefix:'facebook.com/',       placeholder:'username' },
+  { id:'discord',     name:'Discord',          color:'#5865F2', prefix:'',                      placeholder:'https://discord.gg/...' },
+  { id:'twitter',     name:'Twitter / X',      color:'#000000', prefix:'x.com/',               placeholder:'username' },
+  { id:'github',      name:'GitHub',           color:'#24292e', prefix:'github.com/',           placeholder:'username' },
+  { id:'gitlab',      name:'GitLab',           color:'#FC6D26', prefix:'gitlab.com/',           placeholder:'username' },
+  { id:'instagram',   name:'Instagram',        color:'#E1306C', prefix:'instagram.com/',        placeholder:'username' },
+  { id:'facebook',    name:'Facebook',         color:'#1877F2', prefix:'facebook.com/',         placeholder:'username' },
   { id:'spotify',     name:'Spotify',          color:'#1DB954', prefix:'open.spotify.com/user/', placeholder:'username' },
-  { id:'soundcloud',  name:'SoundCloud',       color:'#FF5500', prefix:'soundcloud.com/',     placeholder:'username' },
-  { id:'applemusic',  name:'Apple Music',      color:'#FA2D48', prefix:'music.apple.com/',    placeholder:'profile URL' },
-  { id:'youtube',     name:'YouTube',          color:'#FF0000', prefix:'youtube.com/@',       placeholder:'handle' },
-  { id:'twitch',      name:'Twitch',           color:'#9146FF', prefix:'twitch.tv/',          placeholder:'username' },
-  { id:'tiktok',      name:'TikTok',           color:'#010101', prefix:'tiktok.com/@',        placeholder:'username' },
-  { id:'snapchat',    name:'Snapchat',         color:'#FFFC00', prefix:'snapchat.com/add/',   placeholder:'username' },
-  { id:'linkedin',    name:'LinkedIn',         color:'#0A66C2', prefix:'linkedin.com/in/',    placeholder:'username' },
-  { id:'reddit',      name:'Reddit',           color:'#FF4500', prefix:'reddit.com/u/',       placeholder:'username' },
-  { id:'telegram',    name:'Telegram',         color:'#26A5E4', prefix:'t.me/',               placeholder:'username' },
-  { id:'bluesky',     name:'Bluesky',          color:'#0085FF', prefix:'bsky.app/profile/',   placeholder:'handle' },
-  { id:'vk',          name:'VK',               color:'#4680C2', prefix:'vk.com/',             placeholder:'username' },
-  { id:'pinterest',   name:'Pinterest',        color:'#E60023', prefix:'pinterest.com/',      placeholder:'username' },
-  { id:'dribbble',    name:'Dribbble',         color:'#EA4C89', prefix:'dribbble.com/',       placeholder:'username' },
-  { id:'deviantart',  name:'DeviantArt',       color:'#05CC47', prefix:'deviantart.com/',     placeholder:'username' },
+  { id:'soundcloud',  name:'SoundCloud',       color:'#FF5500', prefix:'soundcloud.com/',       placeholder:'username' },
+  { id:'applemusic',  name:'Apple Music',      color:'#FA2D48', prefix:'music.apple.com/',      placeholder:'profile URL' },
+  { id:'youtube',     name:'YouTube',          color:'#FF0000', prefix:'youtube.com/@',         placeholder:'handle' },
+  { id:'twitch',      name:'Twitch',           color:'#9146FF', prefix:'twitch.tv/',            placeholder:'username' },
+  { id:'tiktok',      name:'TikTok',           color:'#010101', prefix:'tiktok.com/@',          placeholder:'username' },
+  { id:'snapchat',    name:'Snapchat',         color:'#FFFC00', prefix:'snapchat.com/add/',     placeholder:'username' },
+  { id:'linkedin',    name:'LinkedIn',         color:'#0A66C2', prefix:'linkedin.com/in/',      placeholder:'username' },
+  { id:'reddit',      name:'Reddit',           color:'#FF4500', prefix:'reddit.com/u/',         placeholder:'username' },
+  { id:'telegram',    name:'Telegram',         color:'#26A5E4', prefix:'t.me/',                 placeholder:'username' },
+  { id:'bluesky',     name:'Bluesky',          color:'#0085FF', prefix:'bsky.app/profile/',     placeholder:'handle' },
+  { id:'vk',          name:'VK',               color:'#4680C2', prefix:'vk.com/',               placeholder:'username' },
+  { id:'pinterest',   name:'Pinterest',        color:'#E60023', prefix:'pinterest.com/',        placeholder:'username' },
+  { id:'dribbble',    name:'Dribbble',         color:'#EA4C89', prefix:'dribbble.com/',         placeholder:'username' },
+  { id:'deviantart',  name:'DeviantArt',       color:'#05CC47', prefix:'deviantart.com/',       placeholder:'username' },
   { id:'steam',       name:'Steam',            color:'#1B2838', prefix:'steamcommunity.com/id/', placeholder:'username' },
-  { id:'itchio',      name:'itch.io',          color:'#FA5C5C', prefix:'itch.io/profile/',    placeholder:'username' },
+  { id:'itchio',      name:'itch.io',          color:'#FA5C5C', prefix:'itch.io/profile/',      placeholder:'username' },
   { id:'kickstarter', name:'Kickstarter',      color:'#05CE78', prefix:'kickstarter.com/profile/', placeholder:'username' },
-  { id:'patreon',     name:'Patreon',          color:'#FF424D', prefix:'patreon.com/',        placeholder:'username' },
-  { id:'kofi',        name:'Ko-fi',            color:'#FF5E5B', prefix:'ko-fi.com/',          placeholder:'username' },
-  { id:'buymeacoffee',name:'Buy Me a Coffee',  color:'#FFDD02', prefix:'buymeacoffee.com/',   placeholder:'username' },
-  { id:'paypal',      name:'PayPal',           color:'#003087', prefix:'paypal.me/',          placeholder:'username' },
-  { id:'bitcoin',     name:'Bitcoin',          color:'#F7931A', prefix:'',                    placeholder:'wallet address' },
-  { id:'ethereum',    name:'Ethereum',         color:'#627EEA', prefix:'',                    placeholder:'wallet address' },
-  { id:'solana',      name:'Solana',           color:'#9945FF', prefix:'',                    placeholder:'wallet address' },
-  { id:'custom',      name:'Custom',           color:'#e03030', prefix:'',                    placeholder:'https://...' },
+  { id:'patreon',     name:'Patreon',          color:'#FF424D', prefix:'patreon.com/',          placeholder:'username' },
+  { id:'kofi',        name:'Ko-fi',            color:'#FF5E5B', prefix:'ko-fi.com/',            placeholder:'username' },
+  { id:'buymeacoffee',name:'Buy Me a Coffee',  color:'#FFDD02', prefix:'buymeacoffee.com/',     placeholder:'username' },
+  { id:'paypal',      name:'PayPal',           color:'#003087', prefix:'paypal.me/',            placeholder:'username' },
+  { id:'bitcoin',     name:'Bitcoin',          color:'#F7931A', prefix:'',                      placeholder:'wallet address' },
+  { id:'ethereum',    name:'Ethereum',         color:'#627EEA', prefix:'',                      placeholder:'wallet address' },
+  { id:'solana',      name:'Solana',           color:'#9945FF', prefix:'',                      placeholder:'wallet address' },
+  { id:'roblox',      name:'Roblox',           color:'#e00000', prefix:'roblox.com/users/',     placeholder:'username' },
+  { id:'email',       name:'Email',            color:'#EA4335', prefix:'mailto:',               placeholder:'you@example.com' },
+  { id:'custom',      name:'Custom',           color:'#e03030', prefix:'',                      placeholder:'https://...' },
 ]
 
 const PLATFORM_ABBR = {
@@ -46,11 +48,11 @@ const PLATFORM_ABBR = {
   telegram:'Tg', bluesky:'Bs', vk:'VK', pinterest:'Pi', dribbble:'Dr',
   deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa',
   kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ',
-  solana:'◎', custom:'✦',
+  solana:'◎', roblox:'R', email:'✉', custom:'✦',
 }
 
-// Light-text platforms (dark text needed on their bg color)
 const LIGHT_PLATFORMS = new Set(['snapchat', 'buymeacoffee', 'bitcoin'])
+
 const SIMPLE_ICONS = {
   discord:'discord', twitter:'x', github:'github', gitlab:'gitlab',
   instagram:'instagram', facebook:'facebook', spotify:'spotify', soundcloud:'soundcloud',
@@ -59,7 +61,7 @@ const SIMPLE_ICONS = {
   bluesky:'bluesky', vk:'vk', pinterest:'pinterest', dribbble:'dribbble',
   deviantart:'deviantart', steam:'steam', itchio:'itchio', kickstarter:'kickstarter',
   patreon:'patreon', kofi:'kofi', buymeacoffee:'buymeacoffee', paypal:'paypal',
-  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana',
+  bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana', roblox:'roblox',
 }
 
 function getTextColor(platformId) {
@@ -67,7 +69,7 @@ function getTextColor(platformId) {
 }
 
 // ─── Link Icon Tile ────────────────────────────────────────────────────────────
-function LinkIconTile({ link, platform, abbr, onDelete }) {
+function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44 }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -82,10 +84,9 @@ function LinkIconTile({ link, platform, abbr, onDelete }) {
   return (
     <div
       onClick={handleCopy}
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', position: 'relative', width: 72 }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', position: 'relative', width: Math.max(64, iconSize) }}
       className="link-icon-tile"
     >
-      {/* Delete × badge */}
       <div
         className="link-del-btn"
         onClick={e => { e.stopPropagation(); onDelete() }}
@@ -100,37 +101,36 @@ function LinkIconTile({ link, platform, abbr, onDelete }) {
         }}
       >×</div>
 
-      {/* Icon square */}
       <div
         className="link-icon-wrap"
         style={{
-          width: 44, height: 44, borderRadius: 12,
-          background: platform.color,
+          width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27),
+          background: link.iconDataUrl ? 'transparent' : platform.color,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: `0 4px 16px ${platform.color}55`,
+          boxShadow: link.iconDataUrl ? 'none' : `0 4px 16px ${platform.color}55`,
           transition: 'transform .15s, box-shadow .15s',
           overflow: 'hidden', flexShrink: 0,
         }}
->
+      >
         {link.iconDataUrl
-          ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : SIMPLE_ICONS[platform.id]
-            ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
-            : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
+          ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          : platform.id === 'email'
+            ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+            : SIMPLE_ICONS[platform.id]
+              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+              : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
         }
       </div>
 
-      {/* Label */}
       <span style={{
         fontSize: 10, color: 'rgba(255,255,255,0.45)',
         textAlign: 'center', lineHeight: 1.3,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        maxWidth: 72,
+        maxWidth: Math.max(64, iconSize),
       }}>
         {link.title || platform.name}
       </span>
 
-      {/* Copied feedback */}
       {copied && (
         <span style={{
           position: 'absolute', bottom: -22, left: '50%',
@@ -359,7 +359,8 @@ function TabBar({ tabs, active, onSelect, cols }) {
   )
 }
 
-function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPos, selectedFont, showAvatar, avatarPreview, initial, displayName, username, appBio, links }) {
+function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPos, selectedFont, showAvatar, avatarPreview, initial, displayName, username, appBio, links, iconSize, panelSize }) {
+  const panelMaxW = { compact: 160, medium: 200, wide: 240, full: 280 }[panelSize] || 200
   return (
     <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, overflow: 'hidden', position: 'sticky', top: 70 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -371,29 +372,29 @@ function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPo
       </div>
       <div style={{ height: 480, display: 'flex', alignItems: 'center', justifyContent: 'center', background: bgColor || '#0a0202', position: 'relative', overflow: 'hidden' }}>
         {bgPreview && <img src={bgPreview} alt="bg" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: opacity / 100, filter: blur > 0 ? `blur(${Math.round(blur/8)}px)` : 'none' }} />}
-        <div style={{ position: 'relative', zIndex: 1, width: 200, background: 'rgba(255,255,255,0.03)', border: `1px solid ${accentColor}33`, borderRadius: 16, padding: 20, textAlign: avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center', display: 'flex', flexDirection: 'column', alignItems: avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center', gap: 10, opacity: opacity / 100, fontFamily: selectedFont }}>
+        <div style={{ position: 'relative', zIndex: 1, width: panelMaxW, background: 'rgba(255,255,255,0.03)', border: `1px solid ${accentColor}33`, borderRadius: 16, padding: 20, textAlign: avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center', display: 'flex', flexDirection: 'column', alignItems: avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center', gap: 10, opacity: opacity / 100, fontFamily: selectedFont }}>
           {showAvatar && (
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: `${accentColor}22`, border: `2px solid ${accentColor}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, color: accentColor, overflow: 'hidden' }}>
               {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
             </div>
           )}
           <div style={{ fontSize: 14, fontWeight: 700, color: accentColor }}>{displayName || username}</div>
-{appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
-{/* Preview: show mini icon tiles */}
-{links.length > 0 && (
-  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
-    {links.slice(0, 4).map((l, i) => {
-      const p = l.platform || { id: 'custom', color: '#e03030' }
-      return (
-        <div key={i} style={{ width: 28, height: 28, borderRadius: 7, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 8px ${p.color}55`, overflow: 'hidden' }}>
-          {l.iconDataUrl
-            ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : SIMPLE_ICONS[p.id]
-              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
-              : <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
-          }
-        </div>
-      )
+          {appBio && <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>{appBio.slice(0, 60)}{appBio.length > 60 ? '…' : ''}</div>}
+          {links.length > 0 && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
+              {links.slice(0, 4).map((l, i) => {
+                const p = l.platform || { id: 'custom', color: '#e03030' }
+                const previewSize = Math.round((iconSize / 44) * 28)
+                return (
+                  <div key={i} style={{ width: previewSize, height: previewSize, borderRadius: Math.round(previewSize * 0.27), background: l.iconDataUrl ? 'transparent' : p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: l.iconDataUrl ? 'none' : `0 2px 8px ${p.color}55`, overflow: 'hidden' }}>
+                    {l.iconDataUrl
+                      ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      : SIMPLE_ICONS[p.id]
+                        ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
+                        : <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
+                    }
+                  </div>
+                )
               })}
             </div>
           )}
@@ -425,9 +426,11 @@ function AddLinkModal({ platform, onClose, onAdd }) {
   const handleConfirm = () => {
     if (tab === 'link') {
       if (!value.trim()) return
-      const url = platform.prefix
-        ? `https://${platform.prefix}${value.trim()}`
-        : value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`
+      const url = platform.prefix === 'mailto:'
+        ? `mailto:${value.trim()}`
+        : platform.prefix
+          ? `https://${platform.prefix}${value.trim()}`
+          : value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`
       onAdd({ platform, title: platform.name, url, type: 'link', iconDataUrl })
     } else {
       if (!textValue.trim()) return
@@ -446,10 +449,14 @@ function AddLinkModal({ platform, onClose, onAdd }) {
         </button>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: platform.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 12px ${platform.color}55` }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: platform.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 12px ${platform.color}55`, overflow: 'hidden' }}>
             {iconDataUrl
-              ? <img src={iconDataUrl} alt="icon" style={{ width: 24, height: 24, objectFit: 'cover', borderRadius: 5 }} />
-              : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
+              ? <img src={iconDataUrl} alt="icon" style={{ width: 24, height: 24, objectFit: 'contain', borderRadius: 5 }} />
+              : platform.id === 'email'
+                ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                : SIMPLE_ICONS[platform.id]
+                  ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '65%', height: '65%', objectFit: 'contain' }} />
+                  : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
             }
           </div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, margin: 0 }}>
@@ -466,13 +473,13 @@ function AddLinkModal({ platform, onClose, onAdd }) {
           ))}
         </div>
 
-        {platform.id === 'custom' && (
+        {(platform.id === 'custom') && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Custom Icon (optional)</label>
             <input type="file" ref={fileRef} accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
             <div onClick={() => fileRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
               {iconDataUrl
-                ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 7 }} />
+                ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 7 }} />
                 : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               }
               <span>{iconDataUrl ? iconName : 'Upload icon image (PNG, SVG, etc.)'}</span>
@@ -483,10 +490,10 @@ function AddLinkModal({ platform, onClose, onAdd }) {
         {tab === 'link' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>
-              {platform.prefix ? 'Username' : 'URL'}
+              {platform.id === 'email' ? 'Email Address' : platform.prefix ? 'Username' : 'URL'}
             </label>
             <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
-              {platform.prefix && (
+              {platform.prefix && platform.prefix !== 'mailto:' && (
                 <span style={{ padding: '0 8px 0 12px', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>{platform.prefix}</span>
               )}
               <input
@@ -495,7 +502,7 @@ function AddLinkModal({ platform, onClose, onAdd }) {
                 onChange={e => setValue(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleConfirm()}
                 placeholder={platform.placeholder || 'username'}
-                style={{ flex: 1, background: 'transparent', border: 'none', padding: platform.prefix ? '11px 12px 11px 0' : '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
+                style={{ flex: 1, background: 'transparent', border: 'none', padding: (platform.prefix && platform.prefix !== 'mailto:') ? '11px 12px 11px 0' : '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
               />
             </div>
           </div>
@@ -545,7 +552,6 @@ export default function Dashboard() {
   const [profileViews, setProfileViews] = useState(0)
   const [viewsToday, setViewsToday] = useState(0)
 
-  // Appearance state
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
@@ -560,7 +566,6 @@ export default function Dashboard() {
   const [audioName, setAudioName] = useState(null)
   const [uploadingType, setUploadingType] = useState(null)
 
-  // Appearance tabs
   const [appearTab, setAppearTab] = useState('Presets')
   const [selectedPreset, setSelectedPreset] = useState('Crimson')
   const [bgType, setBgType] = useState('Solid')
@@ -569,7 +574,6 @@ export default function Dashboard() {
   const [accentColor, setAccentColor] = useState('#e03030')
   const [bgColor, setBgColor] = useState('#050202')
 
-  // Effects state
   const [effectsTab, setEffectsTab] = useState('Particles')
   const [particleEnabled, setParticleEnabled] = useState(false)
   const [particleStyle, setParticleStyle] = useState('Dots')
@@ -577,7 +581,6 @@ export default function Dashboard() {
   const [entranceAnim, setEntranceAnim] = useState('Fade In')
   const [clickEffect, setClickEffect] = useState('None')
 
-  // Music state
   const [musicEnabled, setMusicEnabled] = useState(false)
   const [musicType, setMusicType] = useState('direct')
   const [musicUrl, setMusicUrl] = useState('')
@@ -588,7 +591,6 @@ export default function Dashboard() {
   const [musicShowTitle, setMusicShowTitle] = useState(true)
   const [musicShowArtist, setMusicShowArtist] = useState(true)
 
-  // Profile editor state
   const [profileTab, setProfileTab] = useState('Identity')
   const [panelSize, setPanelSize] = useState('medium')
   const [showAvatar, setShowAvatar] = useState(true)
@@ -601,16 +603,13 @@ export default function Dashboard() {
   const [enterShowTitle, setEnterShowTitle] = useState(true)
   const [enterShowSubtitle, setEnterShowSubtitle] = useState(true)
 
-  // Links modal state
   const [activeLinkPlatform, setActiveLinkPlatform] = useState(null)
   const [iconSize, setIconSize] = useState(44)
 
-  // Buttons modals
   const [showAddBtnModal, setShowAddBtnModal] = useState(false)
   const [newBtnLabel, setNewBtnLabel] = useState('')
   const [newBtnUrl, setNewBtnUrl] = useState('')
 
-  // Sidebar
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [avatarDDOpen, setAvatarDDOpen] = useState(false)
@@ -832,7 +831,8 @@ export default function Dashboard() {
 
   const saveLinks = async () => {
     setSaving(true)
-    const { error } = await supabase.from('users').update({ links }).eq('username', username)
+    const settings = buildSettings()
+    const { error } = await supabase.from('users').update({ links, settings }).eq('username', username)
     setSaving(false)
     showToast(error ? 'Failed to save' : 'Links saved!')
   }
@@ -922,18 +922,13 @@ export default function Dashboard() {
         .effect-btn { padding:10px 6px; border-radius:10px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); color:rgba(255,255,255,0.45); font-size:12px; font-weight:500; cursor:pointer; transition:all .15s; text-align:center; font-family:inherit; }
         .effect-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
         .effect-btn.active { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); color:#e03030; }
-
-        /* ── Link icon tiles ── */
         .link-icon-tile:hover .link-icon-wrap { transform: scale(1.1); box-shadow: 0 8px 28px rgba(0,0,0,0.45) !important; }
         .link-icon-tile:hover .link-del-btn { display: flex !important; }
-
-        /* ── Platform picker buttons ── */
         .plat-btn { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; padding:12px 6px 10px; border-radius:12px; border:1px solid rgba(255,255,255,0.06); background:rgba(255,255,255,0.02); cursor:pointer; transition:all .15s; font-size:10px; color:rgba(255,255,255,0.5); font-family:inherit; }
         .plat-btn:hover { border-color:rgba(224,48,48,0.3); background:rgba(224,48,48,0.06); color:#fff; }
         .platforms-grid { grid-template-columns: repeat(8, 1fr); }
         @media(max-width:700px){ .platforms-grid { grid-template-columns: repeat(6, 1fr) !important; } }
         @media(max-width:480px){ .platforms-grid { grid-template-columns: repeat(4, 1fr) !important; } }
-
         .link-item-row { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:11px; padding:10px 14px; transition:border-color .15s; }
         .link-item-row:hover { border-color:rgba(255,255,255,0.09); }
         .preset-btn { display:flex; flex-direction:column; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:10px; cursor:pointer; transition:all .15s; font-family:inherit; }
@@ -1179,7 +1174,7 @@ export default function Dashboard() {
 
                   <SaveBar onSave={saveProfile} onDiscard={() => { setAppBio(bio); setDisplayName(dbUser?.display_name || ''); setLocation(dbUser?.location || '') }} saving={saving} />
                 </div>
-                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} />
+                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} iconSize={iconSize} panelSize={panelSize} />
               </div>
             </>
           )}
@@ -1300,7 +1295,7 @@ export default function Dashboard() {
 
                   <SaveBar onSave={saveAppearance} onDiscard={() => showToast('Changes discarded')} saving={saving} />
                 </div>
-                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} />
+                <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} iconSize={iconSize} panelSize={panelSize} />
               </div>
             </>
           )}
@@ -1308,24 +1303,13 @@ export default function Dashboard() {
           {/* ═══ LINKS ═══ */}
           {activePage === 'links' && (
             <>
-              <PageHeader
-                breadcrumb="Dashboard · Links"
-                title='Social <span style="color:#e03030">Links</span>'
-                subtitle="Add your social media profiles and custom links"
-              />
+              <PageHeader breadcrumb="Dashboard · Links" title='Social <span style="color:#e03030">Links</span>' subtitle="Add your social media profiles and custom links" />
 
-              {/* Your Links — icon tile grid */}
               <Card>
                 <CardHeader
                   title="Your Links"
                   sub="Hover to remove · visitors click icons to copy"
-                  icon={
-                    <svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24">
-                      <path d="M9 17H7A5 5 0 0 1 7 7h2"/>
-                      <path d="M15 7h2a5 5 0 1 1 0 10h-2"/>
-                      <line x1="8" x2="16" y1="12" y2="12"/>
-                    </svg>
-                  }
+                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>}
                 />
                 <div style={{ padding: '20px 24px 28px' }}>
                   {links.length === 0 ? (
@@ -1338,13 +1322,7 @@ export default function Dashboard() {
                         const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
                         const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
                         return (
-                          <LinkIconTile
-                            key={l.id || i}
-                            link={l}
-                            platform={p}
-                            abbr={abbr}
-                            onDelete={() => deleteLink(i)}
-                          />
+                          <LinkIconTile key={l.id || i} link={l} platform={p} abbr={abbr} onDelete={() => deleteLink(i)} iconSize={iconSize} />
                         )
                       })}
                     </div>
@@ -1352,33 +1330,24 @@ export default function Dashboard() {
                 </div>
               </Card>
 
-              {/* Platform picker */}
               <Card>
                 <CardHeader
                   title="Add New Link"
                   sub="Choose a platform or create a custom link"
-                  icon={
-                    <svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24">
-                      <path d="M12 5v14"/><path d="M5 12h14"/>
-                    </svg>
-                  }
+                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>}
                 />
-                <div
-                  className="platforms-grid"
-                  style={{ display: 'grid', gap: 8, padding: '16px 22px 22px' }}
-                >
+                <div className="platforms-grid" style={{ display: 'grid', gap: 8, padding: '16px 22px 22px' }}>
                   {PLATFORMS.map(p => {
                     const abbr = PLATFORM_ABBR[p.id] || p.name[0]
                     return (
                       <button key={p.id} className="plat-btn" onClick={() => setActiveLinkPlatform(p)}>
-                        <div style={{
-                          width: 36, height: 36, borderRadius: 10,
-                          background: p.color,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: `0 3px 10px ${p.color}55`,
-                          flexShrink: 0,
-                        }}>
-                          <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(p.id) }}>{abbr}</span>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${p.color}55`, flexShrink: 0, overflow: 'hidden' }}>
+                          {p.id === 'email'
+                            ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                            : SIMPLE_ICONS[p.id]
+                              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
+                              : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(p.id) }}>{abbr}</span>
+                          }
                         </div>
                         <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: 'center' }}>{p.name}</span>
                       </button>
@@ -1388,24 +1357,33 @@ export default function Dashboard() {
               </Card>
 
               <Card>
-  <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
-  <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 6 }}>
-    <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size — {iconSize}px</label>
-    <input type="range" min={32} max={72} value={iconSize} onChange={e => setIconSize(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
-  </div>
-</Card>
+                <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
+                <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size</label>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(224,48,48,0.3)', borderRadius: 8, padding: '2px 10px' }}>{iconSize}px</span>
+                  </div>
+                  <input type="range" min={32} max={72} value={iconSize} onChange={e => setIconSize(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030', height: 6, cursor: 'pointer' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
+                    <span>Small (32px)</span><span>Large (72px)</span>
+                  </div>
+                  {/* Live preview of the size */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, marginTop: 4 }}>
+                    <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Preview:</span>
+                    {['discord','github','instagram','twitter'].map(id => (
+                      <div key={id} style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: PLATFORMS.find(p=>p.id===id)?.color || '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, transition: 'all .2s' }}>
+                        <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[id]}/ffffff`} alt={id} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </Card>
 
-<div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <BtnAccent onClick={saveLinks} disabled={saving}>
-                  {saving ? 'Saving…' : 'Save Links'}
-                </BtnAccent>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <BtnAccent onClick={saveLinks} disabled={saving}>{saving ? 'Saving…' : 'Save Links'}</BtnAccent>
               </div>
 
-              <AddLinkModal
-                platform={activeLinkPlatform}
-                onClose={() => setActiveLinkPlatform(null)}
-                onAdd={handleAddLink}
-              />
+              <AddLinkModal platform={activeLinkPlatform} onClose={() => setActiveLinkPlatform(null)} onAdd={handleAddLink} />
             </>
           )}
 
@@ -1445,12 +1423,9 @@ export default function Dashboard() {
               <PageHeader breadcrumb="Dashboard · Effects" title='Visual <span style="color:#e03030">Effects</span>' subtitle="Particles, cursors, and animations" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <TabBar tabs={['Particles','Cursor','Animations','Click Effects']} active={effectsTab} onSelect={setEffectsTab} cols={4} />
-
                 {effectsTab === 'Particles' && (
                   <Card>
-                    <CardHeader title="Particle Effects" sub="Background particles on your profile"
-                      action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />}
-                    />
+                    <CardHeader title="Particle Effects" sub="Background particles on your profile" action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />} />
                     {particleEnabled && (
                       <div style={{ padding: 24 }}>
                         <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Style</label>
@@ -1461,7 +1436,6 @@ export default function Dashboard() {
                     )}
                   </Card>
                 )}
-
                 {effectsTab === 'Cursor' && (
                   <Card>
                     <CardHeader title="Custom Cursor" sub="Replace the default cursor on your profile" />
@@ -1480,7 +1454,6 @@ export default function Dashboard() {
                     </div>
                   </Card>
                 )}
-
                 {effectsTab === 'Animations' && (
                   <Card>
                     <CardHeader title="Entrance Animation" sub="How your profile animates in for visitors" />
@@ -1491,7 +1464,6 @@ export default function Dashboard() {
                     </div>
                   </Card>
                 )}
-
                 {effectsTab === 'Click Effects' && (
                   <Card>
                     <CardHeader title="Click Effects" sub="What happens when visitors click on your profile" />
@@ -1502,7 +1474,6 @@ export default function Dashboard() {
                     </div>
                   </Card>
                 )}
-
                 <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
@@ -1557,7 +1528,6 @@ export default function Dashboard() {
                     </div>
                   )}
                 </Card>
-
                 {musicEnabled && (
                   <Card>
                     <CardHeader title="Display Options" sub="Control how the music player appears" />
@@ -1568,13 +1538,11 @@ export default function Dashboard() {
                     </div>
                   </Card>
                 )}
-
                 <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
           )}
 
-          {/* ═══ WIDGETS / TEMPLATES ═══ */}
           {(activePage === 'widgets' || activePage === 'templates') && (
             <>
               <PageHeader
@@ -1592,12 +1560,11 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* ═══ PREMIUM ═══ */}
           {activePage === 'premium' && (
             <>
               <PageHeader breadcrumb="Dashboard · Premium" title='Go <span style="color:#e03030">Premium</span>' subtitle="Unlock exclusive features" />
               <div style={{ background: 'linear-gradient(135deg,rgba(224,48,48,0.08),rgba(100,0,0,0.08))', border: '1px solid rgba(224,48,48,0.22)', borderRadius: 14, padding: 28, textAlign: 'center' }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}></div>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>⭐</div>
                 <div style={{ fontFamily: 'Syne, sans-serif', fontSize: 20, fontWeight: 800, marginBottom: 8 }}>fate.rip <span style={{ color: '#e03030' }}>Premium</span></div>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', maxWidth: 340, margin: '0 auto 20px' }}>Unlock custom domains, advanced analytics, exclusive effects, and priority support.</p>
                 <BtnAccent style={{ padding: '12px 28px', fontSize: 14 }} onClick={() => showToast('Redirecting to checkout…')}>Upgrade Now</BtnAccent>
@@ -1613,7 +1580,6 @@ export default function Dashboard() {
             </>
           )}
 
-          {/* ═══ SETTINGS ═══ */}
           {activePage === 'settings' && (
             <>
               <PageHeader breadcrumb="Dashboard · Settings" title='Account <span style="color:#e03030">Settings</span>' subtitle="Manage your account" />
@@ -1646,9 +1612,7 @@ export default function Dashboard() {
                           </div>
                         )
                       })()}
-
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
-
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Display Name</div>
                         <div style={{ display: 'flex', gap: 10 }}>
@@ -1659,9 +1623,7 @@ export default function Dashboard() {
                           }}>Save</BtnAccent>
                         </div>
                       </div>
-
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
-
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Password</div>
                         <div style={{ display: 'flex', gap: 10 }}>
@@ -1681,7 +1643,6 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </Card>
-
                   <div style={{ background: 'rgba(224,48,48,0.04)', border: '1px solid rgba(224,48,48,0.15)', borderRadius: 14, padding: 22 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#e03030', marginBottom: 4 }}>Session</div>
                     <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>Sign out of your current session on this device.</div>
@@ -1691,11 +1652,9 @@ export default function Dashboard() {
               </div>
             </>
           )}
-
         </div>
       </div>
 
-      {/* ── ADD BUTTON MODAL ── */}
       {showAddBtnModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowAddBtnModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
@@ -1720,7 +1679,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* ── TOAST ── */}
       {toastVisible && (
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#1a0808', border: '1px solid rgba(224,48,48,0.22)', color: '#fff', fontSize: 13, padding: '10px 18px', borderRadius: 100, zIndex: 2000, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', animation: 'toastIn .3s ease' }}>
           <svg width="14" height="14" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
