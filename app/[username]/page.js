@@ -244,8 +244,6 @@ export default function ProfilePage() {
     return (
       <div onClick={handleEnter} style={{ background:bgColor, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', cursor:'pointer', position:'relative', overflow:'hidden', fontFamily:`'${fontFamily}', sans-serif` }}>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');`}</style>
-        {/* Audio element always rendered here so the ref is ready the instant the user clicks */}
-        {audioSrc && <audio ref={audioRef} src={audioSrc} loop preload="auto" style={{ display:'none' }} />}
         {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
           ? <video src={bgUrl} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:opacity/100, filter:blur>0?`blur(${blur}px)`:'none' }} autoPlay loop muted playsInline />
           : <img src={bgUrl} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:opacity/100, filter:blur>0?`blur(${blur}px)`:'none' }} />
@@ -267,8 +265,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <ProfileContent
-      profile={profile} fontFamily={fontFamily} fontQuery={fontQuery}
+    <>
+      {/* Audio lives here — always mounted, never unmounts between entrance/profile screens */}
+      {audioSrc && <audio ref={audioRef} src={audioSrc} loop preload="auto" style={{ display:'none' }} />}
+      <ProfileContent
+        profile={profile} fontFamily={fontFamily} fontQuery={fontQuery}
       accentColor={accentColor} bgColorSetting={bgColor} glowIntensity={glowIntensity}
       particleEnabled={particleEnabled} particleStyle={particleStyle} clickEffect={clickEffect}
       music={music} btns={btns} typingBio={typingBio}
@@ -280,6 +281,7 @@ export default function ProfilePage() {
       setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
       iconSize={iconSize} viewCount={viewCount}
     />
+    </>
   )
 }
 
