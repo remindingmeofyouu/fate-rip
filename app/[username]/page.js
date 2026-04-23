@@ -577,6 +577,5 @@ function ProfileContent({
         </div>
       </div>
 
-      <style>{`.uid-hover-wrap:hover .uid-tooltip { opacity: 1 !important; } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
-  )
+<style dangerouslySetInnerHTML={{ __html: `.uid-hover-wrap:hover .uid-tooltip { opacity: 1 !important; } @keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }` }} />  )
 }
