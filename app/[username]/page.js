@@ -500,16 +500,33 @@ function ProfileContent({
           )}
 
           {/* Links */}
-          {links.length > 0 && (
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {links.map((link, i) => (
-                <a key={i} href={link.url} className="link-btn" target="_blank" rel="noopener noreferrer"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.07)`, color: 'rgba(255,255,255,0.7)', boxShadow: glowState.socials ? `0 0 ${8 + glowIntensity * 0.1}px ${accentColor}${Math.round(glowAlpha * 0.3 * 255).toString(16).padStart(2,'0')}` : 'none' }}>
-                  {link.title}<span className="link-arrow">↗</span>
-                </a>
-              ))}
-            </div>
-          )}
+{links.length > 0 && (
+  <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 16, justifyContent: textAlign === 'center' ? 'center' : textAlign === 'right' ? 'flex-end' : 'flex-start' }}>
+    {links.map((link, i) => {
+      const p = link.platform || { id: 'custom', name: link.title, color: '#e03030' }
+      const ABBR = { discord:'Di', twitter:'X', github:'Gh', gitlab:'Gl', instagram:'Ig', facebook:'Fb', spotify:'Sp', soundcloud:'Sc', applemusic:'♪', youtube:'Yt', twitch:'Tv', tiktok:'Tt', snapchat:'Sn', linkedin:'Li', reddit:'Re', telegram:'Tg', bluesky:'Bs', vk:'VK', pinterest:'Pi', dribbble:'Dr', deviantart:'Da', steam:'St', itchio:'It', kickstarter:'Ks', patreon:'Pa', kofi:'Ko', buymeacoffee:'Bm', paypal:'Pp', bitcoin:'₿', ethereum:'Ξ', solana:'◎', custom:'✦' }
+      const LIGHT = new Set(['snapchat','buymeacoffee','bitcoin'])
+      const abbr = ABBR[p.id] || p.name?.[0] || '?'
+      const textColor = LIGHT.has(p.id) ? '#1a1a1a' : '#fff'
+      return (
+        <a key={i} href={link.url || '#'} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none', width: 64 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 14, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: glowState.socials ? `0 4px 16px ${p.color}88` : `0 4px 16px ${p.color}55`, transition: 'transform .15s', overflow: 'hidden', flexShrink: 0 }}
+            onMouseEnter={e => e.currentTarget.style.transform='scale(1.1)'}
+            onMouseLeave={e => e.currentTarget.style.transform='scale(1)'}>
+            {link.iconDataUrl
+              ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <span style={{ fontSize: 14, fontWeight: 800, color: textColor }}>{abbr}</span>
+            }
+          </div>
+          <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 64 }}>
+            {link.title || p.name}
+          </span>
+        </a>
+      )
+    })}
+  </div>
+)}
 
           {/* Custom Buttons */}
           {btns.length > 0 && (
