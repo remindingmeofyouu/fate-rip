@@ -292,6 +292,7 @@ export default function ProfilePage() {
       displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
       entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
       setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
+      iconSize={iconSize}
     />
   )
 }
@@ -303,7 +304,7 @@ function ProfileContent({
   initial, links, opacity, blur, usernameFx, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
-  viewCount,
+  viewCount, iconSize,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
   const glowAlpha    = glowIntensity / 100
