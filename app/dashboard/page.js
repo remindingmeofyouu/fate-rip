@@ -980,6 +980,18 @@ buttons,
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 500, color: '#e03030' }}>{initial}</div>
               <span style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>{username || 'User'}</span>
             </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 500, marginBottom: 2 }}>Have a question or need support?</div>
+  <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', borderRadius: 10, background: 'rgba(88,101,242,0.15)', border: '1px solid rgba(88,101,242,0.25)', color: '#8b9cf4', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>
+    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    Help Center
+  </a>
+  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontWeight: 500, marginTop: 4, marginBottom: 2 }}>Check out your page</div>
+  <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '9px 14px', borderRadius: 10, background: 'rgba(88,101,242,0.15)', border: '1px solid rgba(88,101,242,0.25)', color: '#8b9cf4', fontSize: 13, fontWeight: 500, textDecoration: 'none' }}>
+    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    My Page
+  </a>
+</div>
             <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}>Log out</button>
           </div>
         </div>
