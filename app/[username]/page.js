@@ -182,39 +182,40 @@ export default function ProfilePage() {
   )
 
   const settings       = profile.settings || {}
-  const fontFamily     = settings.font || 'Nunito'
-  const accentColor    = settings.accentColor || '#CC0000'
-  const bgColor        = settings.bgColor || '#080808'
-  const glowIntensity  = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
-  const particleEnabled = settings.particleEnabled || false
-  const particleStyle  = settings.particleStyle || 'Dots'
-  const clickEffect    = settings.clickEffect || 'None'
-  const entranceAnim   = settings.entranceAnim || 'Fade In'
-  const music          = settings.music || {}
-  const layout         = settings.layout || {}
-  const entrance       = settings.entrance || {}
-  const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
-  const typingBio      = layout.typingBio || false
-  const showAvatarPref = layout.showAvatar !== false
-  const avatarPos      = layout.avatarPos || 'center'
-  const panelSize      = layout.panelSize || 'medium'
-  const entranceEnabled = entrance.enabled !== false
-  const panelMaxW      = { compact:380, medium:480, wide:580, full:680 }[panelSize] || 480
-  const iconSize       = settings.iconSize || 44
-  const initial        = profile.username[0].toUpperCase()
-  const links          = Array.isArray(profile.links) ? profile.links : []
-  const opacity        = profile.opacity ?? 100
-  const blur           = profile.blur ?? 0
-  const usernameFx     = profile.username_fx || ''
-  const bgFx           = profile.bg_fx || 'none'
-  const location       = profile.location || ''
-  const glowState      = profile.glow_settings || { username:true, socials:true, badges:false }
-  const avatarUrl      = profile.avatar_url || null
-  const bgUrl          = profile.bg_url || null
-  const displayName    = profile.display_name || ''
-  const audioSrc       = music.url || profile.audio_url || null
-  const fontQuery      = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
-  const glowAlpha      = glowIntensity / 100
+const fontFamily     = settings.font || 'Nunito'
+const accentColor    = settings.accentColor || '#CC0000'
+const bgColor        = settings.bgColor || '#080808'
+const glowIntensity  = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
+const particleEnabled = settings.particleEnabled || false
+const particleStyle  = settings.particleStyle || 'Dots'
+const clickEffect    = settings.clickEffect || 'None'
+const entranceAnim   = settings.entranceAnim || 'Fade In'
+const music          = settings.music || {}
+const layout         = settings.layout || {}
+const entrance       = settings.entrance || {}
+const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
+const typingBio      = layout.typingBio || false
+const showAvatarPref = layout.showAvatar !== false
+const avatarPos      = layout.avatarPos || 'center'
+const panelSize      = layout.panelSize || 'medium'
+const entranceEnabled = entrance.enabled !== false
+const panelMaxW      = { compact:380, medium:480, wide:580, full:680 }[panelSize] || 480
+const iconSize       = settings.iconSize || 44
+const showLinkLabels = settings.showLinkLabels !== false
+const initial        = profile.username[0].toUpperCase()
+const links          = Array.isArray(profile.links) ? profile.links : []
+const opacity        = profile.opacity ?? 100
+const blur           = profile.blur ?? 0
+const usernameFx     = profile.username_fx || ''
+const bgFx           = profile.bg_fx || 'none'
+const location       = profile.location || ''
+const glowState      = profile.glow_settings || { username:true, socials:true, badges:false }
+const avatarUrl      = profile.avatar_url || null
+const bgUrl          = profile.bg_url || null
+const displayName    = profile.display_name || ''
+const audioSrc       = music.url || profile.audio_url || null
+const fontQuery      = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
+const glowAlpha      = glowIntensity / 100
 
   const nameStyle = (() => {
     if (usernameFx === 'rainbow') return { background:'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }
@@ -605,9 +606,11 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
                             : <span style={{ fontSize:14, fontWeight:800, color:tc }}>{abbr}</span>
                       }
                     </div>
-                    <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
-                      {link.title || p.name}
-                    </span>
+                   {showLinkLabels && (
+  <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
+    {link.title || p.name}
+  </span>
+)}
                   </a>
                 )
               })}

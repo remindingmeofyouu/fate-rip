@@ -69,7 +69,7 @@ function getTextColor(platformId) {
 }
 
 // ─── Link Icon Tile ────────────────────────────────────────────────────────────
-function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44 }) {
+function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44, showLabel = true }) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = () => {
@@ -122,14 +122,16 @@ function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44 }) {
         }
       </div>
 
-      <span style={{
-        fontSize: 10, color: 'rgba(255,255,255,0.45)',
-        textAlign: 'center', lineHeight: 1.3,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        maxWidth: Math.max(64, iconSize),
-      }}>
-        {link.title || platform.name}
-      </span>
+ {showLabel && (
+        <span style={{
+          fontSize: 10, color: 'rgba(255,255,255,0.45)',
+          textAlign: 'center', lineHeight: 1.3,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+          maxWidth: Math.max(64, iconSize),
+        }}>
+          {link.title || platform.name}
+        </span>
+      )}
 
       {copied && (
         <span style={{
@@ -606,6 +608,7 @@ export default function Dashboard() {
 
   const [activeLinkPlatform, setActiveLinkPlatform] = useState(null)
   const [iconSize, setIconSize] = useState(44)
+  const [showLinkLabels, setShowLinkLabels] = useState(true)  // ← ADD THIS
 
   const [showAddBtnModal, setShowAddBtnModal] = useState(false)
   const [newBtnLabel, setNewBtnLabel] = useState('')
@@ -662,8 +665,9 @@ export default function Dashboard() {
       showTitle: enterShowTitle,
       showSubtitle: enterShowSubtitle,
     },
-    iconSize,
-    buttons,
+iconSize,
+showLinkLabels,
+buttons,
   })
 
   const applySettings = (s) => {
@@ -708,6 +712,7 @@ export default function Dashboard() {
       if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle)
     }
     if (s.iconSize) setIconSize(s.iconSize)
+    if (s.showLinkLabels !== undefined) setShowLinkLabels(s.showLinkLabels)  // ← ADD THIS
     if (Array.isArray(s.buttons)) setButtons(s.buttons)
   }
 
@@ -1325,7 +1330,7 @@ export default function Dashboard() {
                         const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
                         const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
                         return (
-                          <LinkIconTile key={l.id || i} link={l} platform={p} abbr={abbr} onDelete={() => deleteLink(i)} iconSize={iconSize} />
+                          <LinkIconTile key={l.id || i} link={l} platform={p} abbr={abbr} onDelete={() => deleteLink(i)} iconSize={iconSize} showLabel={showLinkLabels} />
                         )
                       })}
                     </div>
@@ -1360,8 +1365,14 @@ export default function Dashboard() {
               </Card>
 
               <Card>
-                <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
+              <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <ToggleRow
+                    label="Show Link Labels"
+                    sub="Display platform names below each icon"
+                    checked={showLinkLabels}
+                    onChange={e => setShowLinkLabels(e.target.checked)}
+                  />
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size</label>
                     <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(224,48,48,0.3)', borderRadius: 8, padding: '2px 10px' }}>{iconSize}px</span>
