@@ -288,7 +288,7 @@ const glowAlpha      = glowIntensity / 100
       displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
       entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
       setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
-      iconSize={iconSize} viewCount={viewCount}
+      iconSize={iconSize} viewCount={viewCount} showLinkLabels={showLinkLabels}
     />
     </>
   )
@@ -302,7 +302,7 @@ function ProfileContent({
   initial, links, opacity, blur, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
-  viewCount, iconSize,
+  viewCount, iconSize, showLinkLabels,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
   const hexToRgb = (hex) => {
