@@ -489,7 +489,8 @@ useEffect(() => {
         .bar:nth-child(4){animation:barPulse .65s ease-in-out 0.30s infinite}
         @media(max-width:480px){ .profile-outer{max-width:100%!important;padding:0 12px;} }
         .badge-tooltip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:rgba(10,10,10,0.92); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; }
-        .badge-pill:hover .badge-tooltip { opacity:1; }
+       .badge-pill:hover .badge-tooltip { opacity:1; }
+.uid-hover-wrap:hover .uid-tooltip { opacity:1!important; }
       `}</style>
 
       {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
@@ -711,7 +712,5 @@ useEffect(() => {
         )}
 </div>
 </div>
-
-<style>{String('.uid-hover-wrap:hover .uid-tooltip' + '{' + 'opacity:1!important' + '}')}</style>    </div>
   )
 }
