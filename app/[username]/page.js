@@ -234,6 +234,7 @@ export default function ProfilePage() {
   const entrance       = settings.entrance || {}
   const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
   const typingBio      = layout.typingBio || false
+  const followCursor   = layout.followCursor || false
   const showAvatarPref = layout.showAvatar !== false
   const avatarPos      = layout.avatarPos || 'center'
   const panelSize      = layout.panelSize || 'medium'
@@ -328,6 +329,7 @@ export default function ProfilePage() {
         setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
         iconSize={iconSize} viewCount={viewCount} showLinkLabels={showLinkLabels}
         badges={badges} badgePosition={badgePosition}
+        followCursor={followCursor}
       />
     </>
   )
@@ -341,7 +343,7 @@ function ProfileContent({
   initial, links, opacity, blur, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
-  viewCount, iconSize, showLinkLabels, badges, badgePosition,
+  viewCount, iconSize, showLinkLabels, badges, badgePosition, followCursor,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
   const hexToRgb = (hex) => {
@@ -356,6 +358,17 @@ function ProfileContent({
   const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
+const hasMoved = useRef(false)
+useEffect(() => {
+  if (!followCursor) return
+  const onMove = (e) => {
+    hasMoved.current = true
+    setCursorPos({ x: e.clientX, y: e.clientY })
+  }
+  window.addEventListener('mousemove', onMove)
+  return () => window.removeEventListener('mousemove', onMove)
+}, [followCursor])
   const [currentTime, setCurrentTime] = useState(0)
   const [duration,    setDuration]    = useState(0)
 
@@ -530,16 +543,17 @@ function ProfileContent({
         </div>
       )}
 
-      <div className="profile-outer" style={{ width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle }}>
-        {showAvatarPref && (
-          <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
-            <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
-              <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
-                {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="profile-outer" style={{
+  width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
+  ...(followCursor && hasMoved.current ? {
+    position: 'fixed',
+    left: cursorPos.x,
+    top: cursorPos.y,
+    transform: 'translate(-50%, -50%)',
+    transition: 'left 0.12s ease-out, top 0.12s ease-out',
+    zIndex: 10,
+  } : {})
+}}>
 
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
           <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">

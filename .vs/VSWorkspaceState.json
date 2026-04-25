@@ -1,7 +1,10 @@
 {
   "ExpandedNodes": [
     "",
-    "\\app"
+    "\\app",
+    "\\app\\dashboard",
+    "\\app\\[username]"
   ],
+  "SelectedNode": "\\app\\[username]\\page.js",
   "PreviewInSolutionExplorer": false
 }
