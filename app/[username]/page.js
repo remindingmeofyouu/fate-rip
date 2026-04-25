@@ -712,7 +712,6 @@ useEffect(() => {
 </div>
 </div>
 
-      <style>{'.uid-hover-wrap:hover .uid-tooltip{opacity:1!important}'}</style>
-    </div>
+<style>{String('.uid-hover-wrap:hover .uid-tooltip' + '{' + 'opacity:1!important' + '}')}</style>    </div>
   )
 }
