@@ -58,13 +58,13 @@ const SIMPLE_ICONS = {
 
 // ─── Badge definitions (must match dashboard) ─────────────────────────────────
 const BADGE_DEFS = [
-  { id:'owner',     name:'Owner',         color:'#e03030', bg:'rgba(224,48,48,0.15)',    border:'rgba(224,48,48,0.35)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { id:'owner',     name:'Owner',         color:'#e03030', bg:'rgba(224,48,48,0.15)',    border:'rgba(224,48,48,0.35)',    icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2 20h20v-2H2v2zm0-4h20L19 7l-5 4-4-6-4 6-5-4 2 9z"/></svg> },
   { id:'staff',     name:'Staff',         color:'#378ADD', bg:'rgba(55,138,221,0.12)',   border:'rgba(55,138,221,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
   { id:'verified',  name:'Verified',      color:'#1D9E75', bg:'rgba(29,158,117,0.12)',  border:'rgba(29,158,117,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
   { id:'og',        name:'OG',            color:'#EF9F27', bg:'rgba(239,159,39,0.12)',  border:'rgba(239,159,39,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg> },
-  { id:'booster',   name:'Server Booster',color:'#f97316', bg:'rgba(249,115,22,0.12)',  border:'rgba(249,115,22,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { id:'booster',   name:'Server Booster',color:'#f97316', bg:'rgba(249,115,22,0.12)',  border:'rgba(249,115,22,0.3)',    icon:<img src="/d_boost.png" width="18" height="18" style={{objectFit:'contain'}} /> },
   { id:'donator',   name:'Donator',       color:'#5DCAA5', bg:'rgba(93,202,165,0.12)',  border:'rgba(93,202,165,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
-  { id:'premium',   name:'Premium',       color:'#8b5cf6', bg:'rgba(139,92,246,0.12)',  border:'rgba(139,92,246,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { id:'premium',   name:'Premium',       color:'#8b5cf6', bg:'rgba(139,92,246,0.12)',  border:'rgba(139,92,246,0.3)',    icon:<img src="/Premium_Diamond.png" width="18" height="18" style={{objectFit:'contain'}} /> },
   { id:'bug_hunter',name:'Bug Hunter',    color:'#84cc16', bg:'rgba(132,204,22,0.12)',  border:'rgba(132,204,22,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="8" y="6" width="8" height="14" rx="2"/><path d="M3 10h2M19 10h2M3 16h2M19 16h2"/><path d="M8 4a2 2 0 0 1 4 0M12 4a2 2 0 0 1 4 0"/></svg> },
   { id:'gifter',    name:'Gifter',        color:'#fb7185', bg:'rgba(251,113,133,0.12)', border:'rgba(251,113,133,0.3)',   icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> },
 ]
@@ -79,8 +79,11 @@ function BadgeStrip({ badges, align }) {
         const def = BADGE_DEFS.find(d => d.id === b.badge)
         if (!def) return null
         return (
-          <div key={b.badge} title={def.name} style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:99, background:def.bg, border:`1px solid ${def.border}`, color:def.color, fontSize:11, fontWeight:700, whiteSpace:'nowrap' }}>
-            {def.icon}{def.name}
+          <div key={b.badge} title={def.name} style={{ position:'relative', display:'inline-flex' }} className="badge-pill">
+            <div style={{ display:'flex', alignItems:'center', padding:'4px 8px', borderRadius:99, background:def.bg, border:`1px solid ${def.border}`, color:def.color, cursor:'default' }}>
+              {def.icon}
+            </div>
+            <div className="badge-tooltip">{def.name}</div>
           </div>
         )
       })}
@@ -465,6 +468,8 @@ function ProfileContent({
         .bar:nth-child(3){animation:barPulse .65s ease-in-out 0.10s infinite}
         .bar:nth-child(4){animation:barPulse .65s ease-in-out 0.30s infinite}
         @media(max-width:480px){ .profile-outer{max-width:100%!important;padding:0 12px;} }
+        .badge-tooltip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:rgba(10,10,10,0.92); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; }
+        .badge-pill:hover .badge-tooltip { opacity:1; }
       `}</style>
 
       {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
