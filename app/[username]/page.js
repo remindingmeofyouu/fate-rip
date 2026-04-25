@@ -438,7 +438,7 @@ useEffect(() => {
   const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
 
   return (
-    <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden' }}>
+    <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden', perspective:'800px' }}>
       <link rel="icon" href="/scythe.png" />
 
       <style>{`
@@ -458,7 +458,7 @@ useEffect(() => {
         @keyframes firefly   { 0%,100%{transform:translate(0,0);opacity:0.2} 25%{transform:translate(20px,-30px);opacity:1} 50%{transform:translate(-10px,-60px);opacity:0.5} 75%{transform:translate(30px,-40px);opacity:0.8} }
         @keyframes clickFly  { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
         @keyframes barPulse  { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
-        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
+        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; transform-style:preserve-3d; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
         .profile-panel { width:100%; background:rgba(${bgRgb},0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
