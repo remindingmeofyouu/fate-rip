@@ -550,10 +550,11 @@ useEffect(() => {
         </div>
       )}
 
-     <div className="profile-outer" style={{
+ <div className="profile-outer" style={{
   width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
   transform: followCursor ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
   transition: 'transform 0.15s ease-out',
+  transformOrigin: 'center center',
 }}>
 
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
