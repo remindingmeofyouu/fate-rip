@@ -56,6 +56,38 @@ const SIMPLE_ICONS = {
   bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana', roblox:'roblox',
 }
 
+// ─── Badge definitions (must match dashboard) ─────────────────────────────────
+const BADGE_DEFS = [
+  { id:'owner',     name:'Owner',         color:'#e03030', bg:'rgba(224,48,48,0.15)',    border:'rgba(224,48,48,0.35)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { id:'staff',     name:'Staff',         color:'#378ADD', bg:'rgba(55,138,221,0.12)',   border:'rgba(55,138,221,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> },
+  { id:'verified',  name:'Verified',      color:'#1D9E75', bg:'rgba(29,158,117,0.12)',  border:'rgba(29,158,117,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+  { id:'og',        name:'OG',            color:'#EF9F27', bg:'rgba(239,159,39,0.12)',  border:'rgba(239,159,39,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg> },
+  { id:'booster',   name:'Server Booster',color:'#f97316', bg:'rgba(249,115,22,0.12)',  border:'rgba(249,115,22,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { id:'donator',   name:'Donator',       color:'#5DCAA5', bg:'rgba(93,202,165,0.12)',  border:'rgba(93,202,165,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+  { id:'premium',   name:'Premium',       color:'#8b5cf6', bg:'rgba(139,92,246,0.12)',  border:'rgba(139,92,246,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { id:'bug_hunter',name:'Bug Hunter',    color:'#84cc16', bg:'rgba(132,204,22,0.12)',  border:'rgba(132,204,22,0.3)',    icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="8" y="6" width="8" height="14" rx="2"/><path d="M3 10h2M19 10h2M3 16h2M19 16h2"/><path d="M8 4a2 2 0 0 1 4 0M12 4a2 2 0 0 1 4 0"/></svg> },
+  { id:'gifter',    name:'Gifter',        color:'#fb7185', bg:'rgba(251,113,133,0.12)', border:'rgba(251,113,133,0.3)',   icon:<svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> },
+]
+
+// ─── Badge Strip Component ─────────────────────────────────────────────────────
+function BadgeStrip({ badges, align }) {
+  if (!badges || badges.length === 0) return null
+  const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
+  return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:justify, marginBottom:10 }}>
+      {badges.map(b => {
+        const def = BADGE_DEFS.find(d => d.id === b.badge)
+        if (!def) return null
+        return (
+          <div key={b.badge} title={def.name} style={{ display:'flex', alignItems:'center', gap:5, padding:'4px 10px', borderRadius:99, background:def.bg, border:`1px solid ${def.border}`, color:def.color, fontSize:11, fontWeight:700, whiteSpace:'nowrap' }}>
+            {def.icon}{def.name}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export default function ProfilePage() {
   const params = useParams()
   const username = params?.username
@@ -65,6 +97,7 @@ export default function ProfilePage() {
   const [entered, setEntered]     = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [viewCount, setViewCount] = useState(null)
+  const [badges, setBadges]       = useState([])
   const audioRef = useRef(null)
 
   const spawnClickEffect = useCallback((e, type) => {
@@ -88,8 +121,15 @@ export default function ProfilePage() {
     if (!username) return
     const load = async () => {
       const { data, error } = await supabase.from('users').select('*').eq('username', username)
-      if (error || !data || data.length === 0) setNotFound(true)
-      else setProfile(data[0])
+      if (error || !data || data.length === 0) { setNotFound(true); setLoading(false); return }
+      setProfile(data[0])
+      // fetch visible badges
+      const { data: badgeRows } = await supabase
+        .from('user_badges')
+        .select('badge, hidden')
+        .eq('username', username)
+        .eq('hidden', false)
+      setBadges(badgeRows || [])
       setLoading(false)
     }
     load()
@@ -135,14 +175,12 @@ export default function ProfilePage() {
     return () => { clearTimeout(timeout); document.body.style.cursor = '' }
   }, [profile])
 
-  // Try silent autoplay on load (works if user has interacted with the page before)
   useEffect(() => {
     if (!profile) return
     const s   = profile.settings || {}
     const m   = s.music || {}
     const src = m.url || profile.audio_url
     if (!src) return
-    // Wait for audio element to be ready
     const tryPlay = () => {
       if (audioRef.current) {
         audioRef.current.volume = 1
@@ -153,10 +191,8 @@ export default function ProfilePage() {
     return () => clearTimeout(t)
   }, [profile])
 
-  // The entrance-screen click IS a user gesture — safe to play audio here
   const handleEnter = useCallback(() => {
     setEntered(true)
-    // Delay slightly so React finishes re-rendering before we call play()
     setTimeout(() => {
       if (audioRef.current) {
         audioRef.current.volume = 1
@@ -182,40 +218,41 @@ export default function ProfilePage() {
   )
 
   const settings       = profile.settings || {}
-const fontFamily     = settings.font || 'Nunito'
-const accentColor    = settings.accentColor || '#CC0000'
-const bgColor        = settings.bgColor || '#080808'
-const glowIntensity  = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
-const particleEnabled = settings.particleEnabled || false
-const particleStyle  = settings.particleStyle || 'Dots'
-const clickEffect    = settings.clickEffect || 'None'
-const entranceAnim   = settings.entranceAnim || 'Fade In'
-const music          = settings.music || {}
-const layout         = settings.layout || {}
-const entrance       = settings.entrance || {}
-const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
-const typingBio      = layout.typingBio || false
-const showAvatarPref = layout.showAvatar !== false
-const avatarPos      = layout.avatarPos || 'center'
-const panelSize      = layout.panelSize || 'medium'
-const entranceEnabled = entrance.enabled !== false
-const panelMaxW      = { compact:380, medium:480, wide:580, full:680 }[panelSize] || 480
-const iconSize       = settings.iconSize || 44
-const showLinkLabels = settings.showLinkLabels !== false
-const initial        = profile.username[0].toUpperCase()
-const links          = Array.isArray(profile.links) ? profile.links : []
-const opacity        = profile.opacity ?? 100
-const blur           = profile.blur ?? 0
-const usernameFx     = profile.username_fx || ''
-const bgFx           = profile.bg_fx || 'none'
-const location       = profile.location || ''
-const glowState      = profile.glow_settings || { username:true, socials:true, badges:false }
-const avatarUrl      = profile.avatar_url || null
-const bgUrl          = profile.bg_url || null
-const displayName    = profile.display_name || ''
-const audioSrc       = music.url || profile.audio_url || null
-const fontQuery      = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
-const glowAlpha      = glowIntensity / 100
+  const fontFamily     = settings.font || 'Nunito'
+  const accentColor    = settings.accentColor || '#CC0000'
+  const bgColor        = settings.bgColor || '#080808'
+  const glowIntensity  = settings.glowIntensity !== undefined ? settings.glowIntensity : 50
+  const particleEnabled = settings.particleEnabled || false
+  const particleStyle  = settings.particleStyle || 'Dots'
+  const clickEffect    = settings.clickEffect || 'None'
+  const entranceAnim   = settings.entranceAnim || 'Fade In'
+  const music          = settings.music || {}
+  const layout         = settings.layout || {}
+  const entrance       = settings.entrance || {}
+  const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
+  const typingBio      = layout.typingBio || false
+  const showAvatarPref = layout.showAvatar !== false
+  const avatarPos      = layout.avatarPos || 'center'
+  const panelSize      = layout.panelSize || 'medium'
+  const entranceEnabled = entrance.enabled !== false
+  const panelMaxW      = { compact:380, medium:480, wide:580, full:680 }[panelSize] || 480
+  const iconSize       = settings.iconSize || 44
+  const showLinkLabels = settings.showLinkLabels !== false
+  const initial        = profile.username[0].toUpperCase()
+  const links          = Array.isArray(profile.links) ? profile.links : []
+  const opacity        = profile.opacity ?? 100
+  const blur           = profile.blur ?? 0
+  const usernameFx     = profile.username_fx || ''
+  const bgFx           = profile.bg_fx || 'none'
+  const location       = profile.location || ''
+  const glowState      = profile.glow_settings || { username:true, socials:true, badges:false }
+  const avatarUrl      = profile.avatar_url || null
+  const bgUrl          = profile.bg_url || null
+  const displayName    = profile.display_name || ''
+  const audioSrc       = music.url || profile.audio_url || null
+  const fontQuery      = FONT_MAP[fontFamily] || FONT_MAP['Nunito']
+  const glowAlpha      = glowIntensity / 100
+  const badgePosition  = profile.badge_position || 'below_bio'
 
   const nameStyle = (() => {
     if (usernameFx === 'rainbow') return { background:'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }
@@ -243,7 +280,6 @@ const glowAlpha      = glowIntensity / 100
     return { animation:'fadeIn 0.4s ease forwards' }
   })()
 
-  // ── Entrance screen ───────────────────────────────────────────────────────────
   if (!entered && entranceEnabled) {
     const enterTitle    = entrance.title    || profile.username
     const enterSubtitle = entrance.subtitle || 'Click anywhere to enter'
@@ -275,21 +311,21 @@ const glowAlpha      = glowIntensity / 100
 
   return (
     <>
-      {/* Audio lives here — always mounted, never unmounts between entrance/profile screens */}
       {audioSrc && <audio ref={audioRef} src={audioSrc} loop preload="auto" style={{ display:'none' }} />}
       <ProfileContent
         profile={profile} fontFamily={fontFamily} fontQuery={fontQuery}
-      accentColor={accentColor} bgColorSetting={bgColor} glowIntensity={glowIntensity}
-      particleEnabled={particleEnabled} particleStyle={particleStyle} clickEffect={clickEffect}
-      music={music} btns={btns} typingBio={typingBio}
-      showAvatarPref={showAvatarPref} avatarPos={avatarPos} panelMaxW={panelMaxW}
-      initial={initial} links={links} opacity={opacity} blur={blur} usernameFx={usernameFx}
-      bgFx={bgFx} location={location} glowState={glowState} avatarUrl={avatarUrl} bgUrl={bgUrl}
-      displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
-      entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
-      setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
-      iconSize={iconSize} viewCount={viewCount} showLinkLabels={showLinkLabels}
-    />
+        accentColor={accentColor} bgColorSetting={bgColor} glowIntensity={glowIntensity}
+        particleEnabled={particleEnabled} particleStyle={particleStyle} clickEffect={clickEffect}
+        music={music} btns={btns} typingBio={typingBio}
+        showAvatarPref={showAvatarPref} avatarPos={avatarPos} panelMaxW={panelMaxW}
+        initial={initial} links={links} opacity={opacity} blur={blur} usernameFx={usernameFx}
+        bgFx={bgFx} location={location} glowState={glowState} avatarUrl={avatarUrl} bgUrl={bgUrl}
+        displayName={displayName} audioSrc={audioSrc} nameStyle={nameStyle} overlayStyle={overlayStyle}
+        entranceAnimStyle={entranceAnimStyle} audioRef={audioRef} isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying} spawnClickEffect={spawnClickEffect}
+        iconSize={iconSize} viewCount={viewCount} showLinkLabels={showLinkLabels}
+        badges={badges} badgePosition={badgePosition}
+      />
     </>
   )
 }
@@ -302,22 +338,21 @@ function ProfileContent({
   initial, links, opacity, blur, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
-  viewCount, iconSize, showLinkLabels,
+  viewCount, iconSize, showLinkLabels, badges, badgePosition,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
   const hexToRgb = (hex) => {
-  const r = parseInt(hex.slice(1,3),16)
-  const g = parseInt(hex.slice(3,5),16)
-  const b = parseInt(hex.slice(5,7),16)
-  return `${r},${g},${b}`
-}
-const accentRgb = hexToRgb(accentColor || '#CC0000')
-const bgRgb = hexToRgb(bgColorSetting || '#080808')
+    const r = parseInt(hex.slice(1,3),16)
+    const g = parseInt(hex.slice(3,5),16)
+    const b = parseInt(hex.slice(5,7),16)
+    return `${r},${g},${b}`
+  }
+  const accentRgb = hexToRgb(accentColor || '#CC0000')
+  const bgRgb = hexToRgb(bgColorSetting || '#080808')
   const alignItems   = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
   const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
-  // Music player state
   const [currentTime, setCurrentTime] = useState(0)
   const [duration,    setDuration]    = useState(0)
 
@@ -377,10 +412,11 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
   const trackTitle    = music.showTitle !== false ? (music.title || music.musicTitle || 'Unknown') : ''
   const trackArtist   = music.showArtist !== false ? (music.artist || music.musicArtist || 'Unknown') : ''
 
+  const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
+
   return (
     <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden' }}>
       <link rel="icon" href="/scythe.png" />
-      {/* NOTE: No <audio> tag here — it lives in the entrance screen so autoplay works on click */}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=${fontQuery}&display=swap');
@@ -413,55 +449,21 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
         .bg-img     { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
         .bg-overlay { position:fixed; inset:0; z-index:1; pointer-events:none; }
         .fx-layer   { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-
-        /* ── Music Player ───────────────────────────────────────────── */
-        .music-player {
-          width: 100%;
-          background: rgba(10,10,10,0.55);
-          backdrop-filter: blur(24px) saturate(160%);
-          -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 18px;
-          padding: 16px 20px 14px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-        .music-ctrl {
-          background: none; border: none; cursor: pointer;
-          color: rgba(255,255,255,0.5); padding: 4px;
-          display: flex; align-items: center; justify-content: center;
-          transition: color .15s, transform .15s; border-radius: 50%;
-        }
-        .music-ctrl:hover { color: #fff; transform: scale(1.18); }
-        .music-play {
-          width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-          background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.12);
-          cursor: pointer; display: flex; align-items: center; justify-content: center;
-          color: #fff; transition: background .15s, transform .15s;
-        }
-        .music-play:hover { background: rgba(255,255,255,0.2); transform: scale(1.1); }
-        .seek-track {
-          width: 100%; height: 3px; background: rgba(255,255,255,0.1);
-          border-radius: 99px; cursor: pointer; margin: 10px 0 6px;
-          transition: height .15s;
-          position: relative;
-        }
-        .seek-track:hover { height: 5px; margin: 9px 0 5px; }
-        .seek-fill {
-          height: 100%; border-radius: 99px; pointer-events: none;
-          background: ${accentColor}; position: relative;
-        }
-        .seek-fill::after {
-          content:''; position:absolute; right:-5px; top:50%;
-          transform:translateY(-50%); width:11px; height:11px;
-          border-radius:50%; background:#fff; opacity:0; transition:opacity .15s;
-        }
+        .music-player { width:100%; background:rgba(10,10,10,0.55); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:16px 20px 14px; box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05); }
+        .music-ctrl { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.5); padding:4px; display:flex; align-items:center; justify-content:center; transition:color .15s,transform .15s; border-radius:50%; }
+        .music-ctrl:hover { color:#fff; transform:scale(1.18); }
+        .music-play { width:34px; height:34px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.12); cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; transition:background .15s,transform .15s; }
+        .music-play:hover { background:rgba(255,255,255,0.2); transform:scale(1.1); }
+        .seek-track { width:100%; height:3px; background:rgba(255,255,255,0.1); border-radius:99px; cursor:pointer; margin:10px 0 6px; transition:height .15s; position:relative; }
+        .seek-track:hover { height:5px; margin:9px 0 5px; }
+        .seek-fill { height:100%; border-radius:99px; pointer-events:none; background:${accentColor}; position:relative; }
+        .seek-fill::after { content:''; position:absolute; right:-5px; top:50%; transform:translateY(-50%); width:11px; height:11px; border-radius:50%; background:#fff; opacity:0; transition:opacity .15s; }
         .seek-track:hover .seek-fill::after { opacity:1; }
         .bar { width:3px; border-radius:2px; background:${accentColor}; }
         .bar:nth-child(1){animation:barPulse .65s ease-in-out 0.00s infinite}
         .bar:nth-child(2){animation:barPulse .65s ease-in-out 0.20s infinite}
         .bar:nth-child(3){animation:barPulse .65s ease-in-out 0.10s infinite}
         .bar:nth-child(4){animation:barPulse .65s ease-in-out 0.30s infinite}
-
         @media(max-width:480px){ .profile-outer{max-width:100%!important;padding:0 12px;} }
       `}</style>
 
@@ -471,7 +473,6 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
       )}
       <div className="bg-overlay" style={overlayStyle} />
 
-      {/* Particles */}
       {(bgFx === 'particles' || (particleEnabled && particleStyle === 'Dots')) && (
         <div className="fx-layer">
           {Array.from({length:20}).map((_,i) => (
@@ -524,10 +525,7 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
         </div>
       )}
 
-      {/* ── Profile panel + music player stacked ─────────────────────────────── */}
       <div className="profile-outer" style={{ width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle }}>
-
-        {/* Floating avatar */}
         {showAvatarPref && (
           <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
             <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
@@ -538,9 +536,7 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
           </div>
         )}
 
-        {/* Main glass card */}
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
-
           <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">
             <div style={{ fontSize:22, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, cursor:'default', ...nameStyle }}>
               {displayName || `@${profile.username}`}
@@ -555,6 +551,9 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
           {displayName && (
             <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, marginBottom:6, textAlign }}>@{profile.username}</div>
           )}
+
+          {/* BADGES: below username */}
+          {badgePosition === 'below_username' && badgeStrip}
 
           {viewCount !== null && (
             <div style={{ position:'absolute', top:14, right:16, display:'flex', alignItems:'center', gap:4, fontSize:11, color:'rgba(255,255,255,0.3)', fontWeight:600, userSelect:'none' }}>
@@ -572,6 +571,9 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
             </div>
           )}
 
+          {/* BADGES: below bio */}
+          {badgePosition === 'below_bio' && badgeStrip}
+
           {location && (
             <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, display:'flex', alignItems:'center', gap:5, marginBottom:16, alignSelf:alignItems }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -582,6 +584,9 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
           {(links.length > 0 || btns.length > 0) && (
             <div style={{ width:'100%', height:1, background:'rgba(255,255,255,0.06)', margin:'8px 0 16px' }} />
           )}
+
+          {/* BADGES: above links */}
+          {badgePosition === 'above_links' && badgeStrip}
 
           {links.length > 0 && (
             <div style={{ width:'100%', display:'flex', flexWrap:'wrap', gap:16, justifyContent:textAlign==='center'?'center':textAlign==='right'?'flex-end':'flex-start' }}>
@@ -606,11 +611,11 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
                             : <span style={{ fontSize:14, fontWeight:800, color:tc }}>{abbr}</span>
                       }
                     </div>
-                   {showLinkLabels && (
-  <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
-    {link.title || p.name}
-  </span>
-)}
+                    {showLinkLabels && (
+                      <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
+                        {link.title || p.name}
+                      </span>
+                    )}
                   </a>
                 )
               })}
@@ -635,20 +640,13 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
           <div className="footer" style={{ alignSelf:'center', marginTop:20 }}>powered by <a href="/">fate.rip</a></div>
         </div>
 
-        {/* ── Music Player — directly below the panel ─────────────────────────── */}
         {audioSrc && music.showPlayer !== false && (
           <div className="music-player" style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }} onClick={e=>e.stopPropagation()}>
-            {/* Track info row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
               <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                  {trackTitle}
-                </div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
-                  {trackArtist}
-                </div>
+                <div style={{ fontSize:13, fontWeight:700, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackTitle}</div>
+                <div style={{ fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackArtist}</div>
               </div>
-              {/* Animated EQ bars */}
               {isPlaying && (
                 <div style={{ display:'flex', alignItems:'flex-end', gap:2, height:14, flexShrink:0 }}>
                   <div className="bar" style={{ height:5  }} />
@@ -658,45 +656,26 @@ const bgRgb = hexToRgb(bgColorSetting || '#080808')
                 </div>
               )}
             </div>
-
-            {/* Seek bar */}
             <div className="seek-track" onClick={handleSeek}>
               <div className="seek-fill" style={{ width:`${progress}%` }} />
             </div>
-
-            {/* Controls row */}
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30 }}>
-                {fmt(currentTime)}
-              </span>
-
+              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30 }}>{fmt(currentTime)}</span>
               <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                {/* Restart */}
                 <button className="music-ctrl" onClick={restart} title="Restart">
-                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
-                  </svg>
+                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
                 </button>
-
-                {/* Play / Pause */}
                 <button className="music-play" onClick={togglePlay} title={isPlaying?'Pause':'Play'}>
                   {isPlaying
                     ? <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     : <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                   }
                 </button>
-
-                {/* Skip to end (it's looped so it just wraps) */}
                 <button className="music-ctrl" onClick={skipEnd} title="Skip">
-                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
-                  </svg>
+                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
                 </button>
               </div>
-
-              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30, textAlign:'right' }}>
-                {fmt(duration)}
-              </span>
+              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30, textAlign:'right' }}>{fmt(duration)}</span>
             </div>
           </div>
         )}

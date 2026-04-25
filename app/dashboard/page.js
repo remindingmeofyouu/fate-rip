@@ -514,6 +514,8 @@ export default function Dashboard() {
   const [notifOpen, setNotifOpen] = useState(false)
   const [avatarDDOpen, setAvatarDDOpen] = useState(false)
   const [userBadges, setUserBadges] = useState([])
+  const [badgePosition, setBadgePosition] = useState('below_bio')
+  const [savingBadges, setSavingBadges] = useState(false)
 
   const fileBgRef = useRef()
   const fileAvatarRef = useRef()
@@ -570,11 +572,12 @@ export default function Dashboard() {
         setUid(data.id ? String(data.id) : '')
         if (data.settings) applySettings(data.settings); else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
-        const { data: badgeRows } = await supabase
+       const { data: badgeRows } = await supabase
   .from('user_badges')
-  .select('badge')
+  .select('badge, hidden')
   .eq('username', data.username)
-setUserBadges(badgeRows ? badgeRows.map(r => r.badge) : [])
+setUserBadges(badgeRows ? badgeRows : [])
+setBadgePosition(data.badge_position || 'below_bio')
       }
       setLoading(false)
     }
@@ -1043,43 +1046,119 @@ setUserBadges(badgeRows ? badgeRows.map(r => r.badge) : [])
           )}
 
           {/* ═══ BADGES ═══ */}
-          {activePage === 'badges' && (() => {
-            const userBadgeIds = userBadges
-            return (
-              <>
-                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
-                <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Your <span style={{ color: '#e03030' }}>Badges</span></h1>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>Collect badges by being active on fate.rip</p>
-                {userBadgeIds.length > 0 && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, marginBottom: 20 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: 4 }}>Earned</span>
-                    {BADGE_DEFS.filter(b => userBadgeIds.includes(b.id)).map(b => (
-                      <div key={b.id} title={b.name} style={{ width: 36, height: 36, borderRadius: 10, background: b.bg, border: `1px solid ${b.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: b.color }}>{b.icon}</div>
-                    ))}
+{activePage === 'badges' && (() => {
+  const saveBadgeSettings = async () => {
+    setSavingBadges(true)
+    // save position
+    await supabase.from('users').update({ badge_position: badgePosition }).eq('username', username)
+    // save hidden states for each badge
+    for (const b of userBadges) {
+      await supabase.from('user_badges')
+        .update({ hidden: b.hidden || false })
+        .eq('username', username)
+        .eq('badge', b.badge)
+    }
+    setSavingBadges(false)
+    showToast('Badge settings saved!')
+  }
+
+  const toggleBadgeHidden = (badgeId) => {
+    setUserBadges(prev => prev.map(b => b.badge === badgeId ? { ...b, hidden: !b.hidden } : b))
+  }
+
+  return (
+    <>
+      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
+      <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Your <span style={{ color: '#e03030' }}>Badges</span></h1>
+      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>Collect badges by being active on fate.rip</p>
+
+      {/* Badge Position Picker */}
+      <Card style={{ marginBottom: 16 }}>
+        <CardHeader
+          title="Badge Position"
+          sub="Choose where badges appear on your profile"
+          icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>}
+        />
+        <div style={{ padding: 20, display: 'flex', gap: 8 }}>
+          {[
+            { value: 'below_username', label: 'Below Username' },
+            { value: 'below_bio',     label: 'Below Bio' },
+            { value: 'above_links',   label: 'Above Links' },
+          ].map(opt => (
+            <button
+              key={opt.value}
+              onClick={() => setBadgePosition(opt.value)}
+              style={{
+                flex: 1, padding: '10px 8px', borderRadius: 10, fontSize: 12, fontWeight: 500,
+                cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
+                border: `1px solid ${badgePosition === opt.value ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`,
+                background: badgePosition === opt.value ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)',
+                color: badgePosition === opt.value ? '#e03030' : 'rgba(255,255,255,0.45)',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Earned badges with toggle */}
+      {userBadges.length > 0 && (
+        <Card style={{ marginBottom: 16 }}>
+          <CardHeader title="Visibility" sub="Toggle which badges show on your profile" />
+          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {userBadges.map(b => {
+              const def = BADGE_DEFS.find(d => d.id === b.badge)
+              if (!def) return null
+              const isHidden = b.hidden || false
+              return (
+                <div key={b.badge} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', background: isHidden ? 'rgba(255,255,255,0.01)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.05)' : def.border}`, borderRadius: 12, opacity: isHidden ? 0.5 : 1, transition: 'all .2s' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: isHidden ? 'rgba(255,255,255,0.04)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.07)' : def.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: isHidden ? 'rgba(255,255,255,0.2)' : def.color, flexShrink: 0 }}>
+                    {def.icon}
                   </div>
-                )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {BADGE_DEFS.map(badge => {
-                    const owned = userBadgeIds.includes(badge.id)
-                    return (
-                      <div key={badge.id} className="badge-row" style={{ opacity: owned ? 1 : 0.8, border: owned ? `1px solid ${badge.border}` : undefined, background: owned ? badge.bg : undefined }}>
-                        <div className="badge-locked-icon" style={{ background: owned ? badge.bg : 'rgba(255,255,255,0.04)', border: `1px solid ${owned ? badge.border : 'rgba(255,255,255,0.07)'}`, color: owned ? badge.color : 'rgba(255,255,255,0.25)' }}>{badge.icon}</div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: 14, fontWeight: 700, color: owned ? '#fff' : 'rgba(255,255,255,0.55)' }}>{badge.name}</span>
-                            {owned && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}>Earned</span>}
-                          </div>
-                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{badge.desc}</div>
-                        </div>
-                        {!owned && badge.how && (badge.howHref ? <a href={badge.howHref} target="_blank" rel="noopener noreferrer" className="badge-action-btn" style={{ textDecoration: 'none' }}>{badge.how}</a> : <button className="badge-action-btn" onClick={() => showToast(`${badge.name} — coming soon!`)}>{badge.how}</button>)}
-                        {!owned && !badge.how && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>Staff assigned</span>}
-                      </div>
-                    )
-                  })}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: isHidden ? 'rgba(255,255,255,0.35)' : '#fff' }}>{def.name}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{isHidden ? 'Hidden on profile' : 'Visible on profile'}</div>
+                  </div>
+                  <Toggle checked={!isHidden} onChange={() => toggleBadgeHidden(b.badge)} />
                 </div>
-              </>
-            )
-          })()}
+              )
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* All badges list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {BADGE_DEFS.map(badge => {
+          const owned = userBadges.some(b => b.badge === badge.id)
+          return (
+            <div key={badge.id} className="badge-row" style={{ opacity: owned ? 1 : 0.8, border: owned ? `1px solid ${badge.border}` : undefined, background: owned ? badge.bg : undefined }}>
+              <div className="badge-locked-icon" style={{ background: owned ? badge.bg : 'rgba(255,255,255,0.04)', border: `1px solid ${owned ? badge.border : 'rgba(255,255,255,0.07)'}`, color: owned ? badge.color : 'rgba(255,255,255,0.25)' }}>{badge.icon}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: owned ? '#fff' : 'rgba(255,255,255,0.55)' }}>{badge.name}</span>
+                  {owned && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}>Earned</span>}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{badge.desc}</div>
+              </div>
+              {!owned && badge.how && (badge.howHref ? <a href={badge.howHref} target="_blank" rel="noopener noreferrer" className="badge-action-btn" style={{ textDecoration: 'none' }}>{badge.how}</a> : <button className="badge-action-btn" onClick={() => showToast(`${badge.name} — coming soon!`)}>{badge.how}</button>)}
+              {!owned && !badge.how && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>Staff assigned</span>}
+            </div>
+          )
+        })}
+      </div>
+
+      {userBadges.length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+          <BtnAccent onClick={saveBadgeSettings} disabled={savingBadges}>
+            {savingBadges ? 'Saving…' : 'Save Badge Settings'}
+          </BtnAccent>
+        </div>
+      )}
+    </>
+  )
+})()}
 
           {/* ═══ WIDGETS / TEMPLATES ═══ */}
           {(activePage === 'widgets' || activePage === 'templates') && (
