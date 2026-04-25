@@ -551,8 +551,20 @@ useEffect(() => {
       )}
 
  <div className="profile-outer" style={{
-     {showAvatarPref && (
-  <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
+  width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
+  transform: followCursor ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
+  transition: 'transform 0.15s ease-out',
+  transformOrigin: 'center center',
+}}>
+  {showAvatarPref && (
+    <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
+      <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
+        <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
+          {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+        </div>
+      </div>
+    </div>
+  )}
     <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
       <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
         {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
