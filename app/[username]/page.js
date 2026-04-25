@@ -552,7 +552,7 @@ useEffect(() => {
 
  <div className="profile-outer" style={{
   width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
-  transform: followCursor ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
+  transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
   transition: 'transform 0.15s ease-out',
   transformOrigin: 'center center',
 }}>
@@ -709,9 +709,10 @@ useEffect(() => {
             </div>
           </div>
         )}
-      </div>
+</div>
+</div>
 
-      <style dangerouslySetInnerHTML={{ __html:`.uid-hover-wrap:hover .uid-tooltip{opacity:1!important;} @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}` }} />
+      <style dangerouslySetInnerHTML=
     </div>
   )
 }
