@@ -358,16 +358,23 @@ function ProfileContent({
   const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
-  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 })
-const hasMoved = useRef(false)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
 useEffect(() => {
   if (!followCursor) return
   const onMove = (e) => {
-    hasMoved.current = true
-    setCursorPos({ x: e.clientX, y: e.clientY })
+    const cx = window.innerWidth / 2
+    const cy = window.innerHeight / 2
+    const x = ((e.clientY - cy) / cy) * -10
+    const y = ((e.clientX - cx) / cx) * 10
+    setTilt({ x, y })
   }
+  const onLeave = () => setTilt({ x: 0, y: 0 })
   window.addEventListener('mousemove', onMove)
-  return () => window.removeEventListener('mousemove', onMove)
+  window.addEventListener('mouseleave', onLeave)
+  return () => {
+    window.removeEventListener('mousemove', onMove)
+    window.removeEventListener('mouseleave', onLeave)
+  }
 }, [followCursor])
   const [currentTime, setCurrentTime] = useState(0)
   const [duration,    setDuration]    = useState(0)
@@ -543,16 +550,10 @@ useEffect(() => {
         </div>
       )}
 
-      <div className="profile-outer" style={{
+     <div className="profile-outer" style={{
   width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
-  ...(followCursor && hasMoved.current ? {
-    position: 'fixed',
-    left: cursorPos.x,
-    top: cursorPos.y,
-    transform: 'translate(-50%, -50%)',
-    transition: 'left 0.12s ease-out, top 0.12s ease-out',
-    zIndex: 10,
-  } : {})
+  transform: followCursor ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
+  transition: 'transform 0.15s ease-out',
 }}>
 
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
