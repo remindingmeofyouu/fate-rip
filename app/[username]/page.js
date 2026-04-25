@@ -56,7 +56,7 @@ const SIMPLE_ICONS = {
   bitcoin:'bitcoin', ethereum:'ethereum', solana:'solana', roblox:'roblox',
 }
 
-// ─── Badge definitions (must match dashboard) ─────────────────────────────────
+// ─── Badge definitions ─────────────────────────────────────────────────────────
 const BADGE_DEFS = [
   { id:'owner',     name:'Owner',         color:'#e03030', bg:'rgba(224,48,48,0.15)',    border:'rgba(224,48,48,0.35)',    icon:<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M2 20h20v-2H2v2zm0-4h20L19 7l-5 4-4-6-4 6-5-4 2 9z"/></svg> },
   { id:'staff',     name:'Staff',         color:'#378ADD', bg:'rgba(55,138,221,0.12)',   border:'rgba(55,138,221,0.3)',    icon:<img src="/Discord_Staff.png" width="18" height="18" style={{objectFit:'contain'}} /> },
@@ -69,7 +69,7 @@ const BADGE_DEFS = [
   { id:'gifter',    name:'Gifter',        color:'#fb7185', bg:'rgba(251,113,133,0.12)', border:'rgba(251,113,133,0.3)',   icon:<img src="/Presente.png" width="18" height="18" style={{objectFit:'contain'}} /> },
 ]
 
-// ─── Badge Strip Component ─────────────────────────────────────────────────────
+// ─── Badge Strip ───────────────────────────────────────────────────────────────
 function BadgeStrip({ badges, align }) {
   if (!badges || badges.length === 0) return null
   const justify = align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center'
@@ -126,7 +126,6 @@ export default function ProfilePage() {
       const { data, error } = await supabase.from('users').select('*').eq('username', username)
       if (error || !data || data.length === 0) { setNotFound(true); setLoading(false); return }
       setProfile(data[0])
-      // fetch visible badges
       const { data: badgeRows } = await supabase
         .from('user_badges')
         .select('badge, hidden')
@@ -346,6 +345,7 @@ function ProfileContent({
   viewCount, iconSize, showLinkLabels, badges, badgePosition, followCursor,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
+
   const hexToRgb = (hex) => {
     const r = parseInt(hex.slice(1,3),16)
     const g = parseInt(hex.slice(3,5),16)
@@ -353,39 +353,26 @@ function ProfileContent({
     return `${r},${g},${b}`
   }
   const accentRgb = hexToRgb(accentColor || '#CC0000')
-  const bgRgb = hexToRgb(bgColorSetting || '#080808')
-  const alignItems   = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
-  const textAlign    = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
-  const handleClick  = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
+  const bgRgb     = hexToRgb(bgColorSetting || '#080808')
 
+  const alignItems  = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
+  const textAlign   = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
+  const handleClick = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
+
+  // ─── Tilt state — NO window-level useEffect ────────────────────────────────
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
-useEffect(() => {
-  if (!followCursor) return
-  const onMove = (e) => {
-    const cx = window.innerWidth / 2
-    const cy = window.innerHeight / 2
-    const x = ((e.clientY - cy) / cy) * -10
-    const y = ((e.clientX - cx) / cx) * 10
-    setTilt({ x, y })
-  }
-  const onLeave = () => setTilt({ x: 0, y: 0 })
-  window.addEventListener('mousemove', onMove)
-  window.addEventListener('mouseleave', onLeave)
-  return () => {
-    window.removeEventListener('mousemove', onMove)
-    window.removeEventListener('mouseleave', onLeave)
-  }
-}, [followCursor])
+
+  // ─── Audio state ──────────────────────────────────────────────────────────
   const [currentTime, setCurrentTime] = useState(0)
   const [duration,    setDuration]    = useState(0)
 
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-    const onTime    = () => setCurrentTime(audio.currentTime)
-    const onMeta    = () => setDuration(isNaN(audio.duration) ? 0 : audio.duration)
-    const onPlay    = () => setIsPlaying(true)
-    const onPause   = () => setIsPlaying(false)
+    const onTime  = () => setCurrentTime(audio.currentTime)
+    const onMeta  = () => setDuration(isNaN(audio.duration) ? 0 : audio.duration)
+    const onPlay  = () => setIsPlaying(true)
+    const onPause = () => setIsPlaying(false)
     audio.addEventListener('timeupdate',     onTime)
     audio.addEventListener('durationchange', onMeta)
     audio.addEventListener('loadedmetadata', onMeta)
@@ -431,14 +418,22 @@ useEffect(() => {
     if (audioRef.current && duration) audioRef.current.currentTime = Math.max(0, duration - 0.1)
   }
 
-  const progress      = duration ? (currentTime / duration) * 100 : 0
-  const trackTitle    = music.showTitle !== false ? (music.title || music.musicTitle || 'Unknown') : ''
-  const trackArtist   = music.showArtist !== false ? (music.artist || music.musicArtist || 'Unknown') : ''
+  const progress    = duration ? (currentTime / duration) * 100 : 0
+  const trackTitle  = music.showTitle  !== false ? (music.title  || music.musicTitle  || 'Unknown') : ''
+  const trackArtist = music.showArtist !== false ? (music.artist || music.musicArtist || 'Unknown') : ''
 
   const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
 
   return (
-    <div onClick={handleClick} style={{ background:bgColorSetting, minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px', position:'relative', overflow:'hidden', perspective:'800px' }}>
+    <div
+      onClick={handleClick}
+      style={{
+        background:bgColorSetting, minHeight:'100vh', display:'flex',
+        flexDirection:'column', alignItems:'center', justifyContent:'center',
+        fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px',
+        position:'relative', overflow:'hidden', perspective:'800px',
+      }}
+    >
       <link rel="icon" href="/scythe.png" />
 
       <style>{`
@@ -489,16 +484,18 @@ useEffect(() => {
         .bar:nth-child(4){animation:barPulse .65s ease-in-out 0.30s infinite}
         @media(max-width:480px){ .profile-outer{max-width:100%!important;padding:0 12px;} }
         .badge-tooltip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:rgba(10,10,10,0.92); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; }
-       .badge-pill:hover .badge-tooltip { opacity:1; }
-.uid-hover-wrap:hover .uid-tooltip { opacity:1!important; }
+        .badge-pill:hover .badge-tooltip { opacity:1; }
+        .uid-hover-wrap:hover .uid-tooltip { opacity:1!important; }
       `}</style>
 
+      {/* Background media */}
       {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
         ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter:blur>0?`blur(${blur}px)`:'none' }} />
         : <img src={bgUrl} className="bg-img" alt="" style={{ filter:blur>0?`blur(${blur}px)`:'none' }} />
       )}
       <div className="bg-overlay" style={overlayStyle} />
 
+      {/* Particles / FX layers */}
       {(bgFx === 'particles' || (particleEnabled && particleStyle === 'Dots')) && (
         <div className="fx-layer">
           {Array.from({length:20}).map((_,i) => (
@@ -551,31 +548,54 @@ useEffect(() => {
         </div>
       )}
 
- <div className="profile-outer"
-  onMouseMove={followCursor ? (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientY - rect.top - rect.height/2) / (rect.height/2)) * -8
-    const y = ((e.clientX - rect.left - rect.width/2) / (rect.width/2)) * 8
-    setTilt({ x, y })
-  } : undefined}
-  onMouseLeave={followCursor ? () => setTilt({ x:0, y:0 }) : undefined}
-  style={{
-    width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
-    transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-    transition: 'transform 0.15s ease-out',
-    transformOrigin: 'center center',
-  }}>
-  {showAvatarPref && (
-    <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
-      <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
-        <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
-          {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
-        </div>
-      </div>
-    </div>
-  )}
- 
+      {/*
+        ─── TILT FIX ────────────────────────────────────────────────────────────
+        onMouseMove is on the element itself using getBoundingClientRect().
+        This avoids the window-level listener bug caused by backdrop-filter
+        creating a new stacking context. No useEffect needed.
+      */}
+      <div
+        className="profile-outer"
+        onMouseMove={followCursor ? (e) => {
+          const rect = e.currentTarget.getBoundingClientRect()
+          const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -8
+          const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  8
+          setTilt({ x, y })
+        } : undefined}
+        onMouseLeave={followCursor ? () => setTilt({ x:0, y:0 }) : undefined}
+        style={{
+          width:'100%',
+          maxWidth:panelMaxW,
+          opacity:opacity/100,
+          ...entranceAnimStyle,
+          transform:`perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+          transition:'transform 0.15s ease-out',
+          transformOrigin:'center center',
+          transformStyle:'preserve-3d',
+        }}
+      >
+        {/* Avatar floating above panel */}
+        {showAvatarPref && (
+          <div
+            className="profile-avatar-float"
+            style={{
+              alignSelf: alignItems === 'flex-start' ? 'flex-start' : alignItems === 'flex-end' ? 'flex-end' : 'center',
+              marginLeft:  avatarPos === 'left'  ? 28 : 0,
+              marginRight: avatarPos === 'right' ? 28 : 0,
+            }}
+          >
+            <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
+              <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
+                {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main panel */}
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
+
+          {/* Username / display name */}
           <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">
             <div style={{ fontSize:22, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, cursor:'default', ...nameStyle }}>
               {displayName || `@${profile.username}`}
@@ -591,9 +611,10 @@ useEffect(() => {
             <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, marginBottom:6, textAlign }}>@{profile.username}</div>
           )}
 
-          {/* BADGES: below username */}
+          {/* Badges — below username */}
           {badgePosition === 'below_username' && badgeStrip}
 
+          {/* View count */}
           {viewCount !== null && (
             <div style={{ position:'absolute', top:14, right:16, display:'flex', alignItems:'center', gap:4, fontSize:11, color:'rgba(255,255,255,0.3)', fontWeight:600, userSelect:'none' }}>
               <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -603,6 +624,7 @@ useEffect(() => {
             </div>
           )}
 
+          {/* Bio */}
           {profile.bio && (
             <div style={{ fontSize:13, color:'rgba(255,255,255,0.5)', fontWeight:600, textAlign, lineHeight:1.6, marginBottom:12, minHeight:'1.6em' }}>
               {typingBio ? bioDisplayed : profile.bio}
@@ -610,9 +632,10 @@ useEffect(() => {
             </div>
           )}
 
-          {/* BADGES: below bio */}
+          {/* Badges — below bio */}
           {badgePosition === 'below_bio' && badgeStrip}
 
+          {/* Location */}
           {location && (
             <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, display:'flex', alignItems:'center', gap:5, marginBottom:16, alignSelf:alignItems }}>
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -624,9 +647,10 @@ useEffect(() => {
             <div style={{ width:'100%', height:1, background:'rgba(255,255,255,0.06)', margin:'8px 0 16px' }} />
           )}
 
-          {/* BADGES: above links */}
+          {/* Badges — above links */}
           {badgePosition === 'above_links' && badgeStrip}
 
+          {/* Social links */}
           {links.length > 0 && (
             <div style={{ width:'100%', display:'flex', flexWrap:'wrap', gap:16, justifyContent:textAlign==='center'?'center':textAlign==='right'?'flex-end':'flex-start' }}>
               {links.map((link,i) => {
@@ -638,9 +662,11 @@ useEffect(() => {
                 return (
                   <a key={i} href={link.url||'#'} target="_blank" rel="noopener noreferrer"
                     style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, cursor:'pointer', textDecoration:'none', width:Math.max(iconSize,48) }}>
-                    <div style={{ width:iconSize, height:iconSize, borderRadius:Math.round(iconSize*0.27), background:link.iconDataUrl?'transparent':p.color, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:link.iconDataUrl?'none':glowState.socials?`0 4px 16px ${p.color}88`:`0 4px 16px ${p.color}55`, transition:'transform .15s', overflow:'hidden', flexShrink:0 }}
+                    <div
+                      style={{ width:iconSize, height:iconSize, borderRadius:Math.round(iconSize*0.27), background:link.iconDataUrl?'transparent':p.color, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:link.iconDataUrl?'none':glowState.socials?`0 4px 16px ${p.color}88`:`0 4px 16px ${p.color}55`, transition:'transform .15s', overflow:'hidden', flexShrink:0 }}
                       onMouseEnter={e=>e.currentTarget.style.transform='scale(1.1)'}
-                      onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
+                      onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+                    >
                       {link.iconDataUrl
                         ? <img src={link.iconDataUrl} alt="icon" style={{ width:'100%', height:'100%', objectFit:'contain' }} />
                         : p.id==='email'
@@ -661,6 +687,7 @@ useEffect(() => {
             </div>
           )}
 
+          {/* CTA buttons */}
           {btns.length > 0 && (
             <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8, marginTop:links.length>0?8:0 }}>
               {btns.map((btn,i) => (
@@ -679,8 +706,13 @@ useEffect(() => {
           <div className="footer" style={{ alignSelf:'center', marginTop:20 }}>powered by <a href="/">fate.rip</a></div>
         </div>
 
+        {/* Music player — inside profile-outer so it tilts with the panel */}
         {audioSrc && music.showPlayer !== false && (
-          <div className="music-player" style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }} onClick={e=>e.stopPropagation()}>
+          <div
+            className="music-player"
+            style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }}
+            onClick={e=>e.stopPropagation()}
+          >
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
               <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
                 <div style={{ fontSize:13, fontWeight:700, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackTitle}</div>
@@ -718,7 +750,7 @@ useEffect(() => {
             </div>
           </div>
         )}
-</div>
-</div>
+      </div>
+    </div>
   )
 }
