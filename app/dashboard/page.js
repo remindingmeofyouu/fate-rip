@@ -513,6 +513,7 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [avatarDDOpen, setAvatarDDOpen] = useState(false)
+  const [userBadges, setUserBadges] = useState([])
 
   const fileBgRef = useRef()
   const fileAvatarRef = useRef()
@@ -569,6 +570,11 @@ export default function Dashboard() {
         setUid(data.id ? String(data.id) : '')
         if (data.settings) applySettings(data.settings); else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
+        const { data: badgeRows } = await supabase
+  .from('user_badges')
+  .select('badge')
+  .eq('username', data.username)
+setUserBadges(badgeRows ? badgeRows.map(r => r.badge) : [])
       }
       setLoading(false)
     }
@@ -1038,7 +1044,7 @@ export default function Dashboard() {
 
           {/* ═══ BADGES ═══ */}
           {activePage === 'badges' && (() => {
-            const userBadgeIds = dbUser?.badges || []
+            const userBadgeIds = userBadges
             return (
               <>
                 <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
