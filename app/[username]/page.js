@@ -361,6 +361,7 @@ function ProfileContent({
 
   // ─── Tilt state ───────────────────────────────────────────────────────────
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const tiltRef = useRef(null)
 
   // ─── Audio state ──────────────────────────────────────────────────────────
   const [currentTime, setCurrentTime] = useState(0)
@@ -424,25 +425,29 @@ function ProfileContent({
 
   const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
 
-  // ─── Tilt handlers (on the perspective wrapper, not the tilting child) ─────
-  const handleMouseMove = followCursor ? (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
+  // ─── Tilt handlers — mouse on the full page, bounds from tiltRef ──────────
+  // This ensures tilt fires even when cursor is outside the card bounds,
+  // and avoids the jitter caused by getBoundingClientRect() on a rotating element.
+  const handlePageMouseMove = followCursor ? (e) => {
+    if (!tiltRef.current) return
+    const rect = tiltRef.current.getBoundingClientRect()
     const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -8
     const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  8
     setTilt({ x, y })
   } : undefined
 
-  const handleMouseLeave = followCursor ? () => setTilt({ x: 0, y: 0 }) : undefined
+  const handlePageMouseLeave = followCursor ? () => setTilt({ x: 0, y: 0 }) : undefined
 
   return (
     <div
       onClick={handleClick}
+      onMouseMove={handlePageMouseMove}
+      onMouseLeave={handlePageMouseLeave}
       style={{
         background:bgColorSetting, minHeight:'100vh', display:'flex',
         flexDirection:'column', alignItems:'center', justifyContent:'center',
         fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px',
         position:'relative', overflow:'hidden',
-        // ↓ perspective removed from here — it now lives on the wrapper below
       }}
     >
       <link rel="icon" href="/scythe.png" />
@@ -568,21 +573,20 @@ function ProfileContent({
       */}
       <div
         className="tilt-wrapper"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        ref={tiltRef}
         style={{
           width: '100%',
           maxWidth: panelMaxW,
-          perspective: '800px',       // ← perspective on the PARENT
+          perspective: '800px',
+          opacity: opacity / 100,   // ← opacity here, NOT on profile-outer, avoids backdrop-filter double-darken
         }}
       >
         <div
           className="profile-outer"
           style={{
             width: '100%',
-            opacity: opacity / 100,
             ...entranceAnimStyle,
-            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,  // ← no perspective() here
+            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
             transition: 'transform 0.15s ease-out',
             transformOrigin: 'center center',
           }}
