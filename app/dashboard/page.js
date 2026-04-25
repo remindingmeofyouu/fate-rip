@@ -53,6 +53,55 @@ const PLATFORM_ABBR = {
 
 const LIGHT_PLATFORMS = new Set(['snapchat', 'buymeacoffee', 'bitcoin'])
 
+// ─── Badges config ─────────────────────────────────────────────────────────────
+const BADGE_DEFS = [
+  {
+    id: 'owner', name: 'Owner', desc: 'Creator and owner of fate.rip.',
+    color: '#e03030', bg: 'rgba(224,48,48,0.15)', border: 'rgba(224,48,48,0.35)', how: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  },
+  {
+    id: 'staff', name: 'Staff', desc: 'Be a part of the fate.rip staff team.',
+    color: '#378ADD', bg: 'rgba(55,138,221,0.12)', border: 'rgba(55,138,221,0.3)', how: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
+  },
+  {
+    id: 'verified', name: 'Verified', desc: 'Purchase or be a known content creator.',
+    color: '#1D9E75', bg: 'rgba(29,158,117,0.12)', border: 'rgba(29,158,117,0.3)', how: 'Unlock', howHref: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+  },
+  {
+    id: 'og', name: 'OG', desc: 'Be an early supporter of fate.rip.',
+    color: '#EF9F27', bg: 'rgba(239,159,39,0.12)', border: 'rgba(239,159,39,0.3)', how: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>,
+  },
+  {
+    id: 'booster', name: 'Server Booster', desc: 'Boost the fate.rip Discord server.',
+    color: '#f97316', bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.3)', how: 'Boost', howHref: 'https://discord.gg/faterip',
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
+  },
+  {
+    id: 'donator', name: 'Donator', desc: 'Donate at least $10 to fate.rip.',
+    color: '#5DCAA5', bg: 'rgba(93,202,165,0.12)', border: 'rgba(93,202,165,0.3)', how: 'Donate', howHref: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  },
+  {
+    id: 'premium', name: 'Premium', desc: 'Purchase the fate.rip premium package.',
+    color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.3)', how: 'Purchase', howHref: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  },
+  {
+    id: 'bug_hunter', name: 'Bug Hunter', desc: 'Report a verified bug on fate.rip.',
+    color: '#84cc16', bg: 'rgba(132,204,22,0.12)', border: 'rgba(132,204,22,0.3)', how: 'Report', howHref: 'https://discord.gg/faterip',
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="8" y="6" width="8" height="14" rx="2"/><path d="M3 10h2M19 10h2M3 16h2M19 16h2"/><path d="M8 4a2 2 0 0 1 4 0M12 4a2 2 0 0 1 4 0"/></svg>,
+  },
+  {
+    id: 'gifter', name: 'Gifter', desc: 'Gift premium to another fate.rip user.',
+    color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', how: 'Gift', howHref: null,
+    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+  },
+]
+
 const SIMPLE_ICONS = {
   discord:'discord', twitter:'x', github:'github', gitlab:'gitlab',
   instagram:'instagram', facebook:'facebook', spotify:'spotify', soundcloud:'soundcloud',
@@ -71,78 +120,22 @@ function getTextColor(platformId) {
 // ─── Link Icon Tile ────────────────────────────────────────────────────────────
 function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44, showLabel = true }) {
   const [copied, setCopied] = useState(false)
-
   const handleCopy = () => {
     const text = link.url || link.title || ''
     if (!text) return
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500) })
   }
-
   return (
-    <div
-      onClick={handleCopy}
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', position: 'relative', width: Math.max(64, iconSize) }}
-      className="link-icon-tile"
-    >
-      <div
-        className="link-del-btn"
-        onClick={e => { e.stopPropagation(); onDelete() }}
-        title="Remove"
-        style={{
-          position: 'absolute', top: -5, right: 2,
-          width: 18, height: 18, borderRadius: '50%',
-          background: '#e03030', border: '2px solid #050202',
-          color: '#fff', fontSize: 11, fontWeight: 700,
-          display: 'none', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer', zIndex: 2, lineHeight: 1,
-        }}
-      >×</div>
-
-      <div
-        className="link-icon-wrap"
-        style={{
-          width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27),
-          background: link.iconDataUrl ? 'transparent' : platform.color,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: link.iconDataUrl ? 'none' : `0 4px 16px ${platform.color}55`,
-          transition: 'transform .15s, box-shadow .15s',
-          overflow: 'hidden', flexShrink: 0,
-        }}
-      >
-        {link.iconDataUrl
-          ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          : platform.id === 'email'
-            ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-            : SIMPLE_ICONS[platform.id]
-              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
-              : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
-        }
+    <div onClick={handleCopy} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer', position: 'relative', width: Math.max(64, iconSize) }} className="link-icon-tile">
+      <div className="link-del-btn" onClick={e => { e.stopPropagation(); onDelete() }} title="Remove" style={{ position: 'absolute', top: -5, right: 2, width: 18, height: 18, borderRadius: '50%', background: '#e03030', border: '2px solid #050202', color: '#fff', fontSize: 11, fontWeight: 700, display: 'none', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: 2, lineHeight: 1 }}>×</div>
+      <div className="link-icon-wrap" style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: link.iconDataUrl ? 'transparent' : platform.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: link.iconDataUrl ? 'none' : `0 4px 16px ${platform.color}55`, transition: 'transform .15s, box-shadow .15s', overflow: 'hidden', flexShrink: 0 }}>
+        {link.iconDataUrl ? <img src={link.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          : platform.id === 'email' ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+          : SIMPLE_ICONS[platform.id] ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
+          : <span style={{ fontSize: 14, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>}
       </div>
-
- {showLabel && (
-        <span style={{
-          fontSize: 10, color: 'rgba(255,255,255,0.45)',
-          textAlign: 'center', lineHeight: 1.3,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          maxWidth: Math.max(64, iconSize),
-        }}>
-          {link.title || platform.name}
-        </span>
-      )}
-
-      {copied && (
-        <span style={{
-          position: 'absolute', bottom: -22, left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(0,0,0,0.85)', border: '1px solid rgba(224,48,48,0.3)',
-          color: '#fff', fontSize: 9, padding: '2px 7px', borderRadius: 99,
-          whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10,
-          animation: 'fadeInUp .2s ease',
-        }}>Copied!</span>
-      )}
+      {showLabel && <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: Math.max(64, iconSize) }}>{link.title || platform.name}</span>}
+      {copied && <span style={{ position: 'absolute', bottom: -22, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.85)', border: '1px solid rgba(224,48,48,0.3)', color: '#fff', fontSize: 9, padding: '2px 7px', borderRadius: 99, whiteSpace: 'nowrap', pointerEvents: 'none', zIndex: 10, animation: 'fadeInUp .2s ease' }}>Copied!</span>}
     </div>
   )
 }
@@ -176,28 +169,12 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
   const avgDaily = weekData.length > 0 ? (weekTotal / weekData.length).toFixed(1) : '0'
   const maxCount = Math.max(...weekData.map(d => d.count), 1)
   const chartW = 1000, chartH = 200
-
-  const linePath = (() => {
-    if (weekData.length < 2) return ''
-    const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`)
-    return `M ${pts.join(' L ')}`
-  })()
-  const areaPath = (() => {
-    if (weekData.length < 2) return ''
-    const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`)
-    return `M 0,${chartH} L ${pts.join(' L ')} L ${chartW},${chartH} Z`
-  })()
+  const linePath = (() => { if (weekData.length < 2) return ''; const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`); return `M ${pts.join(' L ')}` })()
+  const areaPath = (() => { if (weekData.length < 2) return ''; const pts = weekData.map((d, i) => `${(i / (weekData.length - 1)) * chartW},${chartH - (d.count / maxCount) * (chartH - 20) - 10}`); return `M 0,${chartH} L ${pts.join(' L ')} L ${chartW},${chartH} Z` })()
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-      <style>{`
-        .an-stat { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 20px; transition: border-color .15s, transform .15s; position: relative; overflow: hidden; }
-        .an-stat:hover { border-color: rgba(224,48,48,0.3); transform: translateY(-2px); }
-        .an-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; }
-        @media(max-width:900px){ .an-stat-grid { grid-template-columns: 1fr 1fr; } }
-        @media(max-width:480px){ .an-stat-grid { grid-template-columns: 1fr 1fr; } }
-      `}</style>
-
+      <style>{`.an-stat { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; padding: 20px; transition: border-color .15s, transform .15s; } .an-stat:hover { border-color: rgba(224,48,48,0.3); transform: translateY(-2px); } .an-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 20px; } @media(max-width:900px){ .an-stat-grid { grid-template-columns: 1fr 1fr; } }`}</style>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Analytics</div>
@@ -206,25 +183,15 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
         </div>
         <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>← Back</button>
       </div>
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Time Range</span>
         {lastUpdated && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(224,48,48,0.08)', border: '1px solid rgba(224,48,48,0.2)', borderRadius: 999, padding: '4px 12px' }}>Updated {lastUpdated}</span>}
         <select value={timeRange} onChange={e => setTimeRange(e.target.value)} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, color: '#fff', fontSize: 12, padding: '8px 12px', outline: 'none', fontFamily: 'inherit', cursor: 'pointer' }}>
-          <option value="3">Last 3 days</option>
-          <option value="7">Last 7 days</option>
-          <option value="14">Last 14 days</option>
-          <option value="30">Last 30 days</option>
+          <option value="3">Last 3 days</option><option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option>
         </select>
       </div>
-
       <div className="an-stat-grid">
-        {[
-          { label: 'Total Views', value: profileViews.toLocaleString(), sub: 'All time' },
-          { label: 'Period Views', value: weekTotal.toLocaleString(), sub: `Last ${timeRange} days` },
-          { label: 'Daily Average', value: avgDaily, sub: 'Per day' },
-          { label: 'Today', value: viewsToday.toLocaleString(), sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) },
-        ].map((s, i) => (
+        {[{ label: 'Total Views', value: profileViews.toLocaleString(), sub: 'All time' }, { label: 'Period Views', value: weekTotal.toLocaleString(), sub: `Last ${timeRange} days` }, { label: 'Daily Average', value: avgDaily, sub: 'Per day' }, { label: 'Today', value: viewsToday.toLocaleString(), sub: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }].map((s, i) => (
           <div key={i} className="an-stat">
             <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.4)', marginBottom: 10 }}>{s.label}</div>
             <div style={{ fontSize: 32, fontWeight: 700, color: '#fff', lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
@@ -232,42 +199,23 @@ function AnalyticsPage({ username, profileViews, viewsToday, onBack }) {
           </div>
         ))}
       </div>
-
       <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, padding: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 10 }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>Profile Views</div>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', background: 'rgba(224,48,48,0.06)', border: '1px solid rgba(224,48,48,0.15)', borderRadius: 999, padding: '4px 12px' }}>Unique visitors only</div>
         </div>
-        {loadingWeek ? (
-          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading…</div>
-        ) : weekTotal === 0 ? (
-          <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No views yet — share your profile to get started!</div>
-        ) : (
-          <div style={{ width: '100%', position: 'relative' }}>
+        {loadingWeek ? <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>Loading…</div>
+          : weekTotal === 0 ? <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No views yet — share your profile to get started!</div>
+          : <div style={{ width: '100%', position: 'relative' }}>
             <svg viewBox={`0 0 ${chartW} ${chartH}`} style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }} preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#e03030" stopOpacity="0.2"/>
-                  <stop offset="100%" stopColor="#e03030" stopOpacity="0.02"/>
-                </linearGradient>
-              </defs>
-              {[0.25,0.5,0.75,1].map((v,i) => (
-                <line key={i} x1="0" y1={chartH - v*(chartH-20)-10} x2={chartW} y2={chartH - v*(chartH-20)-10} stroke="rgba(224,48,48,0.06)" strokeWidth="1"/>
-              ))}
+              <defs><linearGradient id="areaGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e03030" stopOpacity="0.2"/><stop offset="100%" stopColor="#e03030" stopOpacity="0.02"/></linearGradient></defs>
+              {[0.25,0.5,0.75,1].map((v,i) => <line key={i} x1="0" y1={chartH - v*(chartH-20)-10} x2={chartW} y2={chartH - v*(chartH-20)-10} stroke="rgba(224,48,48,0.06)" strokeWidth="1"/>)}
               {areaPath && <path d={areaPath} fill="url(#areaGrad2)"/>}
               {linePath && <path d={linePath} fill="none" stroke="#e03030" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
-              {weekData.map((d, i) => {
-                if (!d.count) return null
-                const x = (i / (weekData.length - 1)) * chartW
-                const y = chartH - (d.count / maxCount) * (chartH - 20) - 10
-                return <circle key={i} cx={x} cy={y} r="5" fill="#e03030" stroke="#050202" strokeWidth="2"/>
-              })}
+              {weekData.map((d, i) => { if (!d.count) return null; const x = (i / (weekData.length - 1)) * chartW; const y = chartH - (d.count / maxCount) * (chartH - 20) - 10; return <circle key={i} cx={x} cy={y} r="5" fill="#e03030" stroke="#050202" strokeWidth="2"/> })}
             </svg>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, padding: '0 2px' }}>
-              {weekData.map((d, i) => <span key={i} style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{d.label}</span>)}
-            </div>
-          </div>
-        )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, padding: '0 2px' }}>{weekData.map((d, i) => <span key={i} style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }}>{d.label}</span>)}</div>
+          </div>}
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', marginTop: 12 }}>Each data point represents unique visitor count per day.</div>
       </div>
     </div>
@@ -389,12 +337,9 @@ function PreviewPanel({ bgColor, bgPreview, opacity, blur, accentColor, avatarPo
                 const previewSize = Math.round((iconSize / 44) * 28)
                 return (
                   <div key={i} style={{ width: previewSize, height: previewSize, borderRadius: Math.round(previewSize * 0.27), background: l.iconDataUrl ? 'transparent' : p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: l.iconDataUrl ? 'none' : `0 2px 8px ${p.color}55`, overflow: 'hidden' }}>
-                    {l.iconDataUrl
-                      ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                      : SIMPLE_ICONS[p.id]
-                        ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
-                        : <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>
-                    }
+                    {l.iconDataUrl ? <img src={l.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      : SIMPLE_ICONS[p.id] ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
+                      : <span style={{ fontSize: 8, fontWeight: 800, color: getTextColor(p.id) }}>{PLATFORM_ABBR[p.id] || '?'}</span>}
                   </div>
                 )
               })}
@@ -428,11 +373,7 @@ function AddLinkModal({ platform, onClose, onAdd }) {
   const handleConfirm = () => {
     if (tab === 'link') {
       if (!value.trim()) return
-      const url = platform.prefix === 'mailto:'
-        ? `mailto:${value.trim()}`
-        : platform.prefix
-          ? `https://${platform.prefix}${value.trim()}`
-          : value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`
+      const url = platform.prefix === 'mailto:' ? `mailto:${value.trim()}` : platform.prefix ? `https://${platform.prefix}${value.trim()}` : value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`
       onAdd({ platform, title: platform.name, url, type: 'link', iconDataUrl })
     } else {
       if (!textValue.trim()) return
@@ -449,81 +390,44 @@ function AddLinkModal({ platform, onClose, onAdd }) {
         <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
         </button>
-
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: platform.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: `0 4px 12px ${platform.color}55`, overflow: 'hidden' }}>
-            {iconDataUrl
-              ? <img src={iconDataUrl} alt="icon" style={{ width: 24, height: 24, objectFit: 'contain', borderRadius: 5 }} />
-              : platform.id === 'email'
-                ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-                : SIMPLE_ICONS[platform.id]
-                  ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '65%', height: '65%', objectFit: 'contain' }} />
-                  : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>
-            }
+            {iconDataUrl ? <img src={iconDataUrl} alt="icon" style={{ width: 24, height: 24, objectFit: 'contain', borderRadius: 5 }} />
+              : platform.id === 'email' ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+              : SIMPLE_ICONS[platform.id] ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[platform.id]}/ffffff`} alt={platform.name} style={{ width: '65%', height: '65%', objectFit: 'contain' }} />
+              : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(platform.id) }}>{abbr}</span>}
           </div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, margin: 0 }}>
-            Add <span style={{ color: '#e03030' }}>{platform.name}</span>
-          </h2>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 17, fontWeight: 700, margin: 0 }}>Add <span style={{ color: '#e03030' }}>{platform.name}</span></h2>
         </div>
-        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, paddingLeft: 48 }}>
-          {platform.id === 'custom' ? 'Add a custom link to your profile' : `Add your ${platform.name} to your profile`}
-        </p>
-
+        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 20, paddingLeft: 48 }}>{platform.id === 'custom' ? 'Add a custom link to your profile' : `Add your ${platform.name} to your profile`}</p>
         <div style={{ display: 'flex', gap: 6, marginBottom: 18, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 4, border: '1px solid rgba(255,255,255,0.06)' }}>
-          {['link','text'].map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: 7, borderRadius: 7, border: tab === t ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent', background: tab === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: tab === t ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', textTransform: 'capitalize' }}>{t}</button>
-          ))}
+          {['link','text'].map(t => <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: 7, borderRadius: 7, border: tab === t ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent', background: tab === t ? 'rgba(255,255,255,0.07)' : 'transparent', color: tab === t ? '#fff' : 'rgba(255,255,255,0.4)', fontSize: 12, fontWeight: 500, cursor: 'pointer', transition: 'all .15s', fontFamily: 'inherit', textTransform: 'capitalize' }}>{t}</button>)}
         </div>
-
-        {(platform.id === 'custom') && (
+        {platform.id === 'custom' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Custom Icon (optional)</label>
             <input type="file" ref={fileRef} accept="image/*" style={{ display: 'none' }} onChange={handleIconUpload} />
             <div onClick={() => fileRef.current.click()} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 12, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, cursor: 'pointer', fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-              {iconDataUrl
-                ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 7 }} />
-                : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              }
+              {iconDataUrl ? <img src={iconDataUrl} alt="icon" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 7 }} /> : <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>}
               <span>{iconDataUrl ? iconName : 'Upload icon image (PNG, SVG, etc.)'}</span>
             </div>
           </div>
         )}
-
         {tab === 'link' && (
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>
-              {platform.id === 'email' ? 'Email Address' : platform.prefix ? 'Username' : 'URL'}
-            </label>
+            <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>{platform.id === 'email' ? 'Email Address' : platform.prefix ? 'Username' : 'URL'}</label>
             <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
-              {platform.prefix && platform.prefix !== 'mailto:' && (
-                <span style={{ padding: '0 8px 0 12px', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>{platform.prefix}</span>
-              )}
-              <input
-                autoFocus
-                value={value}
-                onChange={e => setValue(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleConfirm()}
-                placeholder={platform.placeholder || 'username'}
-                style={{ flex: 1, background: 'transparent', border: 'none', padding: (platform.prefix && platform.prefix !== 'mailto:') ? '11px 12px 11px 0' : '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
-              />
+              {platform.prefix && platform.prefix !== 'mailto:' && <span style={{ padding: '0 8px 0 12px', fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', flexShrink: 0 }}>{platform.prefix}</span>}
+              <input autoFocus value={value} onChange={e => setValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleConfirm()} placeholder={platform.placeholder || 'username'} style={{ flex: 1, background: 'transparent', border: 'none', padding: (platform.prefix && platform.prefix !== 'mailto:') ? '11px 12px 11px 0' : '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }} />
             </div>
           </div>
         )}
-
         {tab === 'text' && (
           <div style={{ marginBottom: 14 }}>
             <label style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: 6 }}>Display Text</label>
-            <input
-              autoFocus
-              value={textValue}
-              onChange={e => setTextValue(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleConfirm()}
-              placeholder="What should visitors see?"
-              style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }}
-            />
+            <input autoFocus value={textValue} onChange={e => setTextValue(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleConfirm()} placeholder="What should visitors see?" style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 12px', fontSize: 13, color: '#fff', fontFamily: 'Inter, sans-serif', outline: 'none', height: 44, boxSizing: 'border-box' }} />
           </div>
         )}
-
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 8 }}>
           <BtnGhost onClick={onClose}>Cancel</BtnGhost>
           <BtnAccent onClick={handleConfirm}>+ Add Link</BtnAccent>
@@ -553,7 +457,6 @@ export default function Dashboard() {
   const [showPassword, setShowPassword] = useState(false)
   const [profileViews, setProfileViews] = useState(0)
   const [viewsToday, setViewsToday] = useState(0)
-
   const [appBio, setAppBio] = useState('')
   const [discordPresence, setDiscordPresence] = useState('Enabled')
   const [usernameFx, setUsernameFx] = useState('')
@@ -567,7 +470,6 @@ export default function Dashboard() {
   const [cursorPreview, setCursorPreview] = useState(null)
   const [audioName, setAudioName] = useState(null)
   const [uploadingType, setUploadingType] = useState(null)
-
   const [appearTab, setAppearTab] = useState('Presets')
   const [selectedPreset, setSelectedPreset] = useState('Crimson')
   const [bgType, setBgType] = useState('Solid')
@@ -575,14 +477,12 @@ export default function Dashboard() {
   const [glowIntensity, setGlowIntensity] = useState(50)
   const [accentColor, setAccentColor] = useState('#e03030')
   const [bgColor, setBgColor] = useState('#050202')
-
   const [effectsTab, setEffectsTab] = useState('Particles')
   const [particleEnabled, setParticleEnabled] = useState(false)
   const [particleStyle, setParticleStyle] = useState('Dots')
   const [cursorStyle, setCursorStyle] = useState('Default')
   const [entranceAnim, setEntranceAnim] = useState('Fade In')
   const [clickEffect, setClickEffect] = useState('None')
-
   const [musicEnabled, setMusicEnabled] = useState(false)
   const [musicType, setMusicType] = useState('direct')
   const [musicUrl, setMusicUrl] = useState('')
@@ -593,7 +493,6 @@ export default function Dashboard() {
   const [musicShowTitle, setMusicShowTitle] = useState(true)
   const [musicShowPlayer, setMusicShowPlayer] = useState(true)
   const [musicShowArtist, setMusicShowArtist] = useState(true)
-
   const [profileTab, setProfileTab] = useState('Identity')
   const [panelSize, setPanelSize] = useState('medium')
   const [showAvatar, setShowAvatar] = useState(true)
@@ -605,15 +504,12 @@ export default function Dashboard() {
   const [enterShowAvatar, setEnterShowAvatar] = useState(true)
   const [enterShowTitle, setEnterShowTitle] = useState(true)
   const [enterShowSubtitle, setEnterShowSubtitle] = useState(true)
-
   const [activeLinkPlatform, setActiveLinkPlatform] = useState(null)
   const [iconSize, setIconSize] = useState(44)
-  const [showLinkLabels, setShowLinkLabels] = useState(true)  // ← ADD THIS
-
+  const [showLinkLabels, setShowLinkLabels] = useState(true)
   const [showAddBtnModal, setShowAddBtnModal] = useState(false)
   const [newBtnLabel, setNewBtnLabel] = useState('')
   const [newBtnUrl, setNewBtnUrl] = useState('')
-
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [avatarDDOpen, setAvatarDDOpen] = useState(false)
@@ -623,51 +519,15 @@ export default function Dashboard() {
   const fileCursorRef = useRef()
   const fileAudioRef = useRef()
 
-  const showToast = (msg) => {
-    setToast(msg); setToastVisible(true)
-    setTimeout(() => setToastVisible(false), 2500)
-  }
+  const showToast = (msg) => { setToast(msg); setToastVisible(true); setTimeout(() => setToastVisible(false), 2500) }
 
   const buildSettings = () => ({
-    font: selectedFont,
-    accentColor,
-    bgColor,
-    bgType,
-    glowIntensity,
-    particleEnabled,
-    particleStyle,
-    cursorStyle,
-    entranceAnim,
-    clickEffect,
-    music: {
-      enabled: musicEnabled,
-      type: musicType,
-      url: musicUrl,
-      title: musicTitle,
-      artist: musicArtist,
-      autoplay: musicAutoplay,
-      volume: musicVolume,
-      showTitle: musicShowTitle,
-      showArtist: musicShowArtist,
-      showPlayer: musicShowPlayer,
-    },
-    layout: {
-      panelSize,
-      showAvatar,
-      avatarPos,
-      typingBio,
-    },
-    entrance: {
-      enabled: enterEnabled,
-      title: enterTitle,
-      subtitle: enterSubtitle,
-      showAvatar: enterShowAvatar,
-      showTitle: enterShowTitle,
-      showSubtitle: enterShowSubtitle,
-    },
-iconSize,
-showLinkLabels,
-buttons,
+    font: selectedFont, accentColor, bgColor, bgType, glowIntensity, particleEnabled, particleStyle,
+    cursorStyle, entranceAnim, clickEffect,
+    music: { enabled: musicEnabled, type: musicType, url: musicUrl, title: musicTitle, artist: musicArtist, autoplay: musicAutoplay, volume: musicVolume, showTitle: musicShowTitle, showArtist: musicShowArtist, showPlayer: musicShowPlayer },
+    layout: { panelSize, showAvatar, avatarPos, typingBio },
+    entrance: { enabled: enterEnabled, title: enterTitle, subtitle: enterSubtitle, showAvatar: enterShowAvatar, showTitle: enterShowTitle, showSubtitle: enterShowSubtitle },
+    iconSize, showLinkLabels, buttons,
   })
 
   const applySettings = (s) => {
@@ -682,37 +542,11 @@ buttons,
     if (s.cursorStyle) setCursorStyle(s.cursorStyle)
     if (s.entranceAnim) setEntranceAnim(s.entranceAnim)
     if (s.clickEffect) setClickEffect(s.clickEffect)
-    if (s.music) {
-      const m = s.music
-      if (m.enabled !== undefined) setMusicEnabled(m.enabled)
-      if (m.type) setMusicType(m.type)
-      if (m.url) setMusicUrl(m.url)
-      if (m.title) setMusicTitle(m.title)
-      if (m.artist) setMusicArtist(m.artist)
-      if (m.autoplay !== undefined) setMusicAutoplay(m.autoplay)
-      if (m.volume !== undefined) setMusicVolume(m.volume)
-      if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle)
-      if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist)
-      if (m.showPlayer !== undefined) setMusicShowPlayer(m.showPlayer)
-    }
-    if (s.layout) {
-      const l = s.layout
-      if (l.panelSize) setPanelSize(l.panelSize)
-      if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar)
-      if (l.avatarPos) setAvatarPos(l.avatarPos)
-      if (l.typingBio !== undefined) setTypingBio(l.typingBio)
-    }
-    if (s.entrance) {
-      const e = s.entrance
-      if (e.enabled !== undefined) setEnterEnabled(e.enabled)
-      if (e.title) setEnterTitle(e.title)
-      if (e.subtitle) setEnterSubtitle(e.subtitle)
-      if (e.showAvatar !== undefined) setEnterShowAvatar(e.showAvatar)
-      if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle)
-      if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle)
-    }
+    if (s.music) { const m = s.music; if (m.enabled !== undefined) setMusicEnabled(m.enabled); if (m.type) setMusicType(m.type); if (m.url) setMusicUrl(m.url); if (m.title) setMusicTitle(m.title); if (m.artist) setMusicArtist(m.artist); if (m.autoplay !== undefined) setMusicAutoplay(m.autoplay); if (m.volume !== undefined) setMusicVolume(m.volume); if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle); if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist); if (m.showPlayer !== undefined) setMusicShowPlayer(m.showPlayer) }
+    if (s.layout) { const l = s.layout; if (l.panelSize) setPanelSize(l.panelSize); if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar); if (l.avatarPos) setAvatarPos(l.avatarPos); if (l.typingBio !== undefined) setTypingBio(l.typingBio) }
+    if (s.entrance) { const e = s.entrance; if (e.enabled !== undefined) setEnterEnabled(e.enabled); if (e.title) setEnterTitle(e.title); if (e.subtitle) setEnterSubtitle(e.subtitle); if (e.showAvatar !== undefined) setEnterShowAvatar(e.showAvatar); if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle); if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle) }
     if (s.iconSize) setIconSize(s.iconSize)
-    if (s.showLinkLabels !== undefined) setShowLinkLabels(s.showLinkLabels)  // ← ADD THIS
+    if (s.showLinkLabels !== undefined) setShowLinkLabels(s.showLinkLabels)
     if (Array.isArray(s.buttons)) setButtons(s.buttons)
   }
 
@@ -723,26 +557,17 @@ buttons,
       setUser(session.user)
       const { data } = await supabase.from('users').select('*').eq('email', session.user.email).single()
       if (data) {
-        setUsername(data.username || '')
-        setBio(data.bio || '')
-        setLinks(data.links || [])
-        setAppBio(data.bio || '')
-        setOpacity(data.opacity ?? 100)
-        setBlur(data.blur ?? 0)
-        setUsernameFx(data.username_fx || '')
-        setBgFx(data.bg_fx || 'none')
-        setLocation(data.location || '')
-        setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
+        setUsername(data.username || ''); setBio(data.bio || ''); setLinks(data.links || []); setAppBio(data.bio || '')
+        setOpacity(data.opacity ?? 100); setBlur(data.blur ?? 0); setUsernameFx(data.username_fx || ''); setBgFx(data.bg_fx || 'none')
+        setLocation(data.location || ''); setGlowState(data.glow_settings || { username: true, socials: true, badges: false })
         setDiscordPresence(data.discord_presence || 'Enabled')
         if (data.avatar_url) setAvatarPreview(data.avatar_url)
-        setDisplayName(data.display_name || '')
-        setDbUser(data)
+        setDisplayName(data.display_name || ''); setDbUser(data)
         if (data.bg_url) setBgPreview(data.bg_url)
         if (data.cursor_url) setCursorPreview(data.cursor_url)
         if (data.audio_url) setAudioName('Uploaded ✓')
         setUid(data.id ? String(data.id) : '')
-        if (data.settings) applySettings(data.settings)
-        else setEnterTitle(data.username || '')
+        if (data.settings) applySettings(data.settings); else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
       }
       setLoading(false)
@@ -771,10 +596,7 @@ buttons,
     const url = urlData.publicUrl
     const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
     await supabase.from('users').update({ [colMap[type]]: url }).eq('username', username)
-    if (type === 'bg') setBgPreview(url)
-    else if (type === 'avatar') setAvatarPreview(url)
-    else if (type === 'cursor') setCursorPreview(url)
-    else if (type === 'audio') setAudioName(file.name)
+    if (type === 'bg') setBgPreview(url); else if (type === 'avatar') setAvatarPreview(url); else if (type === 'cursor') setCursorPreview(url); else if (type === 'audio') setAudioName(file.name)
     showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded!`)
     setUploadingType(null)
   }
@@ -782,114 +604,33 @@ buttons,
   const removeAsset = async (type) => {
     const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
     await supabase.from('users').update({ [colMap[type]]: null }).eq('username', username)
-    if (type === 'bg') setBgPreview(null)
-    else if (type === 'avatar') setAvatarPreview(null)
-    else if (type === 'cursor') setCursorPreview(null)
-    else if (type === 'audio') setAudioName(null)
+    if (type === 'bg') setBgPreview(null); else if (type === 'avatar') setAvatarPreview(null); else if (type === 'cursor') setCursorPreview(null); else if (type === 'audio') setAudioName(null)
     showToast('Removed')
   }
 
-  const saveProfile = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const { error } = await supabase.from('users').update({
-      bio: appBio, links, display_name: displayName, location, settings,
-    }).eq('username', username)
-    setSaving(false)
-    if (!error) setBio(appBio)
-    showToast(error ? 'Failed to save' : 'Profile saved!')
-  }
-
-  const saveAppearance = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const { error } = await supabase.from('users').update({
-      bio: appBio, opacity, blur, username_fx: usernameFx, bg_fx: bgFx,
-      location, glow_settings: glowState, discord_presence: discordPresence, settings,
-    }).eq('username', username)
-    setSaving(false)
-    if (!error) setBio(appBio)
-    showToast(error ? 'Failed to save' : 'Appearance saved!')
-  }
-
-  const saveEffects = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const { error } = await supabase.from('users').update({ settings }).eq('username', username)
-    setSaving(false)
-    showToast(error ? 'Failed to save' : 'Effects saved!')
-  }
-
-  const saveMusic = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const extraUpdate = musicEnabled && musicType === 'direct' && musicUrl ? { audio_url: musicUrl } : {}
-    const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username)
-    setSaving(false)
-    showToast(error ? 'Failed to save' : 'Music saved!')
-  }
-
-  const saveButtons = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const { error } = await supabase.from('users').update({ settings }).eq('username', username)
-    setSaving(false)
-    showToast(error ? 'Failed to save' : 'Buttons saved!')
-  }
-
-  const saveLinks = async () => {
-    setSaving(true)
-    const settings = buildSettings()
-    const { error } = await supabase.from('users').update({ links, settings }).eq('username', username)
-    setSaving(false)
-    showToast(error ? 'Failed to save' : 'Links saved!')
-  }
-
-  const handleAddLink = (linkObj) => {
-    setLinks(prev => [...prev, { ...linkObj, id: Date.now() }])
-    showToast('Link added! Remember to save.')
-  }
-
-  const deleteLink = (idx) => {
-    setLinks(prev => prev.filter((_, i) => i !== idx))
-    showToast('Link removed')
-  }
-
-  const addButton = () => {
-    if (!newBtnLabel.trim() || !newBtnUrl.trim()) { showToast('Please fill in both fields'); return }
-    const url = newBtnUrl.trim().startsWith('http') ? newBtnUrl.trim() : `https://${newBtnUrl.trim()}`
-    setButtons(prev => [...prev, { label: newBtnLabel.trim(), url, id: Date.now() }])
-    setNewBtnLabel(''); setNewBtnUrl(''); setShowAddBtnModal(false)
-    showToast('Button added! Remember to save.')
-  }
-
+  const saveProfile = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ bio: appBio, links, display_name: displayName, location, settings }).eq('username', username); setSaving(false); if (!error) setBio(appBio); showToast(error ? 'Failed to save' : 'Profile saved!') }
+  const saveAppearance = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ bio: appBio, opacity, blur, username_fx: usernameFx, bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence, settings }).eq('username', username); setSaving(false); if (!error) setBio(appBio); showToast(error ? 'Failed to save' : 'Appearance saved!') }
+  const saveEffects = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Effects saved!') }
+  const saveMusic = async () => { setSaving(true); const settings = buildSettings(); const extraUpdate = musicEnabled && musicType === 'direct' && musicUrl ? { audio_url: musicUrl } : {}; const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Music saved!') }
+  const saveButtons = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Buttons saved!') }
+  const saveLinks = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ links, settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Links saved!') }
+  const handleAddLink = (linkObj) => { setLinks(prev => [...prev, { ...linkObj, id: Date.now() }]); showToast('Link added! Remember to save.') }
+  const deleteLink = (idx) => { setLinks(prev => prev.filter((_, i) => i !== idx)); showToast('Link removed') }
+  const addButton = () => { if (!newBtnLabel.trim() || !newBtnUrl.trim()) { showToast('Please fill in both fields'); return }; const url = newBtnUrl.trim().startsWith('http') ? newBtnUrl.trim() : `https://${newBtnUrl.trim()}`; setButtons(prev => [...prev, { label: newBtnLabel.trim(), url, id: Date.now() }]); setNewBtnLabel(''); setNewBtnUrl(''); setShowAddBtnModal(false); showToast('Button added! Remember to save.') }
   const navTo = (page) => { setActivePage(page); setSidebarOpen(false); setNotifOpen(false); setAvatarDDOpen(false) }
   const initial = username ? username[0].toUpperCase() : '?'
 
-  const presets = [
-    ['Crimson','#1a0000','#e03030'],['Obsidian','#050505','#6366f1'],
-    ['Sunset','#1a0800','#f97316'],['Rose','#240b1a','#fb7185'],
-    ['Lime','#060b02','#84cc16'],['Ice','#07131d','#7dd3fc'],
-    ['Gold','#140f02','#facc15'],['Cherry','#15030b','#f43f5e'],
-    ['Ocean','#03111c','#0ea5e9'],['Violet','#0a0517','#8b5cf6'],
-  ]
-
+  const presets = [['Crimson','#1a0000','#e03030'],['Obsidian','#050505','#6366f1'],['Sunset','#1a0800','#f97316'],['Rose','#240b1a','#fb7185'],['Lime','#060b02','#84cc16'],['Ice','#07131d','#7dd3fc'],['Gold','#140f02','#facc15'],['Cherry','#15030b','#f43f5e'],['Ocean','#03111c','#0ea5e9'],['Violet','#0a0517','#8b5cf6']]
   const fonts = ['Inter','Syne','Space Mono','Roboto','Poppins','Montserrat','Sora','DM Sans','Manrope','JetBrains Mono','Bebas Neue','Playfair Display']
   const particles = ['Dots','Stars','Snow','Bubbles','Fireflies','Sparks','Matrix','Confetti']
   const cursors = ['Default','Dot','Ring','Crosshair','Skull','Star','Heart','Arrow']
   const entranceAnims = ['Fade In','Slide Up','Zoom In','Glitch','None']
   const clickEffects = ['None','Sparks','Hearts','Stars','Explosion','Ripple']
 
-  if (loading) return (
-    <div style={{ background: '#050202', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Loading…</div>
-    </div>
-  )
+  if (loading) return <div style={{ background: '#050202', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ color: 'rgba(255,255,255,0.3)', fontFamily: 'Inter, sans-serif', fontSize: 14 }}>Loading…</div></div>
 
   const navLinks = [
-    { section: null, items: [
-      { id: 'overview', label: 'Overview', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> },
-    ]},
+    { section: null, items: [{ id: 'overview', label: 'Overview', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> }]},
     { section: 'PROFILE', items: [
       { id: 'profile', label: 'Edit Profile', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> },
       { id: 'appearance', label: 'Appearance', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8H12"/></svg> },
@@ -903,11 +644,11 @@ buttons,
       { id: 'templates', label: 'Templates', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg> },
     ]},
     { section: 'ACCOUNT', items: [
-  { id: 'analytics', label: 'Analytics', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
-  { id: 'badges', label: 'Badges', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg> },
-  { id: 'settings', label: 'Settings', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
-  { id: 'premium', label: 'Premium', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
-]},
+      { id: 'analytics', label: 'Analytics', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> },
+      { id: 'badges', label: 'Badges', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg> },
+      { id: 'settings', label: 'Settings', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> },
+      { id: 'premium', label: 'Premium', icon: <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+    ]},
   ]
 
   return (
@@ -917,9 +658,7 @@ buttons,
         @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { color-scheme: dark; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(224,48,48,0.2); border-radius: 2px; }
+        ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: rgba(224,48,48,0.2); border-radius: 2px; }
         .nav-link-btn { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:10px; font-size:13px; font-weight:500; color:rgba(255,255,255,0.35); cursor:pointer; border:none; background:transparent; width:100%; text-align:left; transition:background .15s, color .15s; font-family:inherit; }
         .nav-link-btn:hover { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.7); }
         .nav-link-btn.active { background:rgba(224,48,48,0.10); color:#e03030; }
@@ -943,101 +682,76 @@ buttons,
         .preset-btn { display:flex; flex-direction:column; align-items:center; gap:8px; border-radius:12px; border:1px solid rgba(255,255,255,0.07); background:rgba(255,255,255,0.02); padding:10px; cursor:pointer; transition:all .15s; font-family:inherit; }
         .preset-btn:hover { border-color:rgba(255,255,255,0.09); background:rgba(255,255,255,0.04); }
         .preset-btn.selected { border-color:rgba(224,48,48,0.4); background:rgba(224,48,48,0.1); }
+        .badge-row { display:flex; align-items:center; gap:16px; padding:16px 20px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.05); border-radius:14px; transition:border-color .15s; }
+        .badge-row:hover { border-color:rgba(255,255,255,0.09); }
+        .badge-action-btn { padding:8px 18px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.6); font-family:inherit; transition:all .15s; white-space:nowrap; flex-shrink:0; }
+        .badge-action-btn:hover { background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.2); }
+        .badge-locked-icon { display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:13px; flex-shrink:0; }
         @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
         @keyframes fadeInUp { from{opacity:0;transform:translateX(-50%) translateY(4px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
         @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} .platforms-grid{grid-template-columns:repeat(5,1fr)!important;} }
         @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} .platforms-grid{grid-template-columns:repeat(4,1fr)!important;} }
       `}</style>
 
-   {/* ── SIDEBAR ── */}
- <div className="sidebar-desktop" style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.97)', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', zIndex: 20 }}>
-   <div style={{ height: 64, display: 'flex', alignItems: 'center', gap: 8, padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-     <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>
-       fate<span style={{ color: 'rgba(255,255,255,0.18)' }}>.</span><span style={{ color: '#e03030' }}>rip</span>
-     </span>
-   </div>
-   <nav style={{ flex: 1, padding: 12, paddingTop: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
-     {navLinks.map(({ section, items }) => (
-       <div key={section || 'root'}>
-         {section && <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0 12px', marginBottom: 4 }}>{section}</div>}
-         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-           {items.map(item => (
-             <button key={item.id} className={`nav-link-btn ${activePage === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
-               {item.icon}{item.label}
-               {activePage === item.id && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#e03030', flexShrink: 0 }} />}
-             </button>
-           ))}
-         </div>
-       </div>
-     ))}
-   </nav>
-   <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: 12 }}>
-     {/* Support section */}
-     <div style={{ marginBottom: 8 }}>
-       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 500, padding: '0 4px', marginBottom: 6 }}>Have a question or need support?</div>
-       <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer"
-         style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(224,48,48,0.1)', border: '1px solid rgba(224,48,48,0.22)', color: '#f87171', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
-         onMouseEnter={e => e.currentTarget.style.background = 'rgba(224,48,48,0.2)'}
-         onMouseLeave={e => e.currentTarget.style.background = 'rgba(224,48,48,0.1)'}
-       >
-         <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-           <svg width="11" height="11" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-         </div>
-         Help Center
-       </a>
-     </div>
-     {/* My Page section */}
-     <div style={{ marginBottom: 8 }}>
-       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 500, padding: '0 4px', marginBottom: 6 }}>Check out your page</div>
-       <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer"
-         style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(224,48,48,0.1)', border: '1px solid rgba(224,48,48,0.22)', color: '#f87171', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}
-         onMouseEnter={e => e.currentTarget.style.background = 'rgba(224,48,48,0.2)'}
-         onMouseLeave={e => e.currentTarget.style.background = 'rgba(224,48,48,0.1)'}
-       >
-         <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-           <svg width="11" height="11" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-         </div>
-         My Page
-       </a>
-     </div>
-     {/* Share Your Profile button */}
-     <button
-       onClick={() => { navigator.clipboard.writeText(`https://fate.rip/${username}`); showToast('Profile URL copied!') }}
-       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '11px 16px', borderRadius: 10, border: '1px solid rgba(224,48,48,0.4)', background: '#e03030', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 10 }}
-       onMouseEnter={e => e.currentTarget.style.background = '#c72828'}
-       onMouseLeave={e => e.currentTarget.style.background = '#e03030'}
-     >
-       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-       Share Your Profile
-     </button>
-     {/* User info row */}
-     <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-       <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#e03030', overflow: 'hidden', flexShrink: 0 }}>
-         {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
-       </div>
-       <div style={{ flex: 1, minWidth: 0 }}>
-         <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{username || 'User'}</div>
-         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: 'Space Mono, monospace' }}>UID {uid || '000000'}</div>
-       </div>
-       <div style={{ position: 'relative' }}>
-         <button
-           onClick={() => setAvatarDDOpen(p => !p)}
-           style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px 6px', borderRadius: 6, fontSize: 16, lineHeight: 1, letterSpacing: 1 }}
-           onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-           onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}
-         >•••</button>
-         {avatarDDOpen && (
-           <div style={{ position: 'absolute', bottom: 36, right: 0, width: 160, background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, overflow: 'hidden', zIndex: 50 }} onClick={e => e.stopPropagation()}>
-             {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => (
-               <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit' }}>{label}</button>
-             ))}
-             <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', padding: '11px 16px', fontSize: 13, color: '#e03030', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}>Log out</button>
-           </div>
-         )}
-       </div>
-     </div>
-   </div>
- </div>
+      {/* ── SIDEBAR ── */}
+      <div className="sidebar-desktop" style={{ width: 270, flexShrink: 0, display: 'flex', flexDirection: 'column', borderRight: '1px solid rgba(255,255,255,0.05)', background: 'rgba(5,2,2,0.97)', position: 'sticky', top: 0, height: '100vh', overflowY: 'auto', zIndex: 20 }}>
+        <div style={{ height: 64, display: 'flex', alignItems: 'center', gap: 8, padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <span style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 800, letterSpacing: '-0.02em' }}>fate<span style={{ color: 'rgba(255,255,255,0.18)' }}>.</span><span style={{ color: '#e03030' }}>rip</span></span>
+        </div>
+        <nav style={{ flex: 1, padding: 12, paddingTop: 16, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {navLinks.map(({ section, items }) => (
+            <div key={section || 'root'}>
+              {section && <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0 12px', marginBottom: 4 }}>{section}</div>}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {items.map(item => (
+                  <button key={item.id} className={`nav-link-btn ${activePage === item.id ? 'active' : ''}`} onClick={() => navTo(item.id)}>
+                    {item.icon}{item.label}
+                    {activePage === item.id && <span style={{ marginLeft: 'auto', width: 6, height: 6, borderRadius: '50%', background: '#e03030', flexShrink: 0 }} />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </nav>
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: 12 }}>
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 500, padding: '0 4px', marginBottom: 6 }}>Have a question or need support?</div>
+            <a href="https://discord.gg/faterip" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(224,48,48,0.1)', border: '1px solid rgba(224,48,48,0.22)', color: '#f87171', fontSize: 13, fontWeight: 600, textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(224,48,48,0.2)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(224,48,48,0.1)'}>
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg width="11" height="11" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+              Help Center
+            </a>
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontWeight: 500, padding: '0 4px', marginBottom: 6 }}>Check out your page</div>
+            <a href={username ? `/${username}` : '/'} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 10, background: 'rgba(224,48,48,0.1)', border: '1px solid rgba(224,48,48,0.22)', color: '#f87171', fontSize: 13, fontWeight: 600, textDecoration: 'none' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(224,48,48,0.2)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(224,48,48,0.1)'}>
+              <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(224,48,48,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg width="11" height="11" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+              My Page
+            </a>
+          </div>
+          <button onClick={() => { navigator.clipboard.writeText(`https://fate.rip/${username}`); showToast('Profile URL copied!') }} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '11px 16px', borderRadius: 10, border: '1px solid rgba(224,48,48,0.4)', background: '#e03030', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginBottom: 10 }} onMouseEnter={e => e.currentTarget.style.background = '#c72828'} onMouseLeave={e => e.currentTarget.style.background = '#e03030'}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share Your Profile
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#e03030', overflow: 'hidden', flexShrink: 0 }}>
+              {avatarPreview ? <img src={avatarPreview} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.85)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{username || 'User'}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', fontFamily: 'Space Mono, monospace' }}>UID {uid || '000000'}</div>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setAvatarDDOpen(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: '4px 6px', borderRadius: 6, fontSize: 16, lineHeight: 1, letterSpacing: 1 }} onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'} onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>•••</button>
+              {avatarDDOpen && (
+                <div style={{ position: 'absolute', bottom: 36, right: 0, width: 160, background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, overflow: 'hidden', zIndex: 50 }} onClick={e => e.stopPropagation()}>
+                  {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit' }}>{label}</button>)}
+                  <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', padding: '11px 16px', fontSize: 13, color: '#e03030', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}>Log out</button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ── MAIN AREA ── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', minWidth: 0, position: 'relative', zIndex: 1 }}>
@@ -1053,9 +767,7 @@ buttons,
             <svg width="14" height="14" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             {avatarDDOpen && (
               <div style={{ position: 'absolute', top: 48, right: 0, width: 200, background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 12, overflow: 'hidden', zIndex: 50 }} onClick={e => e.stopPropagation()}>
-                {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => (
-                  <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit' }}>{label}</button>
-                ))}
+                {[['Edit Profile','profile'],['Settings','settings']].map(([label, page]) => <button key={page} onClick={() => { navTo(page); setAvatarDDOpen(false) }} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: 'rgba(255,255,255,0.6)', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', fontFamily: 'inherit' }}>{label}</button>)}
                 <button onClick={handleLogout} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13, color: '#e03030', cursor: 'pointer', border: 'none', background: 'none', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}>Log out</button>
               </div>
             )}
@@ -1091,11 +803,7 @@ buttons,
                 </div>
               </div>
               <div className="stats-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
-                {[
-                  { label: 'Total Views', value: profileViews.toLocaleString(), color: '#e03030' },
-                  { label: 'Username', value: `@${username}`, color: '#f05050' },
-                  { label: 'UID', value: `#${uid || '0001'}`, color: '#b41414' },
-                ].map((s, i) => (
+                {[{ label: 'Total Views', value: profileViews.toLocaleString(), color: '#e03030' }, { label: 'Username', value: `@${username}`, color: '#f05050' }, { label: 'UID', value: `#${uid || '0001'}`, color: '#b41414' }].map((s, i) => (
                   <div key={i} className="stat-card-h">
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <div style={{ minWidth: 0, flex: 1, paddingRight: 12 }}>
@@ -1112,19 +820,10 @@ buttons,
               <div>
                 <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 12 }}>Quick Actions</div>
                 <div className="actions-grid-3" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
-                  {[
-                    { page: 'links', title: 'Links', desc: 'Add or edit your social links' },
-                    { page: 'profile', title: 'Edit Profile', desc: 'Update bio, avatar, and display name' },
-                    { page: 'buttons', title: 'Custom Buttons', desc: 'Create call-to-action buttons' },
-                    { page: 'appearance', title: 'Appearance', desc: 'Colors, fonts, and themes' },
-                    { page: 'effects', title: 'Effects', desc: 'Particles, cursors, and animations' },
-                    { page: 'music', title: 'Music', desc: 'Add background music' },
-                  ].map((item, i) => (
+                  {[{ page: 'links', title: 'Links', desc: 'Add or edit your social links' }, { page: 'profile', title: 'Edit Profile', desc: 'Update bio, avatar, and display name' }, { page: 'buttons', title: 'Custom Buttons', desc: 'Create call-to-action buttons' }, { page: 'appearance', title: 'Appearance', desc: 'Colors, fonts, and themes' }, { page: 'effects', title: 'Effects', desc: 'Particles, cursors, and animations' }, { page: 'music', title: 'Music', desc: 'Add background music' }].map((item, i) => (
                     <div key={i} className="action-card" onClick={() => navTo(item.page)}>
                       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e03030' }}>
-                          <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
-                        </div>
+                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg,rgba(224,48,48,0.2),rgba(180,20,20,0.2))', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e03030' }}><svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></div>
                         <span style={{ color: 'rgba(255,255,255,0.2)' }}><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></span>
                       </div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 4 }}>{item.title}</div>
@@ -1137,9 +836,7 @@ buttons,
           )}
 
           {/* ═══ ANALYTICS ═══ */}
-          {activePage === 'analytics' && (
-            <AnalyticsPage username={username} profileViews={profileViews} viewsToday={viewsToday} onBack={() => navTo('overview')} />
-          )}
+          {activePage === 'analytics' && <AnalyticsPage username={username} profileViews={profileViews} viewsToday={viewsToday} onBack={() => navTo('overview')} />}
 
           {/* ═══ PROFILE EDITOR ═══ */}
           {activePage === 'profile' && (
@@ -1148,7 +845,6 @@ buttons,
               <div className="editor-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <TabBar tabs={['Identity','Layout','Entrance']} active={profileTab} onSelect={setProfileTab} />
-
                   {profileTab === 'Identity' && (
                     <Card>
                       <CardHeader title="Profile Identity" sub="Your public-facing info" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>} />
@@ -1165,66 +861,32 @@ buttons,
                           {avatarPreview && <BtnGhost onClick={() => removeAsset('avatar')} style={{ fontSize: 11 }}>Remove</BtnGhost>}
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Display Name</label>
-                            <Input placeholder="Your name" value={displayName} onChange={e => setDisplayName(e.target.value)} />
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                            <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Location</label>
-                            <Input placeholder="City, Country" value={location} onChange={e => setLocation(e.target.value)} />
-                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Display Name</label><Input placeholder="Your name" value={displayName} onChange={e => setDisplayName(e.target.value)} /></div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Location</label><Input placeholder="City, Country" value={location} onChange={e => setLocation(e.target.value)} /></div>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Bio</label>
-                          <Textarea placeholder="Tell visitors about yourself…" value={appBio} onChange={e => setAppBio(e.target.value)} rows={4} />
-                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Bio</label><Textarea placeholder="Tell visitors about yourself…" value={appBio} onChange={e => setAppBio(e.target.value)} rows={4} /></div>
                         <ToggleRow label="Typing Bio Effect" sub="Animate bio text as it types in" checked={typingBio} onChange={e => setTypingBio(e.target.checked)} />
                       </div>
                     </Card>
                   )}
-
                   {profileTab === 'Layout' && (
                     <Card>
                       <CardHeader title="Profile Layout" sub="Control the structure of your page" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>} />
                       <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Panel Size</label>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            {['compact','medium','wide','full'].map(s => (
-                              <button key={s} onClick={() => setPanelSize(s)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${panelSize === s ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: panelSize === s ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: panelSize === s ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{s}</button>
-                            ))}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Avatar Position</label>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            {['left','center','right'].map(p => (
-                              <button key={p} onClick={() => setAvatarPos(p)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${avatarPos === p ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: avatarPos === p ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: avatarPos === p ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{p}</button>
-                            ))}
-                          </div>
-                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Panel Size</label><div style={{ display: 'flex', gap: 8 }}>{['compact','medium','wide','full'].map(s => <button key={s} onClick={() => setPanelSize(s)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${panelSize === s ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: panelSize === s ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: panelSize === s ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{s}</button>)}</div></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Avatar Position</label><div style={{ display: 'flex', gap: 8 }}>{['left','center','right'].map(p => <button key={p} onClick={() => setAvatarPos(p)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${avatarPos === p ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: avatarPos === p ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: avatarPos === p ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{p}</button>)}</div></div>
                         <ToggleRow label="Show Avatar" sub="Display your avatar on your profile" checked={showAvatar} onChange={e => setShowAvatar(e.target.checked)} />
                       </div>
                     </Card>
                   )}
-
                   {profileTab === 'Entrance' && (
                     <Card>
-                      <CardHeader title="Entrance Screen" sub="Show a splash screen before visitors see your profile"
-                        icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>}
-                        action={<Toggle checked={enterEnabled} onChange={e => setEnterEnabled(e.target.checked)} />}
-                      />
+                      <CardHeader title="Entrance Screen" sub="Show a splash screen before visitors see your profile" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>} action={<Toggle checked={enterEnabled} onChange={e => setEnterEnabled(e.target.checked)} />} />
                       {enterEnabled && (
                         <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Title</label>
-                              <Input placeholder="Enter title" value={enterTitle} onChange={e => setEnterTitle(e.target.value)} />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Subtitle</label>
-                              <Input placeholder="Click anywhere to enter" value={enterSubtitle} onChange={e => setEnterSubtitle(e.target.value)} />
-                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Title</label><Input placeholder="Enter title" value={enterTitle} onChange={e => setEnterTitle(e.target.value)} /></div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Subtitle</label><Input placeholder="Click anywhere to enter" value={enterSubtitle} onChange={e => setEnterSubtitle(e.target.value)} /></div>
                           </div>
                           <ToggleRow label="Show Avatar" checked={enterShowAvatar} onChange={e => setEnterShowAvatar(e.target.checked)} />
                           <ToggleRow label="Show Title" checked={enterShowTitle} onChange={e => setEnterShowTitle(e.target.checked)} />
@@ -1233,7 +895,6 @@ buttons,
                       )}
                     </Card>
                   )}
-
                   <SaveBar onSave={saveProfile} onDiscard={() => { setAppBio(bio); setDisplayName(dbUser?.display_name || ''); setLocation(dbUser?.location || '') }} saving={saving} />
                 </div>
                 <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} iconSize={iconSize} panelSize={panelSize} />
@@ -1249,91 +910,22 @@ buttons,
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                   <input type="file" ref={fileBgRef} accept="image/*,video/*" style={{ display: 'none' }} onChange={e => handleFileUpload('bg', e.target.files[0])} />
                   <TabBar tabs={['Presets','Colors','Fonts','Background','Glow']} active={appearTab} onSelect={setAppearTab} cols={5} />
-
-                  {appearTab === 'Presets' && (
-                    <Card>
-                      <CardHeader title="Theme Presets" sub="One-click themes with coordinated colors and effects" />
-                      <div style={{ padding: 24 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8 }}>
-                          {presets.map(([name, bg, acc]) => (
-                            <button key={name} className={`preset-btn ${selectedPreset === name ? 'selected' : ''}`} onClick={() => { setSelectedPreset(name); setAccentColor(acc); setBgColor(bg); showToast(`${name} applied! Save to keep it.`) }}>
-                              <div style={{ width: '100%', height: 36, borderRadius: 8, overflow: 'hidden', display: 'flex' }}>
-                                <div style={{ flex: 1, background: bg }} />
-                                <div style={{ width: 20, background: acc }} />
-                              </div>
-                              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{name}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-
-                  {appearTab === 'Colors' && (
-                    <Card>
-                      <CardHeader title="Color Settings" sub="Customize accent and background colors" />
-                      <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        {[['Accent Color', accentColor, setAccentColor],['Background Color', bgColor, setBgColor]].map(([lbl, val, setter]) => (
-                          <div key={lbl} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                            <div>
-                              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{lbl}</div>
-                              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono, monospace', marginTop: 4 }}>{val}</div>
-                            </div>
-                            <input type="color" value={val} onChange={e => setter(e.target.value)} style={{ width: 44, height: 44, border: 'none', borderRadius: 10, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', padding: 4 }} />
-                          </div>
-                        ))}
-                      </div>
-                    </Card>
-                  )}
-
-                  {appearTab === 'Fonts' && (
-                    <Card>
-                      <CardHeader title="Font Family" sub="Choose a font for your profile text" />
-                      <div style={{ padding: 24 }}>
-                        <div className="effect-grid">
-                          {fonts.map(f => (
-                            <button key={f} className={`effect-btn ${selectedFont === f ? 'active' : ''}`} style={{ fontFamily: `'${f}', sans-serif` }} onClick={() => setSelectedFont(f)}>{f}</button>
-                          ))}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-
+                  {appearTab === 'Presets' && <Card><CardHeader title="Theme Presets" sub="One-click themes with coordinated colors and effects" /><div style={{ padding: 24 }}><div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 8 }}>{presets.map(([name, bg, acc]) => <button key={name} className={`preset-btn ${selectedPreset === name ? 'selected' : ''}`} onClick={() => { setSelectedPreset(name); setAccentColor(acc); setBgColor(bg); showToast(`${name} applied! Save to keep it.`) }}><div style={{ width: '100%', height: 36, borderRadius: 8, overflow: 'hidden', display: 'flex' }}><div style={{ flex: 1, background: bg }} /><div style={{ width: 20, background: acc }} /></div><div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.6)' }}>{name}</div></button>)}</div></div></Card>}
+                  {appearTab === 'Colors' && <Card><CardHeader title="Color Settings" sub="Customize accent and background colors" /><div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>{[['Accent Color', accentColor, setAccentColor],['Background Color', bgColor, setBgColor]].map(([lbl, val, setter]) => <div key={lbl} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}><div><div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{lbl}</div><div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: 'Space Mono, monospace', marginTop: 4 }}>{val}</div></div><input type="color" value={val} onChange={e => setter(e.target.value)} style={{ width: 44, height: 44, border: 'none', borderRadius: 10, background: 'rgba(255,255,255,0.05)', cursor: 'pointer', padding: 4 }} /></div>)}</div></Card>}
+                  {appearTab === 'Fonts' && <Card><CardHeader title="Font Family" sub="Choose a font for your profile text" /><div style={{ padding: 24 }}><div className="effect-grid">{fonts.map(f => <button key={f} className={`effect-btn ${selectedFont === f ? 'active' : ''}`} style={{ fontFamily: `'${f}', sans-serif` }} onClick={() => setSelectedFont(f)}>{f}</button>)}</div></div></Card>}
                   {appearTab === 'Background' && (
                     <Card>
                       <CardHeader title="Background" sub="Choose how your profile background looks" />
                       <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Type</label>
-                          <div style={{ display: 'flex', gap: 8 }}>
-                            {['Solid','Gradient','Image','Video'].map(t => (
-                              <button key={t} onClick={() => setBgType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${bgType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: bgType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: bgType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>{t}</button>
-                            ))}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Background Effect</label>
-                          <select value={bgFx} onChange={e => setBgFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}>
-                            <option value="none">None</option><option value="nighttime">Night Time</option><option value="particles">Particles</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="matrix">Matrix</option>
-                          </select>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Opacity — {opacity}%</label>
-                          <input type="range" min={20} max={100} value={opacity} onChange={e => setOpacity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Blur — {blur}px</label>
-                          <input type="range" min={0} max={80} value={blur} onChange={e => setBlur(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
-                        </div>
-                        <div onClick={() => fileBgRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '32px 24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'rgba(255,255,255,0.01)' }}>
-                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-                          {uploadingType === 'bg' ? 'Uploading…' : bgPreview ? 'Replace background media' : 'Upload background media (max 25MB)'}
-                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Type</label><div style={{ display: 'flex', gap: 8 }}>{['Solid','Gradient','Image','Video'].map(t => <button key={t} onClick={() => setBgType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${bgType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: bgType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: bgType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s' }}>{t}</button>)}</div></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Background Effect</label><select value={bgFx} onChange={e => setBgFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}><option value="none">None</option><option value="nighttime">Night Time</option><option value="particles">Particles</option><option value="rain">Rain</option><option value="snow">Snow</option><option value="matrix">Matrix</option></select></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Opacity — {opacity}%</label><input type="range" min={20} max={100} value={opacity} onChange={e => setOpacity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} /></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Blur — {blur}px</label><input type="range" min={0} max={80} value={blur} onChange={e => setBlur(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} /></div>
+                        <div onClick={() => fileBgRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '32px 24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', background: 'rgba(255,255,255,0.01)' }}><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>{uploadingType === 'bg' ? 'Uploading…' : bgPreview ? 'Replace background media' : 'Upload background media (max 25MB)'}</div>
                         {bgPreview && <BtnGhost onClick={() => removeAsset('bg')} style={{ alignSelf: 'flex-start' }}>Remove Background</BtnGhost>}
                       </div>
                     </Card>
                   )}
-
                   {appearTab === 'Glow' && (
                     <Card>
                       <CardHeader title="Glow Effects" sub="Add glowing highlights to profile elements" />
@@ -1341,20 +933,11 @@ buttons,
                         <ToggleRow label="Glow Username" checked={glowState.username} onChange={e => setGlowState(p => ({ ...p, username: e.target.checked }))} />
                         <ToggleRow label="Glow Social Links" checked={glowState.socials} onChange={e => setGlowState(p => ({ ...p, socials: e.target.checked }))} />
                         <ToggleRow label="Glow Badges" checked={glowState.badges} onChange={e => setGlowState(p => ({ ...p, badges: e.target.checked }))} />
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Glow Intensity — {glowIntensity}%</label>
-                          <input type="range" min={0} max={100} value={glowIntensity} onChange={e => setGlowIntensity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Username Effect</label>
-                          <select value={usernameFx} onChange={e => setUsernameFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}>
-                            <option value="">None</option><option value="rainbow">🌈 Rainbow</option><option value="glitch">⚡ Glitch</option><option value="neon">✨ Neon</option><option value="gold">🏆 Gold</option>
-                          </select>
-                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Glow Intensity — {glowIntensity}%</label><input type="range" min={0} max={100} value={glowIntensity} onChange={e => setGlowIntensity(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} /></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Username Effect</label><select value={usernameFx} onChange={e => setUsernameFx(e.target.value)} style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '11px 14px', fontSize: 13, color: '#fff', fontFamily: 'inherit', outline: 'none', height: 44, appearance: 'none' }}><option value="">None</option><option value="rainbow">🌈 Rainbow</option><option value="glitch">⚡ Glitch</option><option value="neon">✨ Neon</option><option value="gold">🏆 Gold</option></select></div>
                       </div>
                     </Card>
                   )}
-
                   <SaveBar onSave={saveAppearance} onDiscard={() => showToast('Changes discarded')} saving={saving} />
                 </div>
                 <PreviewPanel bgColor={bgColor} bgPreview={bgPreview} opacity={opacity} blur={blur} accentColor={accentColor} avatarPos={avatarPos} selectedFont={selectedFont} showAvatar={showAvatar} avatarPreview={avatarPreview} initial={initial} displayName={displayName} username={username} appBio={appBio} links={links} iconSize={iconSize} panelSize={panelSize} />
@@ -1366,91 +949,33 @@ buttons,
           {activePage === 'links' && (
             <>
               <PageHeader breadcrumb="Dashboard · Links" title='Social <span style="color:#e03030">Links</span>' subtitle="Add your social media profiles and custom links" />
-
               <Card>
-                <CardHeader
-                  title="Your Links"
-                  sub="Hover to remove · visitors click icons to copy"
-                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>}
-                />
+                <CardHeader title="Your Links" sub="Hover to remove · visitors click icons to copy" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>} />
                 <div style={{ padding: '20px 24px 28px' }}>
-                  {links.length === 0 ? (
-                    <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>
-                      No links yet — pick a platform below to add one!
-                    </div>
-                  ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
-                      {links.map((l, i) => {
-                        const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }
-                        const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'
-                        return (
-                          <LinkIconTile key={l.id || i} link={l} platform={p} abbr={abbr} onDelete={() => deleteLink(i)} iconSize={iconSize} showLabel={showLinkLabels} />
-                        )
-                      })}
-                    </div>
-                  )}
+                  {links.length === 0 ? <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No links yet — pick a platform below to add one!</div>
+                    : <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>{links.map((l, i) => { const p = l.platform || { id: 'custom', name: l.title, color: '#e03030' }; const abbr = PLATFORM_ABBR[p.id] || p.name?.[0] || '?'; return <LinkIconTile key={l.id || i} link={l} platform={p} abbr={abbr} onDelete={() => deleteLink(i)} iconSize={iconSize} showLabel={showLinkLabels} /> })}</div>}
                 </div>
               </Card>
-
               <Card>
-                <CardHeader
-                  title="Add New Link"
-                  sub="Choose a platform or create a custom link"
-                  icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>}
-                />
+                <CardHeader title="Add New Link" sub="Choose a platform or create a custom link" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>} />
                 <div className="platforms-grid" style={{ display: 'grid', gap: 8, padding: '16px 22px 22px' }}>
-                  {PLATFORMS.map(p => {
-                    const abbr = PLATFORM_ABBR[p.id] || p.name[0]
-                    return (
-                      <button key={p.id} className="plat-btn" onClick={() => setActiveLinkPlatform(p)}>
-                        <div style={{ width: 36, height: 36, borderRadius: 10, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${p.color}55`, flexShrink: 0, overflow: 'hidden' }}>
-                          {p.id === 'email'
-                            ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-                            : SIMPLE_ICONS[p.id]
-                              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} />
-                              : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(p.id) }}>{abbr}</span>
-                          }
-                        </div>
-                        <span style={{ fontSize: 10, lineHeight: 1.2, textAlign: 'center' }}>{p.name}</span>
-                      </button>
-                    )
-                  })}
+                  {PLATFORMS.map(p => { const abbr = PLATFORM_ABBR[p.id] || p.name[0]; return <button key={p.id} className="plat-btn" onClick={() => setActiveLinkPlatform(p)}><div style={{ width: 36, height: 36, borderRadius: 10, background: p.color, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 10px ${p.color}55`, flexShrink: 0, overflow: 'hidden' }}>{p.id === 'email' ? <svg width="18" height="18" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg> : SIMPLE_ICONS[p.id] ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width: '60%', height: '60%', objectFit: 'contain' }} /> : <span style={{ fontSize: 12, fontWeight: 800, color: getTextColor(p.id) }}>{abbr}</span>}</div><span style={{ fontSize: 10, lineHeight: 1.2, textAlign: 'center' }}>{p.name}</span></button> })}
                 </div>
               </Card>
-
               <Card>
-              <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
+                <CardHeader title="Icon Size" sub="Adjust the size of your social link icons" />
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <ToggleRow
-                    label="Show Link Labels"
-                    sub="Display platform names below each icon"
-                    checked={showLinkLabels}
-                    onChange={e => setShowLinkLabels(e.target.checked)}
-                  />
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size</label>
-                    <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(224,48,48,0.3)', borderRadius: 8, padding: '2px 10px' }}>{iconSize}px</span>
-                  </div>
+                  <ToggleRow label="Show Link Labels" sub="Display platform names below each icon" checked={showLinkLabels} onChange={e => setShowLinkLabels(e.target.checked)} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Size</label><span style={{ fontSize: 13, fontWeight: 600, color: '#fff', background: 'rgba(224,48,48,0.15)', border: '1px solid rgba(224,48,48,0.3)', borderRadius: 8, padding: '2px 10px' }}>{iconSize}px</span></div>
                   <input type="range" min={32} max={72} value={iconSize} onChange={e => setIconSize(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030', height: 6, cursor: 'pointer' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.25)' }}>
-                    <span>Small (32px)</span><span>Large (72px)</span>
-                  </div>
-                  {/* Live preview of the size */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(255,255,255,0.25)' }}><span>Small (32px)</span><span>Large (72px)</span></div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, marginTop: 4 }}>
                     <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Preview:</span>
-                    {['discord','github','instagram','twitter'].map(id => (
-                      <div key={id} style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: PLATFORMS.find(p=>p.id===id)?.color || '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, transition: 'all .2s' }}>
-                        <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[id]}/ffffff`} alt={id} style={{ width: '55%', height: '55%', objectFit: 'contain' }} />
-                      </div>
-                    ))}
+                    {['discord','github','instagram','twitter'].map(id => <div key={id} style={{ width: iconSize, height: iconSize, borderRadius: Math.round(iconSize * 0.27), background: PLATFORMS.find(p=>p.id===id)?.color || '#333', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: 0, transition: 'all .2s' }}><img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[id]}/ffffff`} alt={id} style={{ width: '55%', height: '55%', objectFit: 'contain' }} /></div>)}
                   </div>
                 </div>
               </Card>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <BtnAccent onClick={saveLinks} disabled={saving}>{saving ? 'Saving…' : 'Save Links'}</BtnAccent>
-              </div>
-
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}><BtnAccent onClick={saveLinks} disabled={saving}>{saving ? 'Saving…' : 'Save Links'}</BtnAccent></div>
               <AddLinkModal platform={activeLinkPlatform} onClose={() => setActiveLinkPlatform(null)} onAdd={handleAddLink} />
             </>
           )}
@@ -1460,25 +985,10 @@ buttons,
             <>
               <PageHeader breadcrumb="Dashboard · Buttons" title='Custom <span style="color:#e03030">Buttons</span>' subtitle="Create call-to-action buttons" />
               <Card>
-                <CardHeader title="Your Buttons" sub={`${buttons.length} button${buttons.length !== 1 ? 's' : ''}`}
-                  action={<BtnAccent onClick={() => setShowAddBtnModal(true)}>
-                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-                    Add Button
-                  </BtnAccent>}
-                />
+                <CardHeader title="Your Buttons" sub={`${buttons.length} button${buttons.length !== 1 ? 's' : ''}`} action={<BtnAccent onClick={() => setShowAddBtnModal(true)}><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>Add Button</BtnAccent>} />
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {buttons.length === 0 && <div style={{ padding: '32px 0', textAlign: 'center', color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>No buttons yet — create one above!</div>}
-                  {buttons.map((b, i) => (
-                    <div key={i} className="link-item-row">
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{b.label}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace' }}>{b.url}</div>
-                      </div>
-                      <button onClick={() => { setButtons(prev => prev.filter((_, idx) => idx !== i)); showToast('Button removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-                      </button>
-                    </div>
-                  ))}
+                  {buttons.map((b, i) => <div key={i} className="link-item-row"><div style={{ flex: 1 }}><div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.8)' }}>{b.label}</div><div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'Space Mono, monospace' }}>{b.url}</div></div><button onClick={() => { setButtons(prev => prev.filter((_, idx) => idx !== i)); showToast('Button removed') }} style={{ width: 28, height: 28, borderRadius: 8, border: 'none', background: 'transparent', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></button></div>)}
                 </div>
               </Card>
               <SaveBar onSave={saveButtons} saving={saving} />
@@ -1491,57 +1001,10 @@ buttons,
               <PageHeader breadcrumb="Dashboard · Effects" title='Visual <span style="color:#e03030">Effects</span>' subtitle="Particles, cursors, and animations" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                 <TabBar tabs={['Particles','Cursor','Animations','Click Effects']} active={effectsTab} onSelect={setEffectsTab} cols={4} />
-                {effectsTab === 'Particles' && (
-                  <Card>
-                    <CardHeader title="Particle Effects" sub="Background particles on your profile" action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />} />
-                    {particleEnabled && (
-                      <div style={{ padding: 24 }}>
-                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Style</label>
-                        <div className="effect-grid">
-                          {particles.map(p => <button key={p} className={`effect-btn ${particleStyle === p ? 'active' : ''}`} onClick={() => setParticleStyle(p)}>{p}</button>)}
-                        </div>
-                      </div>
-                    )}
-                  </Card>
-                )}
-                {effectsTab === 'Cursor' && (
-                  <Card>
-                    <CardHeader title="Custom Cursor" sub="Replace the default cursor on your profile" />
-                    <div style={{ padding: 24 }}>
-                      <div className="effect-grid">
-                        {cursors.map(c => <button key={c} className={`effect-btn ${cursorStyle === c ? 'active' : ''}`} onClick={() => setCursorStyle(c)}>{c}</button>)}
-                      </div>
-                    </div>
-                    <div style={{ padding: '0 24px 24px' }}>
-                      <input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} />
-                      <div onClick={() => fileCursorRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
-                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-                        {uploadingType === 'cursor' ? 'Uploading…' : cursorPreview ? 'Replace cursor image' : 'Upload a custom cursor image'}
-                      </div>
-                      {cursorPreview && <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}><img src={cursorPreview} alt="cursor" style={{ width: 32, height: 32, objectFit: 'contain' }} /><BtnGhost onClick={() => removeAsset('cursor')}>Remove</BtnGhost></div>}
-                    </div>
-                  </Card>
-                )}
-                {effectsTab === 'Animations' && (
-                  <Card>
-                    <CardHeader title="Entrance Animation" sub="How your profile animates in for visitors" />
-                    <div style={{ padding: 24 }}>
-                      <div className="effect-grid">
-                        {entranceAnims.map(a => <button key={a} className={`effect-btn ${entranceAnim === a ? 'active' : ''}`} onClick={() => setEntranceAnim(a)}>{a}</button>)}
-                      </div>
-                    </div>
-                  </Card>
-                )}
-                {effectsTab === 'Click Effects' && (
-                  <Card>
-                    <CardHeader title="Click Effects" sub="What happens when visitors click on your profile" />
-                    <div style={{ padding: 24 }}>
-                      <div className="effect-grid">
-                        {clickEffects.map(e => <button key={e} className={`effect-btn ${clickEffect === e ? 'active' : ''}`} onClick={() => setClickEffect(e)}>{e}</button>)}
-                      </div>
-                    </div>
-                  </Card>
-                )}
+                {effectsTab === 'Particles' && <Card><CardHeader title="Particle Effects" sub="Background particles on your profile" action={<Toggle checked={particleEnabled} onChange={e => setParticleEnabled(e.target.checked)} />} />{particleEnabled && <div style={{ padding: 24 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Style</label><div className="effect-grid">{particles.map(p => <button key={p} className={`effect-btn ${particleStyle === p ? 'active' : ''}`} onClick={() => setParticleStyle(p)}>{p}</button>)}</div></div>}</Card>}
+                {effectsTab === 'Cursor' && <Card><CardHeader title="Custom Cursor" sub="Replace the default cursor on your profile" /><div style={{ padding: 24 }}><div className="effect-grid">{cursors.map(c => <button key={c} className={`effect-btn ${cursorStyle === c ? 'active' : ''}`} onClick={() => setCursorStyle(c)}>{c}</button>)}</div></div><div style={{ padding: '0 24px 24px' }}><input type="file" ref={fileCursorRef} accept="image/*" style={{ display: 'none' }} onChange={e => handleFileUpload('cursor', e.target.files[0])} /><div onClick={() => fileCursorRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '24px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>{uploadingType === 'cursor' ? 'Uploading…' : cursorPreview ? 'Replace cursor image' : 'Upload a custom cursor image'}</div>{cursorPreview && <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}><img src={cursorPreview} alt="cursor" style={{ width: 32, height: 32, objectFit: 'contain' }} /><BtnGhost onClick={() => removeAsset('cursor')}>Remove</BtnGhost></div>}</div></Card>}
+                {effectsTab === 'Animations' && <Card><CardHeader title="Entrance Animation" sub="How your profile animates in for visitors" /><div style={{ padding: 24 }}><div className="effect-grid">{entranceAnims.map(a => <button key={a} className={`effect-btn ${entranceAnim === a ? 'active' : ''}`} onClick={() => setEntranceAnim(a)}>{a}</button>)}</div></div></Card>}
+                {effectsTab === 'Click Effects' && <Card><CardHeader title="Click Effects" sub="What happens when visitors click on your profile" /><div style={{ padding: 24 }}><div className="effect-grid">{clickEffects.map(e => <button key={e} className={`effect-btn ${clickEffect === e ? 'active' : ''}`} onClick={() => setClickEffect(e)}>{e}</button>)}</div></div></Card>}
                 <SaveBar onSave={saveEffects} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
@@ -1553,94 +1016,78 @@ buttons,
               <PageHeader breadcrumb="Dashboard · Music" title='Background <span style="color:#e03030">Music</span>' subtitle="Add a track that plays when visitors view your profile" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
                 <Card>
-                  <CardHeader title="Background Music" sub="Add a track that plays when visitors view your profile"
-                    icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>}
-                    action={<Toggle checked={musicEnabled} onChange={e => setMusicEnabled(e.target.checked)} />}
-                  />
+                  <CardHeader title="Background Music" sub="Add a track that plays when visitors view your profile" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>} action={<Toggle checked={musicEnabled} onChange={e => setMusicEnabled(e.target.checked)} />} />
                   {musicEnabled && (
                     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        {['direct','spotify','soundcloud'].map(t => (
-                          <button key={t} onClick={() => setMusicType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${musicType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: musicType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: musicType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>
-                            {{ direct: 'Direct URL', spotify: 'Spotify', soundcloud: 'SoundCloud' }[t]}
-                          </button>
-                        ))}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{musicType === 'direct' ? 'Audio URL (.mp3, .ogg, etc.)' : 'Track URL'}</label>
-                        <Input placeholder={musicType === 'direct' ? 'https://example.com/song.mp3' : musicType === 'spotify' ? 'https://open.spotify.com/track/…' : 'https://soundcloud.com/…'} value={musicUrl} onChange={e => setMusicUrl(e.target.value)} />
-                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>{['direct','spotify','soundcloud'].map(t => <button key={t} onClick={() => setMusicType(t)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${musicType === t ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: musicType === t ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: musicType === t ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>{{ direct: 'Direct URL', spotify: 'Spotify', soundcloud: 'SoundCloud' }[t]}</button>)}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>{musicType === 'direct' ? 'Audio URL (.mp3, .ogg, etc.)' : 'Track URL'}</label><Input placeholder={musicType === 'direct' ? 'https://example.com/song.mp3' : musicType === 'spotify' ? 'https://open.spotify.com/track/…' : 'https://soundcloud.com/…'} value={musicUrl} onChange={e => setMusicUrl(e.target.value)} /></div>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Track Title</label>
-                          <Input placeholder="Song name" value={musicTitle} onChange={e => setMusicTitle(e.target.value)} />
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Artist</label>
-                          <Input placeholder="Artist name" value={musicArtist} onChange={e => setMusicArtist(e.target.value)} />
-                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Track Title</label><Input placeholder="Song name" value={musicTitle} onChange={e => setMusicTitle(e.target.value)} /></div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Artist</label><Input placeholder="Artist name" value={musicArtist} onChange={e => setMusicArtist(e.target.value)} /></div>
                       </div>
-                      {musicType === 'direct' && (
-                        <div>
-                          <input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} />
-                          <div onClick={() => fileAudioRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
-                            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>
-                            {uploadingType === 'audio' ? 'Uploading…' : audioName ? `Uploaded: ${audioName}` : 'Or upload an audio file (max 10MB)'}
-                          </div>
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Volume — {musicVolume}%</label>
-                        <input type="range" min={0} max={100} value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} />
-                      </div>
+                      {musicType === 'direct' && <div><input type="file" ref={fileAudioRef} accept="audio/*" style={{ display: 'none' }} onChange={e => handleFileUpload('audio', e.target.files[0])} /><div onClick={() => fileAudioRef.current.click()} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, padding: '20px', fontSize: 13, color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m17 8-5-5-5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>{uploadingType === 'audio' ? 'Uploading…' : audioName ? `Uploaded: ${audioName}` : 'Or upload an audio file (max 10MB)'}</div></div>}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Volume — {musicVolume}%</label><input type="range" min={0} max={100} value={musicVolume} onChange={e => setMusicVolume(Number(e.target.value))} style={{ width: '100%', accentColor: '#e03030' }} /></div>
                     </div>
                   )}
                 </Card>
-                {musicEnabled && (
-                  <Card>
-                    <CardHeader title="Display Options" sub="Control how the music player appears" />
-                    <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-                      <ToggleRow label="Autoplay" sub="Start playing when visitors arrive" checked={musicAutoplay} onChange={e => setMusicAutoplay(e.target.checked)} />
-                      <ToggleRow label="Show Track Title" sub="Display song name in player" checked={musicShowTitle} onChange={e => setMusicShowTitle(e.target.checked)} />
-                      <ToggleRow label="Show Artist" sub="Display artist name in player" checked={musicShowArtist} onChange={e => setMusicShowArtist(e.target.checked)} />
-                      <ToggleRow label="Show Player" sub="Display the music player on your profile" checked={musicShowPlayer} onChange={e => setMusicShowPlayer(e.target.checked)} />
-                    </div>
-                  </Card>
-                )}
+                {musicEnabled && <Card><CardHeader title="Display Options" sub="Control how the music player appears" /><div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}><ToggleRow label="Autoplay" sub="Start playing when visitors arrive" checked={musicAutoplay} onChange={e => setMusicAutoplay(e.target.checked)} /><ToggleRow label="Show Track Title" sub="Display song name in player" checked={musicShowTitle} onChange={e => setMusicShowTitle(e.target.checked)} /><ToggleRow label="Show Artist" sub="Display artist name in player" checked={musicShowArtist} onChange={e => setMusicShowArtist(e.target.checked)} /><ToggleRow label="Show Player" sub="Display the music player on your profile" checked={musicShowPlayer} onChange={e => setMusicShowPlayer(e.target.checked)} /></div></Card>}
                 <SaveBar onSave={saveMusic} onDiscard={() => showToast('Changes discarded')} saving={saving} />
               </div>
             </>
           )}
 
-          {activePage === 'badges' && (
-  <>
-    <PageHeader breadcrumb="Dashboard · Badges" title='Your <span style="color:#e03030">Badges</span>' subtitle="Earn badges by being active on fate.rip" />
-    <div style={{ padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12 }}>
-      <div style={{ fontSize: 36, marginBottom: 12 }}>🏅</div>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Coming Soon</div>
-      <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-        Collect badges for milestones, early access, and exclusive achievements.
-      </div>
-    </div>
-  </>
-)}
+          {/* ═══ BADGES ═══ */}
+          {activePage === 'badges' && (() => {
+            const userBadgeIds = dbUser?.badges || []
+            return (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Your <span style={{ color: '#e03030' }}>Badges</span></h1>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>Collect badges by being active on fate.rip</p>
+                {userBadgeIds.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, marginBottom: 20 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.25)', letterSpacing: '0.08em', textTransform: 'uppercase', marginRight: 4 }}>Earned</span>
+                    {BADGE_DEFS.filter(b => userBadgeIds.includes(b.id)).map(b => (
+                      <div key={b.id} title={b.name} style={{ width: 36, height: 36, borderRadius: 10, background: b.bg, border: `1px solid ${b.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: b.color }}>{b.icon}</div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {BADGE_DEFS.map(badge => {
+                    const owned = userBadgeIds.includes(badge.id)
+                    return (
+                      <div key={badge.id} className="badge-row" style={{ opacity: owned ? 1 : 0.8, border: owned ? `1px solid ${badge.border}` : undefined, background: owned ? badge.bg : undefined }}>
+                        <div className="badge-locked-icon" style={{ background: owned ? badge.bg : 'rgba(255,255,255,0.04)', border: `1px solid ${owned ? badge.border : 'rgba(255,255,255,0.07)'}`, color: owned ? badge.color : 'rgba(255,255,255,0.25)' }}>{badge.icon}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: owned ? '#fff' : 'rgba(255,255,255,0.55)' }}>{badge.name}</span>
+                            {owned && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}>Earned</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{badge.desc}</div>
+                        </div>
+                        {!owned && badge.how && (badge.howHref ? <a href={badge.howHref} target="_blank" rel="noopener noreferrer" className="badge-action-btn" style={{ textDecoration: 'none' }}>{badge.how}</a> : <button className="badge-action-btn" onClick={() => showToast(`${badge.name} — coming soon!`)}>{badge.how}</button>)}
+                        {!owned && !badge.how && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>Staff assigned</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )
+          })()}
+
+          {/* ═══ WIDGETS / TEMPLATES ═══ */}
           {(activePage === 'widgets' || activePage === 'templates') && (
             <>
-              <PageHeader
-                breadcrumb={`Dashboard · ${activePage === 'widgets' ? 'Widgets' : 'Templates'}`}
-                title={activePage === 'widgets' ? 'Profile <span style="color:#e03030">Widgets</span>' : 'Browse <span style="color:#e03030">Templates</span>'}
-                subtitle={activePage === 'widgets' ? 'Add widgets to your page' : 'Pick a pre-built layout'}
-              />
+              <PageHeader breadcrumb={`Dashboard · ${activePage === 'widgets' ? 'Widgets' : 'Templates'}`} title={activePage === 'widgets' ? 'Profile <span style="color:#e03030">Widgets</span>' : 'Browse <span style="color:#e03030">Templates</span>'} subtitle={activePage === 'widgets' ? 'Add widgets to your page' : 'Pick a pre-built layout'} />
               <div style={{ padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12 }}>
                 <div style={{ fontSize: 36, marginBottom: 12 }}>{activePage === 'widgets' ? '⊞' : '⊟'}</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Coming Soon</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-                  {activePage === 'widgets' ? 'Add countdown timers, now-playing widgets, Discord status, and more.' : 'Pick from pre-built layouts to instantly style your profile.'}
-                </div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>{activePage === 'widgets' ? 'Add countdown timers, now-playing widgets, Discord status, and more.' : 'Pick from pre-built layouts to instantly style your profile.'}</div>
               </div>
             </>
           )}
 
+          {/* ═══ PREMIUM ═══ */}
           {activePage === 'premium' && (
             <>
               <PageHeader breadcrumb="Dashboard · Premium" title='Go <span style="color:#e03030">Premium</span>' subtitle="Unlock exclusive features" />
@@ -1661,6 +1108,7 @@ buttons,
             </>
           )}
 
+          {/* ═══ SETTINGS ═══ */}
           {activePage === 'settings' && (
             <>
               <PageHeader breadcrumb="Dashboard · Settings" title='Account <span style="color:#e03030">Settings</span>' subtitle="Manage your account" />
@@ -1698,10 +1146,7 @@ buttons,
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 8 }}>Display Name</div>
                         <div style={{ display: 'flex', gap: 10 }}>
                           <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Display name" />
-                          <BtnAccent onClick={async () => {
-                            const { error } = await supabase.from('users').update({ display_name: displayName }).eq('email', user.email)
-                            showToast(error ? 'Failed to save' : 'Display name saved!')
-                          }}>Save</BtnAccent>
+                          <BtnAccent onClick={async () => { const { error } = await supabase.from('users').update({ display_name: displayName }).eq('email', user.email); showToast(error ? 'Failed to save' : 'Display name saved!') }}>Save</BtnAccent>
                         </div>
                       </div>
                       <div style={{ height: 1, background: 'rgba(255,255,255,0.05)' }} />
@@ -1710,16 +1155,9 @@ buttons,
                         <div style={{ display: 'flex', gap: 10 }}>
                           <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, paddingRight: 10 }}>
                             <Input type={showPassword ? 'text' : 'password'} placeholder="New password" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={{ border: 'none', background: 'transparent', flex: 1 }} />
-                            <button onClick={() => setShowPassword(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, display: 'flex' }}>
-                              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
+                            <button onClick={() => setShowPassword(p => !p)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4, display: 'flex' }}><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                           </div>
-                          <BtnAccent onClick={async () => {
-                            if (!newPassword || newPassword.length < 6) { showToast('Password must be 6+ characters'); return }
-                            const { error } = await supabase.auth.updateUser({ password: newPassword })
-                            if (!error) setNewPassword('')
-                            showToast(error ? 'Failed to update password' : 'Password updated!')
-                          }}>Update</BtnAccent>
+                          <BtnAccent onClick={async () => { if (!newPassword || newPassword.length < 6) { showToast('Password must be 6+ characters'); return }; const { error } = await supabase.auth.updateUser({ password: newPassword }); if (!error) setNewPassword(''); showToast(error ? 'Failed to update password' : 'Password updated!') }}>Update</BtnAccent>
                         </div>
                       </div>
                     </div>
@@ -1739,23 +1177,12 @@ buttons,
       {showAddBtnModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowAddBtnModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
-            <button onClick={() => setShowAddBtnModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}>
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
+            <button onClick={() => setShowAddBtnModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', padding: 4 }}><svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
             <h2 style={{ fontFamily: 'Syne, sans-serif', fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Custom <span style={{ color: '#e03030' }}>Button</span></h2>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 20 }}>Create a call-to-action button on your profile</p>
-            <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Button Label</label>
-              <Input placeholder="e.g. Hire Me, Buy Now…" value={newBtnLabel} onChange={e => setNewBtnLabel(e.target.value)} />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label>
-              <Input type="url" placeholder="https://…" value={newBtnUrl} onChange={e => setNewBtnUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addButton()} />
-            </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <BtnGhost onClick={() => setShowAddBtnModal(false)}>Cancel</BtnGhost>
-              <BtnAccent onClick={addButton}>Create Button</BtnAccent>
-            </div>
+            <div style={{ marginBottom: 14 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>Button Label</label><Input placeholder="e.g. Hire Me, Buy Now…" value={newBtnLabel} onChange={e => setNewBtnLabel(e.target.value)} /></div>
+            <div style={{ marginBottom: 20 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: 6 }}>URL</label><Input type="url" placeholder="https://…" value={newBtnUrl} onChange={e => setNewBtnUrl(e.target.value)} onKeyDown={e => e.key === 'Enter' && addButton()} /></div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}><BtnGhost onClick={() => setShowAddBtnModal(false)}>Cancel</BtnGhost><BtnAccent onClick={addButton}>Create Button</BtnAccent></div>
           </div>
         </div>
       )}
