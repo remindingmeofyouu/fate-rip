@@ -359,7 +359,7 @@ function ProfileContent({
   const textAlign   = avatarPos === 'left' ? 'left'       : avatarPos === 'right' ? 'right'    : 'center'
   const handleClick = (e) => { if (clickEffect !== 'None') spawnClickEffect(e, clickEffect) }
 
-  // ─── Tilt state — NO window-level useEffect ────────────────────────────────
+  // ─── Tilt state ───────────────────────────────────────────────────────────
   const [tilt, setTilt] = useState({ x: 0, y: 0 })
 
   // ─── Audio state ──────────────────────────────────────────────────────────
@@ -424,6 +424,16 @@ function ProfileContent({
 
   const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
 
+  // ─── Tilt handlers (on the perspective wrapper, not the tilting child) ─────
+  const handleMouseMove = followCursor ? (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -8
+    const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  8
+    setTilt({ x, y })
+  } : undefined
+
+  const handleMouseLeave = followCursor ? () => setTilt({ x: 0, y: 0 }) : undefined
+
   return (
     <div
       onClick={handleClick}
@@ -431,7 +441,8 @@ function ProfileContent({
         background:bgColorSetting, minHeight:'100vh', display:'flex',
         flexDirection:'column', alignItems:'center', justifyContent:'center',
         fontFamily:`'${fontFamily}', sans-serif`, padding:'40px 16px',
-        position:'relative', overflow:'hidden', perspective:'800px',
+        position:'relative', overflow:'hidden',
+        // ↓ perspective removed from here — it now lives on the wrapper below
       }}
     >
       <link rel="icon" href="/scythe.png" />
@@ -453,7 +464,8 @@ function ProfileContent({
         @keyframes firefly   { 0%,100%{transform:translate(0,0);opacity:0.2} 25%{transform:translate(20px,-30px);opacity:1} 50%{transform:translate(-10px,-60px);opacity:0.5} 75%{transform:translate(30px,-40px);opacity:0.8} }
         @keyframes clickFly  { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
         @keyframes barPulse  { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
-        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; transform-style:preserve-3d; }
+        /* transform-style:preserve-3d removed — backdrop-filter breaks it anyway */
+        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
         .profile-panel { width:100%; background:rgba(${bgRgb},0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
@@ -482,7 +494,7 @@ function ProfileContent({
         .bar:nth-child(2){animation:barPulse .65s ease-in-out 0.20s infinite}
         .bar:nth-child(3){animation:barPulse .65s ease-in-out 0.10s infinite}
         .bar:nth-child(4){animation:barPulse .65s ease-in-out 0.30s infinite}
-        @media(max-width:480px){ .profile-outer{max-width:100%!important;padding:0 12px;} }
+        @media(max-width:480px){ .tilt-wrapper{max-width:100%!important;padding:0 12px;} }
         .badge-tooltip { position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%); background:rgba(10,10,10,0.92); border:1px solid rgba(255,255,255,0.1); color:#fff; font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap; pointer-events:none; opacity:0; transition:opacity .15s; }
         .badge-pill:hover .badge-tooltip { opacity:1; }
         .uid-hover-wrap:hover .uid-tooltip { opacity:1!important; }
@@ -550,206 +562,208 @@ function ProfileContent({
 
       {/*
         ─── TILT FIX ────────────────────────────────────────────────────────────
-        onMouseMove is on the element itself using getBoundingClientRect().
-        This avoids the window-level listener bug caused by backdrop-filter
-        creating a new stacking context. No useEffect needed.
+        perspective lives on this OUTER wrapper.
+        Mouse events are also here so getBoundingClientRect() is stable.
+        The INNER .profile-outer only gets rotateX/rotateY — no perspective().
       */}
       <div
-        className="profile-outer"
-        onMouseMove={followCursor ? (e) => {
-          const rect = e.currentTarget.getBoundingClientRect()
-          const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -8
-          const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  8
-          setTilt({ x, y })
-        } : undefined}
-        onMouseLeave={followCursor ? () => setTilt({ x:0, y:0 }) : undefined}
+        className="tilt-wrapper"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         style={{
-          width:'100%',
-          maxWidth:panelMaxW,
-          opacity:opacity/100,
-          ...entranceAnimStyle,
-          transform:`perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-          transition:'transform 0.15s ease-out',
-          transformOrigin:'center center',
-          transformStyle:'preserve-3d',
+          width: '100%',
+          maxWidth: panelMaxW,
+          perspective: '800px',       // ← perspective on the PARENT
         }}
       >
-        {/* Avatar floating above panel */}
-        {showAvatarPref && (
-          <div
-            className="profile-avatar-float"
-            style={{
-              alignSelf: alignItems === 'flex-start' ? 'flex-start' : alignItems === 'flex-end' ? 'flex-end' : 'center',
-              marginLeft:  avatarPos === 'left'  ? 28 : 0,
-              marginRight: avatarPos === 'right' ? 28 : 0,
-            }}
-          >
-            <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
-              <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
-                {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+        <div
+          className="profile-outer"
+          style={{
+            width: '100%',
+            opacity: opacity / 100,
+            ...entranceAnimStyle,
+            transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,  // ← no perspective() here
+            transition: 'transform 0.15s ease-out',
+            transformOrigin: 'center center',
+          }}
+        >
+          {/* Avatar floating above panel */}
+          {showAvatarPref && (
+            <div
+              className="profile-avatar-float"
+              style={{
+                alignSelf: alignItems === 'flex-start' ? 'flex-start' : alignItems === 'flex-end' ? 'flex-end' : 'center',
+                marginLeft:  avatarPos === 'left'  ? 28 : 0,
+                marginRight: avatarPos === 'right' ? 28 : 0,
+              }}
+            >
+              <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
+                <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
+                  {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Main panel */}
-        <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
+          {/* Main panel */}
+          <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
 
-          {/* Username / display name */}
-          <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">
-            <div style={{ fontSize:22, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, cursor:'default', ...nameStyle }}>
-              {displayName || `@${profile.username}`}
-            </div>
-            {profile.id && (
-              <div className="uid-tooltip" style={{ position:'absolute', left:'50%', top:'110%', transform:'translateX(-50%)', background:'rgba(10,10,10,0.92)', border:`1px solid ${accentColor}44`, borderRadius:8, padding:'4px 10px', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.6)', whiteSpace:'nowrap', pointerEvents:'none', zIndex:10, backdropFilter:'blur(8px)', opacity:0, transition:'opacity .15s' }}>
-                UID {profile.id}
+            {/* Username / display name */}
+            <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">
+              <div style={{ fontSize:22, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, cursor:'default', ...nameStyle }}>
+                {displayName || `@${profile.username}`}
               </div>
-            )}
-          </div>
-
-          {displayName && (
-            <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, marginBottom:6, textAlign }}>@{profile.username}</div>
-          )}
-
-          {/* Badges — below username */}
-          {badgePosition === 'below_username' && badgeStrip}
-
-          {/* View count */}
-          {viewCount !== null && (
-            <div style={{ position:'absolute', top:14, right:16, display:'flex', alignItems:'center', gap:4, fontSize:11, color:'rgba(255,255,255,0.3)', fontWeight:600, userSelect:'none' }}>
-              <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-              <span>{viewCount >= 1000 ? `${(viewCount/1000).toFixed(1)}k` : viewCount}</span>
-            </div>
-          )}
-
-          {/* Bio */}
-          {profile.bio && (
-            <div style={{ fontSize:13, color:'rgba(255,255,255,0.5)', fontWeight:600, textAlign, lineHeight:1.6, marginBottom:12, minHeight:'1.6em' }}>
-              {typingBio ? bioDisplayed : profile.bio}
-              {typingBio && <span style={{ borderRight:`2px solid ${accentColor}`, marginLeft:1, animation:'cursorBlink 0.8s step-end infinite' }} />}
-            </div>
-          )}
-
-          {/* Badges — below bio */}
-          {badgePosition === 'below_bio' && badgeStrip}
-
-          {/* Location */}
-          {location && (
-            <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, display:'flex', alignItems:'center', gap:5, marginBottom:16, alignSelf:alignItems }}>
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-              {location}
-            </div>
-          )}
-
-          {(links.length > 0 || btns.length > 0) && (
-            <div style={{ width:'100%', height:1, background:'rgba(255,255,255,0.06)', margin:'8px 0 16px' }} />
-          )}
-
-          {/* Badges — above links */}
-          {badgePosition === 'above_links' && badgeStrip}
-
-          {/* Social links */}
-          {links.length > 0 && (
-            <div style={{ width:'100%', display:'flex', flexWrap:'wrap', gap:16, justifyContent:textAlign==='center'?'center':textAlign==='right'?'flex-end':'flex-start' }}>
-              {links.map((link,i) => {
-                const p = link.platform || { id:'custom', name:link.title, color:'#e03030' }
-                const ABBR = { discord:'Di',twitter:'X',github:'Gh',gitlab:'Gl',instagram:'Ig',facebook:'Fb',spotify:'Sp',soundcloud:'Sc',applemusic:'♪',youtube:'Yt',twitch:'Tv',tiktok:'Tt',snapchat:'Sn',linkedin:'Li',reddit:'Re',telegram:'Tg',bluesky:'Bs',vk:'VK',pinterest:'Pi',dribbble:'Dr',deviantart:'Da',steam:'St',itchio:'It',kickstarter:'Ks',patreon:'Pa',kofi:'Ko',buymeacoffee:'Bm',paypal:'Pp',bitcoin:'₿',ethereum:'Ξ',solana:'◎',roblox:'R',email:'✉',custom:'✦' }
-                const LIGHT = new Set(['snapchat','buymeacoffee','bitcoin'])
-                const abbr = ABBR[p.id] || p.name?.[0] || '?'
-                const tc   = LIGHT.has(p.id) ? '#1a1a1a' : '#fff'
-                return (
-                  <a key={i} href={link.url||'#'} target="_blank" rel="noopener noreferrer"
-                    style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, cursor:'pointer', textDecoration:'none', width:Math.max(iconSize,48) }}>
-                    <div
-                      style={{ width:iconSize, height:iconSize, borderRadius:Math.round(iconSize*0.27), background:link.iconDataUrl?'transparent':p.color, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:link.iconDataUrl?'none':glowState.socials?`0 4px 16px ${p.color}88`:`0 4px 16px ${p.color}55`, transition:'transform .15s', overflow:'hidden', flexShrink:0 }}
-                      onMouseEnter={e=>e.currentTarget.style.transform='scale(1.1)'}
-                      onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
-                    >
-                      {link.iconDataUrl
-                        ? <img src={link.iconDataUrl} alt="icon" style={{ width:'100%', height:'100%', objectFit:'contain' }} />
-                        : p.id==='email'
-                          ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
-                          : SIMPLE_ICONS[p.id]
-                            ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width:'55%', height:'55%', objectFit:'contain' }} />
-                            : <span style={{ fontSize:14, fontWeight:800, color:tc }}>{abbr}</span>
-                      }
-                    </div>
-                    {showLinkLabels && (
-                      <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
-                        {link.title || p.name}
-                      </span>
-                    )}
-                  </a>
-                )
-              })}
-            </div>
-          )}
-
-          {/* CTA buttons */}
-          {btns.length > 0 && (
-            <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8, marginTop:links.length>0?8:0 }}>
-              {btns.map((btn,i) => (
-                <a key={i} href={btn.url} className="action-btn" target="_blank" rel="noopener noreferrer"
-                  style={{ background:accentColor, color:'#fff', boxShadow:`0 4px 20px ${accentColor}44` }}>
-                  {btn.label}
-                </a>
-              ))}
-            </div>
-          )}
-
-          {links.length === 0 && btns.length === 0 && (
-            <div style={{ fontSize:13, color:'rgba(255,255,255,0.15)', fontWeight:600, marginTop:4 }}>No links yet.</div>
-          )}
-
-          <div className="footer" style={{ alignSelf:'center', marginTop:20 }}>powered by <a href="/">fate.rip</a></div>
-        </div>
-
-        {/* Music player — inside profile-outer so it tilts with the panel */}
-        {audioSrc && music.showPlayer !== false && (
-          <div
-            className="music-player"
-            style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }}
-            onClick={e=>e.stopPropagation()}
-          >
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
-              <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
-                <div style={{ fontSize:13, fontWeight:700, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackTitle}</div>
-                <div style={{ fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackArtist}</div>
-              </div>
-              {isPlaying && (
-                <div style={{ display:'flex', alignItems:'flex-end', gap:2, height:14, flexShrink:0 }}>
-                  <div className="bar" style={{ height:5  }} />
-                  <div className="bar" style={{ height:10 }} />
-                  <div className="bar" style={{ height:7  }} />
-                  <div className="bar" style={{ height:12 }} />
+              {profile.id && (
+                <div className="uid-tooltip" style={{ position:'absolute', left:'50%', top:'110%', transform:'translateX(-50%)', background:'rgba(10,10,10,0.92)', border:`1px solid ${accentColor}44`, borderRadius:8, padding:'4px 10px', fontSize:11, fontWeight:700, color:'rgba(255,255,255,0.6)', whiteSpace:'nowrap', pointerEvents:'none', zIndex:10, backdropFilter:'blur(8px)', opacity:0, transition:'opacity .15s' }}>
+                  UID {profile.id}
                 </div>
               )}
             </div>
-            <div className="seek-track" onClick={handleSeek}>
-              <div className="seek-fill" style={{ width:`${progress}%` }} />
-            </div>
-            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30 }}>{fmt(currentTime)}</span>
-              <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                <button className="music-ctrl" onClick={restart} title="Restart">
-                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-                </button>
-                <button className="music-play" onClick={togglePlay} title={isPlaying?'Pause':'Play'}>
-                  {isPlaying
-                    ? <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    : <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                  }
-                </button>
-                <button className="music-ctrl" onClick={skipEnd} title="Skip">
-                  <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
-                </button>
+
+            {displayName && (
+              <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, marginBottom:6, textAlign }}>@{profile.username}</div>
+            )}
+
+            {/* Badges — below username */}
+            {badgePosition === 'below_username' && badgeStrip}
+
+            {/* View count */}
+            {viewCount !== null && (
+              <div style={{ position:'absolute', top:14, right:16, display:'flex', alignItems:'center', gap:4, fontSize:11, color:'rgba(255,255,255,0.3)', fontWeight:600, userSelect:'none' }}>
+                <svg width="12" height="12" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>{viewCount >= 1000 ? `${(viewCount/1000).toFixed(1)}k` : viewCount}</span>
               </div>
-              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30, textAlign:'right' }}>{fmt(duration)}</span>
-            </div>
+            )}
+
+            {/* Bio */}
+            {profile.bio && (
+              <div style={{ fontSize:13, color:'rgba(255,255,255,0.5)', fontWeight:600, textAlign, lineHeight:1.6, marginBottom:12, minHeight:'1.6em' }}>
+                {typingBio ? bioDisplayed : profile.bio}
+                {typingBio && <span style={{ borderRight:`2px solid ${accentColor}`, marginLeft:1, animation:'cursorBlink 0.8s step-end infinite' }} />}
+              </div>
+            )}
+
+            {/* Badges — below bio */}
+            {badgePosition === 'below_bio' && badgeStrip}
+
+            {/* Location */}
+            {location && (
+              <div style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:600, display:'flex', alignItems:'center', gap:5, marginBottom:16, alignSelf:alignItems }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+                {location}
+              </div>
+            )}
+
+            {(links.length > 0 || btns.length > 0) && (
+              <div style={{ width:'100%', height:1, background:'rgba(255,255,255,0.06)', margin:'8px 0 16px' }} />
+            )}
+
+            {/* Badges — above links */}
+            {badgePosition === 'above_links' && badgeStrip}
+
+            {/* Social links */}
+            {links.length > 0 && (
+              <div style={{ width:'100%', display:'flex', flexWrap:'wrap', gap:16, justifyContent:textAlign==='center'?'center':textAlign==='right'?'flex-end':'flex-start' }}>
+                {links.map((link,i) => {
+                  const p = link.platform || { id:'custom', name:link.title, color:'#e03030' }
+                  const ABBR = { discord:'Di',twitter:'X',github:'Gh',gitlab:'Gl',instagram:'Ig',facebook:'Fb',spotify:'Sp',soundcloud:'Sc',applemusic:'♪',youtube:'Yt',twitch:'Tv',tiktok:'Tt',snapchat:'Sn',linkedin:'Li',reddit:'Re',telegram:'Tg',bluesky:'Bs',vk:'VK',pinterest:'Pi',dribbble:'Dr',deviantart:'Da',steam:'St',itchio:'It',kickstarter:'Ks',patreon:'Pa',kofi:'Ko',buymeacoffee:'Bm',paypal:'Pp',bitcoin:'₿',ethereum:'Ξ',solana:'◎',roblox:'R',email:'✉',custom:'✦' }
+                  const LIGHT = new Set(['snapchat','buymeacoffee','bitcoin'])
+                  const abbr = ABBR[p.id] || p.name?.[0] || '?'
+                  const tc   = LIGHT.has(p.id) ? '#1a1a1a' : '#fff'
+                  return (
+                    <a key={i} href={link.url||'#'} target="_blank" rel="noopener noreferrer"
+                      style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, cursor:'pointer', textDecoration:'none', width:Math.max(iconSize,48) }}>
+                      <div
+                        style={{ width:iconSize, height:iconSize, borderRadius:Math.round(iconSize*0.27), background:link.iconDataUrl?'transparent':p.color, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:link.iconDataUrl?'none':glowState.socials?`0 4px 16px ${p.color}88`:`0 4px 16px ${p.color}55`, transition:'transform .15s', overflow:'hidden', flexShrink:0 }}
+                        onMouseEnter={e=>e.currentTarget.style.transform='scale(1.1)'}
+                        onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}
+                      >
+                        {link.iconDataUrl
+                          ? <img src={link.iconDataUrl} alt="icon" style={{ width:'100%', height:'100%', objectFit:'contain' }} />
+                          : p.id==='email'
+                            ? <svg width="55%" height="55%" fill="none" stroke="#fff" strokeWidth="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+                            : SIMPLE_ICONS[p.id]
+                              ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width:'55%', height:'55%', objectFit:'contain' }} />
+                              : <span style={{ fontSize:14, fontWeight:800, color:tc }}>{abbr}</span>
+                        }
+                      </div>
+                      {showLinkLabels && (
+                        <span style={{ fontSize:10, color:'rgba(255,255,255,0.45)', textAlign:'center', lineHeight:1.3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(iconSize,48) }}>
+                          {link.title || p.name}
+                        </span>
+                      )}
+                    </a>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* CTA buttons */}
+            {btns.length > 0 && (
+              <div style={{ width:'100%', display:'flex', flexDirection:'column', gap:8, marginTop:links.length>0?8:0 }}>
+                {btns.map((btn,i) => (
+                  <a key={i} href={btn.url} className="action-btn" target="_blank" rel="noopener noreferrer"
+                    style={{ background:accentColor, color:'#fff', boxShadow:`0 4px 20px ${accentColor}44` }}>
+                    {btn.label}
+                  </a>
+                ))}
+              </div>
+            )}
+
+            {links.length === 0 && btns.length === 0 && (
+              <div style={{ fontSize:13, color:'rgba(255,255,255,0.15)', fontWeight:600, marginTop:4 }}>No links yet.</div>
+            )}
+
+            <div className="footer" style={{ alignSelf:'center', marginTop:20 }}>powered by <a href="/">fate.rip</a></div>
           </div>
-        )}
+
+          {/* Music player — inside profile-outer so it tilts with the panel */}
+          {audioSrc && music.showPlayer !== false && (
+            <div
+              className="music-player"
+              style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }}
+              onClick={e=>e.stopPropagation()}
+            >
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
+                <div style={{ minWidth:0, flex:1, paddingRight:12 }}>
+                  <div style={{ fontSize:13, fontWeight:700, color:'#fff', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackTitle}</div>
+                  <div style={{ fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{trackArtist}</div>
+                </div>
+                {isPlaying && (
+                  <div style={{ display:'flex', alignItems:'flex-end', gap:2, height:14, flexShrink:0 }}>
+                    <div className="bar" style={{ height:5  }} />
+                    <div className="bar" style={{ height:10 }} />
+                    <div className="bar" style={{ height:7  }} />
+                    <div className="bar" style={{ height:12 }} />
+                  </div>
+                )}
+              </div>
+              <div className="seek-track" onClick={handleSeek}>
+                <div className="seek-fill" style={{ width:`${progress}%` }} />
+              </div>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30 }}>{fmt(currentTime)}</span>
+                <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                  <button className="music-ctrl" onClick={restart} title="Restart">
+                    <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                  </button>
+                  <button className="music-play" onClick={togglePlay} title={isPlaying?'Pause':'Play'}>
+                    {isPlaying
+                      ? <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                      : <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    }
+                  </button>
+                  <button className="music-ctrl" onClick={skipEnd} title="Skip">
+                    <svg width="17" height="17" fill="currentColor" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/></svg>
+                  </button>
+                </div>
+                <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontVariantNumeric:'tabular-nums', minWidth:30, textAlign:'right' }}>{fmt(duration)}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
