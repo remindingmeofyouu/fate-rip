@@ -565,19 +565,7 @@ useEffect(() => {
       </div>
     </div>
   )}
-    <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
-      <div className="avatar-inner" style={{ background:'#0a0a0a', color:accentColor }}>
-        {avatarUrl ? <img src={avatarUrl} alt={profile.username} /> : initial}
-      </div>
-    </div>
-  </div>
-)}
-  width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
-  transform: followCursor ? `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` : 'none',
-  transition: 'transform 0.15s ease-out',
-  transformOrigin: 'center center',
-}}>
-
+ 
         <div className="profile-panel" style={{ alignItems, position:'relative', paddingTop:showAvatarPref?64:28 }}>
           <div style={{ position:'relative', display:'inline-block' }} className="uid-hover-wrap">
             <div style={{ fontSize:22, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, cursor:'default', ...nameStyle }}>
