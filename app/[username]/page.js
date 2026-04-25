@@ -551,12 +551,20 @@ useEffect(() => {
         </div>
       )}
 
- <div className="profile-outer" style={{
-  width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
-  transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-  transition: 'transform 0.15s ease-out',
-  transformOrigin: 'center center',
-}}>
+ <div className="profile-outer"
+  onMouseMove={followCursor ? (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = ((e.clientY - rect.top - rect.height/2) / (rect.height/2)) * -8
+    const y = ((e.clientX - rect.left - rect.width/2) / (rect.width/2)) * 8
+    setTilt({ x, y })
+  } : undefined}
+  onMouseLeave={followCursor ? () => setTilt({ x:0, y:0 }) : undefined}
+  style={{
+    width:'100%', maxWidth:panelMaxW, opacity:opacity/100, ...entranceAnimStyle,
+    transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+    transition: 'transform 0.15s ease-out',
+    transformOrigin: 'center center',
+  }}>
   {showAvatarPref && (
     <div className="profile-avatar-float" style={{ alignSelf:alignItems==='flex-start'?'flex-start':alignItems==='flex-end'?'flex-end':'center', marginLeft:avatarPos==='left'?28:0, marginRight:avatarPos==='right'?28:0 }}>
       <div className="avatar-ring" style={{ width:90, height:90, background:`linear-gradient(135deg,${accentColor},${accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${accentColor}44` }}>
