@@ -63,17 +63,17 @@ const BADGE_DEFS = [
   {
     id: 'staff', name: 'Staff', desc: 'Be a part of the fate.rip staff team.',
     color: '#378ADD', bg: 'rgba(55,138,221,0.12)', border: 'rgba(55,138,221,0.3)', how: null,
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>,
+    icon: <img src="/Discord_Staff.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
   {
     id: 'verified', name: 'Verified', desc: 'Purchase or be a known content creator.',
     color: '#1D9E75', bg: 'rgba(29,158,117,0.12)', border: 'rgba(29,158,117,0.3)', how: 'Unlock', howHref: null,
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+    icon: <img src="/blurple_verified.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
   {
     id: 'og', name: 'OG', desc: 'Be an early supporter of fate.rip.',
     color: '#EF9F27', bg: 'rgba(239,159,39,0.12)', border: 'rgba(239,159,39,0.3)', how: null,
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>,
+    icon: <img src="/Star_blue.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
   {
     id: 'booster', name: 'Server Booster', desc: 'Boost the fate.rip Discord server.',
@@ -83,22 +83,22 @@ const BADGE_DEFS = [
   {
     id: 'donator', name: 'Donator', desc: 'Donate at least $10 to fate.rip.',
     color: '#5DCAA5', bg: 'rgba(93,202,165,0.12)', border: 'rgba(93,202,165,0.3)', how: 'Donate', howHref: null,
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+    icon: <img src="/Money.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
- {
-  id: 'premium', name: 'Premium', desc: 'Purchase the fate.rip premium package.',
-  color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.3)', how: 'Purchase', howHref: null,
-  icon: <img src="/Premium_Diamond.png" width="22" height="22" style={{objectFit:'contain'}} />,
-},
+  {
+    id: 'premium', name: 'Premium', desc: 'Purchase the fate.rip premium package.',
+    color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.3)', how: 'Purchase', howHref: null,
+    icon: <img src="/Premium_Diamond.png" width="22" height="22" style={{objectFit:'contain'}} />,
+  },
   {
     id: 'bug_hunter', name: 'Bug Hunter', desc: 'Report a verified bug on fate.rip.',
     color: '#84cc16', bg: 'rgba(132,204,22,0.12)', border: 'rgba(132,204,22,0.3)', how: 'Report', howHref: 'https://discord.gg/faterip',
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="8" y="6" width="8" height="14" rx="2"/><path d="M3 10h2M19 10h2M3 16h2M19 16h2"/><path d="M8 4a2 2 0 0 1 4 0M12 4a2 2 0 0 1 4 0"/></svg>,
+    icon: <img src="/bug_hunter.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
   {
     id: 'gifter', name: 'Gifter', desc: 'Gift premium to another fate.rip user.',
     color: '#fb7185', bg: 'rgba(251,113,133,0.12)', border: 'rgba(251,113,133,0.3)', how: 'Gift', howHref: null,
-    icon: <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>,
+    icon: <img src="/Presente.png" width="22" height="22" style={{objectFit:'contain'}} />,
   },
 ]
 
