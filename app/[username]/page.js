@@ -434,8 +434,8 @@ function ProfileContent({
   const handlePageMouseMove = followCursor ? (e) => {
     if (!tiltRef.current) return
     const rect = tiltRef.current.getBoundingClientRect()
-    const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -8
-    const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  8
+    const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -25
+    const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  25
     setTilt({ x, y })
   } : undefined
 
