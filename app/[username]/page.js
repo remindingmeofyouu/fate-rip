@@ -233,7 +233,7 @@ export default function ProfilePage() {
   const entrance       = settings.entrance || {}
   const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
   const typingBio      = layout.typingBio || false
-  const followCursor   = layout.followCursor || false
+  const followCursor   = layout.followCursor || true
   const panelOpacity   = layout.panelOpacity !== undefined ? layout.panelOpacity : 85
   const panelBlur      = layout.panelBlur !== undefined ? layout.panelBlur : 24
   const showAvatarPref = layout.showAvatar !== false
