@@ -726,7 +726,7 @@ function ProfileContent({
           {audioSrc && music.showPlayer !== false && (
             <div
               className="music-player"
-              style={{ marginTop:10, background:`rgba(${bgRgb},0.55)`, border:`1px solid rgba(${accentRgb},0.10)` }}
+              style={{ marginTop:10, background:`rgba(${bgRgb},0.85)`, border:`1px solid rgba(${accentRgb},0.10)` }}
               onClick={e=>e.stopPropagation()}
             >
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>
