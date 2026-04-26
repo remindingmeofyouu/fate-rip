@@ -234,6 +234,8 @@ export default function ProfilePage() {
   const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
   const typingBio      = layout.typingBio || false
   const followCursor   = layout.followCursor || false
+  const panelOpacity   = layout.panelOpacity !== undefined ? layout.panelOpacity : 85
+  const panelBlur      = layout.panelBlur !== undefined ? layout.panelBlur : 24
   const showAvatarPref = layout.showAvatar !== false
   const avatarPos      = layout.avatarPos || 'center'
   const panelSize      = layout.panelSize || 'medium'
@@ -329,6 +331,7 @@ export default function ProfilePage() {
         iconSize={iconSize} viewCount={viewCount} showLinkLabels={showLinkLabels}
         badges={badges} badgePosition={badgePosition}
         followCursor={followCursor}
+        panelOpacity={panelOpacity} panelBlur={panelBlur}
       />
     </>
   )
@@ -342,7 +345,7 @@ function ProfileContent({
   initial, links, opacity, blur, bgFx, location, glowState,
   avatarUrl, bgUrl, displayName, audioSrc, nameStyle, overlayStyle,
   entranceAnimStyle, audioRef, isPlaying, setIsPlaying, spawnClickEffect,
-  viewCount, iconSize, showLinkLabels, badges, badgePosition, followCursor,
+  viewCount, iconSize, showLinkLabels, badges, badgePosition, followCursor, panelOpacity, panelBlur,
 }) {
   const bioDisplayed = useTypewriter(profile.bio || '', typingBio)
 
@@ -472,7 +475,7 @@ function ProfileContent({
         /* transform-style:preserve-3d removed — backdrop-filter breaks it anyway */
         .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
-        .profile-panel { width:100%; background:rgba(${bgRgb},0.85); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
+        .profile-panel { width:100%; background:rgba(${bgRgb},${panelOpacity/100}); backdrop-filter:blur(${panelBlur}px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
         .avatar-inner { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; overflow:hidden; }
         .avatar-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
@@ -484,7 +487,7 @@ function ProfileContent({
         .bg-img     { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; }
         .bg-overlay { position:fixed; inset:0; z-index:1; pointer-events:none; }
         .fx-layer   { position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
-        .music-player { width:100%; background:rgba(10,10,10,0.55); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:16px 20px 14px; box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05); }
+        .music-player { width:100%; background:rgba(${bgRgb},${panelOpacity/100}); backdrop-filter:blur(${panelBlur}px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:16px 20px 14px; box-shadow:0 8px 32px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.05); }
         .music-ctrl { background:none; border:none; cursor:pointer; color:rgba(255,255,255,0.5); padding:4px; display:flex; align-items:center; justify-content:center; transition:color .15s,transform .15s; border-radius:50%; }
         .music-ctrl:hover { color:#fff; transform:scale(1.18); }
         .music-play { width:34px; height:34px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.12); cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; transition:background .15s,transform .15s; }
@@ -726,7 +729,7 @@ function ProfileContent({
           {audioSrc && music.showPlayer !== false && (
             <div
               className="music-player"
-              style={{ marginTop:10, background:`rgba(${bgRgb},0.85)`, border:`1px solid rgba(${accentRgb},0.10)` }}
+              style={{ marginTop:10, background:`rgba(${bgRgb},${panelOpacity/100})`, border:`1px solid rgba(${accentRgb},0.10)` }}
               onClick={e=>e.stopPropagation()}
             >
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4 }}>

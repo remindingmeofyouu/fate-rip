@@ -498,6 +498,8 @@ export default function Dashboard() {
   const [showAvatar, setShowAvatar] = useState(true)
   const [avatarPos, setAvatarPos] = useState('center')
   const [followCursor, setFollowCursor] = useState(false)
+  const [panelOpacity, setPanelOpacity] = useState(100)
+  const [panelBlur, setPanelBlur] = useState(24)
   const [typingBio, setTypingBio] = useState(false)
   const [enterEnabled, setEnterEnabled] = useState(true)
   const [enterTitle, setEnterTitle] = useState('')
@@ -529,7 +531,7 @@ export default function Dashboard() {
     font: selectedFont, accentColor, bgColor, bgType, glowIntensity, particleEnabled, particleStyle,
     cursorStyle, entranceAnim, clickEffect,
     music: { enabled: musicEnabled, type: musicType, url: musicUrl, title: musicTitle, artist: musicArtist, autoplay: musicAutoplay, volume: musicVolume, showTitle: musicShowTitle, showArtist: musicShowArtist, showPlayer: musicShowPlayer },
-    layout: { panelSize, showAvatar, avatarPos, typingBio, followCursor },
+    layout: { panelSize, showAvatar, avatarPos, typingBio, followCursor, panelOpacity, panelBlur },
     entrance: { enabled: enterEnabled, title: enterTitle, subtitle: enterSubtitle, showAvatar: enterShowAvatar, showTitle: enterShowTitle, showSubtitle: enterShowSubtitle },
     iconSize, showLinkLabels, buttons,
   })
@@ -547,7 +549,7 @@ export default function Dashboard() {
     if (s.entranceAnim) setEntranceAnim(s.entranceAnim)
     if (s.clickEffect) setClickEffect(s.clickEffect)
     if (s.music) { const m = s.music; if (m.enabled !== undefined) setMusicEnabled(m.enabled); if (m.type) setMusicType(m.type); if (m.url) setMusicUrl(m.url); if (m.title) setMusicTitle(m.title); if (m.artist) setMusicArtist(m.artist); if (m.autoplay !== undefined) setMusicAutoplay(m.autoplay); if (m.volume !== undefined) setMusicVolume(m.volume); if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle); if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist); if (m.showPlayer !== undefined) setMusicShowPlayer(m.showPlayer) }
-    if (s.layout) { const l = s.layout; if (l.panelSize) setPanelSize(l.panelSize); if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar); if (l.avatarPos) setAvatarPos(l.avatarPos); if (l.typingBio !== undefined) setTypingBio(l.typingBio); if (l.followCursor !== undefined) setFollowCursor(l.followCursor) }
+    if (s.layout) { const l = s.layout; if (l.panelSize) setPanelSize(l.panelSize); if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar); if (l.avatarPos) setAvatarPos(l.avatarPos); if (l.typingBio !== undefined) setTypingBio(l.typingBio); if (l.followCursor !== undefined) setFollowCursor(l.followCursor); if (l.panelOpacity !== undefined) setPanelOpacity(l.panelOpacity); if (l.panelBlur !== undefined) setPanelBlur(l.panelBlur) }
     if (s.entrance) { const e = s.entrance; if (e.enabled !== undefined) setEnterEnabled(e.enabled); if (e.title) setEnterTitle(e.title); if (e.subtitle) setEnterSubtitle(e.subtitle); if (e.showAvatar !== undefined) setEnterShowAvatar(e.showAvatar); if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle); if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle) }
     if (s.iconSize) setIconSize(s.iconSize)
     if (s.showLinkLabels !== undefined) setShowLinkLabels(s.showLinkLabels)
@@ -887,6 +889,8 @@ setBadgePosition(data.badge_position || 'below_bio')
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}><label style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Avatar Position</label><div style={{ display: 'flex', gap: 8 }}>{['left','center','right'].map(p => <button key={p} onClick={() => setAvatarPos(p)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, border: `1px solid ${avatarPos === p ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: avatarPos === p ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: avatarPos === p ? '#e03030' : 'rgba(255,255,255,0.45)', fontSize: 12, fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize', fontFamily: 'inherit', transition: 'all .15s' }}>{p}</button>)}</div></div>
                         <ToggleRow label="Show Avatar" sub="Display your avatar on your profile" checked={showAvatar} onChange={e => setShowAvatar(e.target.checked)} />
                         <ToggleRow label="Follow Cursor" sub="Panel floats and follows the visitor's cursor" checked={followCursor} onChange={e => setFollowCursor(e.target.checked)} />
+                        <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:11,fontWeight:500,color:'rgba(255,255,255,0.35)',letterSpacing:'0.04em',textTransform:'uppercase'}}>Panel Opacity — {panelOpacity}%</label><input type="range" min={20} max={100} value={panelOpacity} onChange={e=>setPanelOpacity(Number(e.target.value))} style={{width:'100%',accentColor:'#e03030'}}/></div>
+<div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:11,fontWeight:500,color:'rgba(255,255,255,0.35)',letterSpacing:'0.04em',textTransform:'uppercase'}}>Panel Blur — {panelBlur}px</label><input type="range" min={0} max={40} value={panelBlur} onChange={e=>setPanelBlur(Number(e.target.value))} style={{width:'100%',accentColor:'#e03030'}}/></div>
                       </div>
                     </Card>
                   )}
