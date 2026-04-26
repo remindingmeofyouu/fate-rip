@@ -608,7 +608,7 @@ setBadgePosition(data.badge_position || 'below_bio')
     const url = urlData.publicUrl
     const colMap = { bg: 'bg_url', avatar: 'avatar_url', cursor: 'cursor_url', audio: 'audio_url' }
     await supabase.from('users').update({ [colMap[type]]: url }).eq('username', username)
-    if (type === 'bg') setBgPreview(url); else if (type === 'avatar') setAvatarPreview(url); else if (type === 'cursor') setCursorPreview(url); else if (type === 'audio') setAudioName(file.name)
+    if (type === 'bg') setBgPreview(url); else if (type === 'avatar') setAvatarPreview(url); else if (type === 'cursor') setCursorPreview(url); else if (type === 'audio') { setAudioName(file.name); setMusicUrl(url) }
     showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} uploaded!`)
     setUploadingType(null)
   }
@@ -623,7 +623,7 @@ setBadgePosition(data.badge_position || 'below_bio')
   const saveProfile = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ bio: appBio, links, display_name: displayName, location, settings }).eq('username', username); setSaving(false); if (!error) setBio(appBio); showToast(error ? 'Failed to save' : 'Profile saved!') }
   const saveAppearance = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ bio: appBio, opacity, blur, username_fx: usernameFx, bg_fx: bgFx, location, glow_settings: glowState, discord_presence: discordPresence, settings }).eq('username', username); setSaving(false); if (!error) setBio(appBio); showToast(error ? 'Failed to save' : 'Appearance saved!') }
   const saveEffects = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Effects saved!') }
-  const saveMusic = async () => { setSaving(true); const settings = buildSettings(); const extraUpdate = musicEnabled && musicType === 'direct' && musicUrl ? { audio_url: musicUrl } : {}; const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Music saved!') }
+  const saveMusic = async () => { setSaving(true); const settings = buildSettings(); const extraUpdate = musicUrl ? { audio_url: musicUrl } : {}; const { error } = await supabase.from('users').update({ settings, ...extraUpdate }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Music saved!') }
   const saveButtons = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Buttons saved!') }
   const saveLinks = async () => { setSaving(true); const settings = buildSettings(); const { error } = await supabase.from('users').update({ links, settings }).eq('username', username); setSaving(false); showToast(error ? 'Failed to save' : 'Links saved!') }
   const handleAddLink = (linkObj) => { setLinks(prev => [...prev, { ...linkObj, id: Date.now() }]); showToast('Link added! Remember to save.') }
