@@ -507,8 +507,8 @@ function ProfileContent({
 
       {/* Background media */}
       {bgUrl && (bgUrl.match(/\.(mp4|webm|ogg|mov)$/i)
-        ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter:blur>0?`blur(${blur}px)`:'none' }} />
-        : <img src={bgUrl} className="bg-img" alt="" style={{ filter:blur>0?`blur(${blur}px)`:'none' }} />
+        ? <video src={bgUrl} className="bg-img" autoPlay loop muted playsInline style={{ filter:blur>0?`blur(${blur}px)`:'none', opacity:opacity/100 }} />
+        : <img src={bgUrl} className="bg-img" alt="" style={{ filter:blur>0?`blur(${blur}px)`:'none', opacity:opacity/100 }} />
       )}
       <div className="bg-overlay" style={overlayStyle} />
 
@@ -578,7 +578,6 @@ function ProfileContent({
           width: '100%',
           maxWidth: panelMaxW,
           perspective: '800px',
-          opacity: opacity / 100,   // ← opacity here, NOT on profile-outer, avoids backdrop-filter double-darken
         }}
       >
         <div
