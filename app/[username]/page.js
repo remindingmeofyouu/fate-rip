@@ -472,7 +472,7 @@ function ProfileContent({
         /* transform-style:preserve-3d removed — backdrop-filter breaks it anyway */
         .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
-        .profile-panel { width:100%; background:rgba(${bgRgb},0.5); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
+        .profile-panel { width:100%; background:rgba(${bgRgb},0.85); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
         .avatar-inner { width:100%; height:100%; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:34px; font-weight:900; overflow:hidden; }
         .avatar-inner img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
