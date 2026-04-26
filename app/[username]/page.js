@@ -233,7 +233,7 @@ export default function ProfilePage() {
   const entrance       = settings.entrance || {}
   const btns           = Array.isArray(settings.buttons) ? settings.buttons : []
   const typingBio      = layout.typingBio || false
-  const followCursor   = layout.followCursor || true
+  const followCursor   = layout.followCursor || false
   const panelOpacity   = layout.panelOpacity !== undefined ? layout.panelOpacity : 85
   const panelBlur      = layout.panelBlur !== undefined ? layout.panelBlur : 24
   const showAvatarPref = layout.showAvatar !== false
@@ -428,24 +428,25 @@ function ProfileContent({
 
   const badgeStrip = <BadgeStrip badges={badges} align={avatarPos} />
 
-  // ─── Tilt handlers — mouse on the full page, bounds from tiltRef ──────────
-  // This ensures tilt fires even when cursor is outside the card bounds,
-  // and avoids the jitter caused by getBoundingClientRect() on a rotating element.
-  const handlePageMouseMove = followCursor ? (e) => {
-    if (!tiltRef.current) return
-    const rect = tiltRef.current.getBoundingClientRect()
-    const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -25
-    const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  25
-    setTilt({ x, y })
-  } : undefined
+  // ─── TILT HANDLERS — on the wrapper div itself ────────────────────────────
+  const onTiltMove = followCursor
+    ? (e) => {
+        const el = tiltRef.current
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const x = ((e.clientY - rect.top  - rect.height / 2) / (rect.height / 2)) * -10
+        const y = ((e.clientX - rect.left - rect.width  / 2) / (rect.width  / 2)) *  10
+        setTilt({ x, y })
+      }
+    : undefined
 
-  const handlePageMouseLeave = followCursor ? () => setTilt({ x: 0, y: 0 }) : undefined
+  const onTiltLeave = followCursor
+    ? () => setTilt({ x: 0, y: 0 })
+    : undefined
 
   return (
     <div
       onClick={handleClick}
-      onMouseMove={handlePageMouseMove}
-      onMouseLeave={handlePageMouseLeave}
       style={{
         background:bgColorSetting, minHeight:'100vh', display:'flex',
         flexDirection:'column', alignItems:'center', justifyContent:'center',
@@ -472,8 +473,7 @@ function ProfileContent({
         @keyframes firefly   { 0%,100%{transform:translate(0,0);opacity:0.2} 25%{transform:translate(20px,-30px);opacity:1} 50%{transform:translate(-10px,-60px);opacity:0.5} 75%{transform:translate(30px,-40px);opacity:0.8} }
         @keyframes clickFly  { 0%{transform:translate(0,0) scale(1);opacity:1} 100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0} }
         @keyframes barPulse  { 0%,100%{transform:scaleY(0.3)} 50%{transform:scaleY(1)} }
-        /* transform-style:preserve-3d removed — backdrop-filter breaks it anyway */
-        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; }
+        .profile-outer { display:flex; flex-direction:column; align-items:center; position:relative; z-index:2; width:100%; }
         .profile-avatar-float { position:relative; z-index:3; margin-bottom:-46px; }
         .profile-panel { width:100%; background:rgba(${bgRgb},${panelOpacity/100}); backdrop-filter:blur(${panelBlur}px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:64px 28px 28px; display:flex; flex-direction:column; box-shadow:0 8px 40px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.06); }
         .avatar-ring  { border-radius:50%; padding:3px; flex-shrink:0; }
@@ -569,28 +569,32 @@ function ProfileContent({
       )}
 
       {/*
-        ─── TILT FIX ────────────────────────────────────────────────────────────
-        perspective lives on this OUTER wrapper.
-        Mouse events are also here so getBoundingClientRect() is stable.
-        The INNER .profile-outer only gets rotateX/rotateY — no perspective().
+        ─── TILT WRAPPER ────────────────────────────────────────────────────────
+        Mouse events live HERE on the wrapper so getBoundingClientRect is stable.
+        perspective is set here; the inner div only gets rotateX/rotateY.
       */}
       <div
-        className="tilt-wrapper"
         ref={tiltRef}
+        className="tilt-wrapper"
+        onMouseMove={onTiltMove}
+        onMouseLeave={onTiltLeave}
         style={{
           width: '100%',
           maxWidth: panelMaxW,
           perspective: '800px',
+          perspectiveOrigin: 'center center',
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         <div
           className="profile-outer"
           style={{
-            width: '100%',
             ...entranceAnimStyle,
             transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-            transition: 'transform 0.15s ease-out',
+            transition: 'transform 0.12s ease-out',
             transformOrigin: 'center center',
+            willChange: 'transform',
           }}
         >
           {/* Avatar floating above panel */}
