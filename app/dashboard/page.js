@@ -117,6 +117,68 @@ function getTextColor(platformId) {
   return LIGHT_PLATFORMS.has(platformId) ? '#1a1a1a' : '#fff'
 }
 
+// ─── Templates ─────────────────────────────────────────────────────────────────
+const TEMPLATES = [
+  {
+    id: 'crimson_dark', name: 'Crimson Dark', desc: 'Classic fate.rip — bold red on deep black', tags: ['Dark','Bold'],
+    accent: '#e03030', bg: '#080808',
+    settings: { font:'Nunito', accentColor:'#e03030', bgColor:'#080808', glowIntensity:60, particleEnabled:false, particleStyle:'Dots', entranceAnim:'Fade In', clickEffect:'Sparks', bgFx:'none', usernameFx:'neon', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:85, panelBlur:24, followCursor:false, typingBio:false }, iconSize:44, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'cyberpunk', name: 'Cyberpunk', desc: 'Neon green matrix vibes with monospace font', tags: ['Neon','Animated'],
+    accent: '#00ff41', bg: '#050505',
+    settings: { font:'JetBrains Mono', accentColor:'#00ff41', bgColor:'#050505', glowIntensity:80, particleEnabled:true, particleStyle:'Stars', entranceAnim:'Glitch', clickEffect:'Explosion', bgFx:'matrix', usernameFx:'neon', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:80, panelBlur:20, followCursor:true, typingBio:true }, iconSize:44, showLinkLabels:false, buttons:[] },
+  },
+  {
+    id: 'clean_minimal', name: 'Clean Minimal', desc: 'Simple, elegant, distraction-free', tags: ['Clean','Minimal'],
+    accent: '#ffffff', bg: '#0a0a0a',
+    settings: { font:'DM Sans', accentColor:'#ffffff', bgColor:'#0a0a0a', glowIntensity:20, particleEnabled:false, particleStyle:'Dots', entranceAnim:'Fade In', clickEffect:'None', bgFx:'none', usernameFx:'', layout:{ panelSize:'compact', avatarPos:'left', panelOpacity:90, panelBlur:16, followCursor:false, typingBio:false }, iconSize:36, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'sunset', name: 'Sunset', desc: 'Warm orange tones with firefly ambiance', tags: ['Warm','Chill'],
+    accent: '#f97316', bg: '#1a0800',
+    settings: { font:'Poppins', accentColor:'#f97316', bgColor:'#1a0800', glowIntensity:50, particleEnabled:true, particleStyle:'Fireflies', entranceAnim:'Zoom In', clickEffect:'Sparks', bgFx:'none', usernameFx:'gold', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:85, panelBlur:24, followCursor:false, typingBio:false }, iconSize:44, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'deep_ocean', name: 'Deep Ocean', desc: 'Cool blues with rain ambiance', tags: ['Cool','Animated'],
+    accent: '#0ea5e9', bg: '#03111c',
+    settings: { font:'Sora', accentColor:'#0ea5e9', bgColor:'#03111c', glowIntensity:55, particleEnabled:false, particleStyle:'Dots', entranceAnim:'Slide Up', clickEffect:'Ripple', bgFx:'rain', usernameFx:'neon', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:80, panelBlur:28, followCursor:true, typingBio:false }, iconSize:44, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'violet_dream', name: 'Violet Dream', desc: 'Purple haze with floating bubbles', tags: ['Purple','Dreamy'],
+    accent: '#8b5cf6', bg: '#0a0517',
+    settings: { font:'Manrope', accentColor:'#8b5cf6', bgColor:'#0a0517', glowIntensity:65, particleEnabled:true, particleStyle:'Bubbles', entranceAnim:'Fade In', clickEffect:'Stars', bgFx:'none', usernameFx:'rainbow', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:85, panelBlur:24, followCursor:false, typingBio:true }, iconSize:44, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'gold_elite', name: 'Gold Elite', desc: 'Luxury gold with Playfair elegance', tags: ['Luxury','Bold'],
+    accent: '#facc15', bg: '#140f02',
+    settings: { font:'Playfair Display', accentColor:'#facc15', bgColor:'#140f02', glowIntensity:70, particleEnabled:true, particleStyle:'Stars', entranceAnim:'Zoom In', clickEffect:'Sparks', bgFx:'none', usernameFx:'gold', layout:{ panelSize:'wide', avatarPos:'center', panelOpacity:90, panelBlur:20, followCursor:false, typingBio:false }, iconSize:48, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'cherry_blossom', name: 'Cherry Blossom', desc: 'Soft pink with snow particles', tags: ['Pink','Soft'],
+    accent: '#f43f5e', bg: '#15030b',
+    settings: { font:'Nunito', accentColor:'#f43f5e', bgColor:'#15030b', glowIntensity:45, particleEnabled:true, particleStyle:'Stars', entranceAnim:'Slide Up', clickEffect:'Hearts', bgFx:'snow', usernameFx:'neon', layout:{ panelSize:'medium', avatarPos:'center', panelOpacity:85, panelBlur:24, followCursor:false, typingBio:true }, iconSize:44, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'rose_glass', name: 'Rose Glass', desc: 'Glassy pink panel with dreamy blur', tags: ['Pink','Glass'],
+    accent: '#fb7185', bg: '#240b1a',
+    settings: { font:'Sora', accentColor:'#fb7185', bgColor:'#240b1a', glowIntensity:55, particleEnabled:true, particleStyle:'Fireflies', entranceAnim:'Zoom In', clickEffect:'Hearts', bgFx:'none', usernameFx:'neon', layout:{ panelSize:'compact', avatarPos:'center', panelOpacity:60, panelBlur:40, followCursor:true, typingBio:false }, iconSize:40, showLinkLabels:true, buttons:[] },
+  },
+  {
+    id: 'lime_hacker', name: 'Lime Hacker', desc: 'Sharp lime green on near-black', tags: ['Neon','Hacker'],
+    accent: '#84cc16', bg: '#060b02',
+    settings: { font:'Space Mono', accentColor:'#84cc16', bgColor:'#060b02', glowIntensity:75, particleEnabled:true, particleStyle:'Dots', entranceAnim:'Glitch', clickEffect:'Explosion', bgFx:'none', usernameFx:'neon', layout:{ panelSize:'medium', avatarPos:'left', panelOpacity:85, panelBlur:16, followCursor:false, typingBio:true }, iconSize:44, showLinkLabels:false, buttons:[] },
+  },
+]
+
+const FONT_QUERY_MAP = {
+  'Inter':'Inter:wght@400;700','Syne':'Syne:wght@400;700;800','Space Mono':'Space+Mono:wght@400;700',
+  'Roboto':'Roboto:wght@400;700','Poppins':'Poppins:wght@400;600;700','Montserrat':'Montserrat:wght@400;700',
+  'Sora':'Sora:wght@400;700','DM Sans':'DM+Sans:wght@400;700','Manrope':'Manrope:wght@400;700',
+  'JetBrains Mono':'JetBrains+Mono:wght@400;700','Bebas Neue':'Bebas+Neue',
+  'Playfair Display':'Playfair+Display:wght@400;700','Nunito':'Nunito:wght@400;700;900',
+}
+
 // ─── Link Icon Tile ────────────────────────────────────────────────────────────
 function LinkIconTile({ link, platform, abbr, onDelete, iconSize = 44, showLabel = true }) {
   const [copied, setCopied] = useState(false)
@@ -519,6 +581,8 @@ export default function Dashboard() {
   const [userBadges, setUserBadges] = useState([])
   const [badgePosition, setBadgePosition] = useState('below_bio')
   const [savingBadges, setSavingBadges] = useState(false)
+  // ── Templates ──
+  const [templatePreview, setTemplatePreview] = useState(null)
 
   const fileBgRef = useRef()
   const fileAvatarRef = useRef()
@@ -548,6 +612,8 @@ export default function Dashboard() {
     if (s.cursorStyle) setCursorStyle(s.cursorStyle)
     if (s.entranceAnim) setEntranceAnim(s.entranceAnim)
     if (s.clickEffect) setClickEffect(s.clickEffect)
+    if (s.bgFx) setBgFx(s.bgFx)
+    if (s.usernameFx !== undefined) setUsernameFx(s.usernameFx)
     if (s.music) { const m = s.music; if (m.enabled !== undefined) setMusicEnabled(m.enabled); if (m.type) setMusicType(m.type); if (m.url) setMusicUrl(m.url); if (m.title) setMusicTitle(m.title); if (m.artist) setMusicArtist(m.artist); if (m.autoplay !== undefined) setMusicAutoplay(m.autoplay); if (m.volume !== undefined) setMusicVolume(m.volume); if (m.showTitle !== undefined) setMusicShowTitle(m.showTitle); if (m.showArtist !== undefined) setMusicShowArtist(m.showArtist); if (m.showPlayer !== undefined) setMusicShowPlayer(m.showPlayer) }
     if (s.layout) { const l = s.layout; if (l.panelSize) setPanelSize(l.panelSize); if (l.showAvatar !== undefined) setShowAvatar(l.showAvatar); if (l.avatarPos) setAvatarPos(l.avatarPos); if (l.typingBio !== undefined) setTypingBio(l.typingBio); if (l.followCursor !== undefined) setFollowCursor(l.followCursor); if (l.panelOpacity !== undefined) setPanelOpacity(l.panelOpacity); if (l.panelBlur !== undefined) setPanelBlur(l.panelBlur) }
     if (s.entrance) { const e = s.entrance; if (e.enabled !== undefined) setEnterEnabled(e.enabled); if (e.title) setEnterTitle(e.title); if (e.subtitle) setEnterSubtitle(e.subtitle); if (e.showAvatar !== undefined) setEnterShowAvatar(e.showAvatar); if (e.showTitle !== undefined) setEnterShowTitle(e.showTitle); if (e.showSubtitle !== undefined) setEnterShowSubtitle(e.showSubtitle) }
@@ -575,12 +641,9 @@ export default function Dashboard() {
         setUid(data.id ? String(data.id) : '')
         if (data.settings) applySettings(data.settings); else setEnterTitle(data.username || '')
         if (data.username) fetchViewCounts(data.username)
-       const { data: badgeRows } = await supabase
-  .from('user_badges')
-  .select('badge, hidden')
-  .eq('username', data.username)
-setUserBadges(badgeRows ? badgeRows : [])
-setBadgePosition(data.badge_position || 'below_bio')
+        const { data: badgeRows } = await supabase.from('user_badges').select('badge, hidden').eq('username', data.username)
+        setUserBadges(badgeRows ? badgeRows : [])
+        setBadgePosition(data.badge_position || 'below_bio')
       }
       setLoading(false)
     }
@@ -699,10 +762,13 @@ setBadgePosition(data.badge_position || 'below_bio')
         .badge-action-btn { padding:8px 18px; border-radius:10px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.6); font-family:inherit; transition:all .15s; white-space:nowrap; flex-shrink:0; }
         .badge-action-btn:hover { background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.2); }
         .badge-locked-icon { display:flex; align-items:center; justify-content:center; width:46px; height:46px; border-radius:13px; flex-shrink:0; }
+        .tpl-card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:16px; overflow:hidden; transition:border-color .15s, transform .2s; }
+        .tpl-card:hover { transform:translateY(-2px); }
         @keyframes toastIn { from{transform:translateX(-50%) translateY(60px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
         @keyframes fadeInUp { from{opacity:0;transform:translateX(-50%) translateY(4px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
-        @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} .platforms-grid{grid-template-columns:repeat(5,1fr)!important;} }
-        @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} .platforms-grid{grid-template-columns:repeat(4,1fr)!important;} }
+        @keyframes glitch { 0%,100%{text-shadow:2px 0 #ff0000,-2px 0 #0000ff} 25%{text-shadow:-2px 0 #ff0000,2px 0 #0000ff} 50%{text-shadow:2px 2px #ff0000,-2px -2px #0000ff} 75%{text-shadow:-2px 2px #ff0000,2px -2px #0000ff} }
+        @media(max-width:900px){ .sidebar-desktop{display:none!important;} .actions-grid-3{grid-template-columns:1fr 1fr!important;} .stats-grid-3{grid-template-columns:1fr 1fr!important;} .editor-layout{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(3,1fr)!important;} .platforms-grid{grid-template-columns:repeat(5,1fr)!important;} .tpl-grid{grid-template-columns:1fr 1fr!important;} }
+        @media(max-width:600px){ .actions-grid-3{grid-template-columns:1fr!important;} .stats-grid-3{grid-template-columns:1fr!important;} .effect-grid{grid-template-columns:repeat(2,1fr)!important;} .platforms-grid{grid-template-columns:repeat(4,1fr)!important;} .tpl-grid{grid-template-columns:1fr!important;} }
       `}</style>
 
       {/* ── SIDEBAR ── */}
@@ -890,7 +956,7 @@ setBadgePosition(data.badge_position || 'below_bio')
                         <ToggleRow label="Show Avatar" sub="Display your avatar on your profile" checked={showAvatar} onChange={e => setShowAvatar(e.target.checked)} />
                         <ToggleRow label="Follow Cursor" sub="Panel floats and follows the visitor's cursor" checked={followCursor} onChange={e => setFollowCursor(e.target.checked)} />
                         <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:11,fontWeight:500,color:'rgba(255,255,255,0.35)',letterSpacing:'0.04em',textTransform:'uppercase'}}>Panel Opacity — {panelOpacity}%</label><input type="range" min={20} max={100} value={panelOpacity} onChange={e=>setPanelOpacity(Number(e.target.value))} style={{width:'100%',accentColor:'#e03030'}}/></div>
-<div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:11,fontWeight:500,color:'rgba(255,255,255,0.35)',letterSpacing:'0.04em',textTransform:'uppercase'}}>Panel Blur — {panelBlur}px</label><input type="range" min={0} max={40} value={panelBlur} onChange={e=>setPanelBlur(Number(e.target.value))} style={{width:'100%',accentColor:'#e03030'}}/></div>
+                        <div style={{display:'flex',flexDirection:'column',gap:6}}><label style={{fontSize:11,fontWeight:500,color:'rgba(255,255,255,0.35)',letterSpacing:'0.04em',textTransform:'uppercase'}}>Panel Blur — {panelBlur}px</label><input type="range" min={0} max={40} value={panelBlur} onChange={e=>setPanelBlur(Number(e.target.value))} style={{width:'100%',accentColor:'#e03030'}}/></div>
                       </div>
                     </Card>
                   )}
@@ -1052,129 +1118,266 @@ setBadgePosition(data.badge_position || 'below_bio')
           )}
 
           {/* ═══ BADGES ═══ */}
-{activePage === 'badges' && (() => {
-  const saveBadgeSettings = async () => {
-    setSavingBadges(true)
-    // save position
-    await supabase.from('users').update({ badge_position: badgePosition }).eq('username', username)
-    // save hidden states for each badge
-    for (const b of userBadges) {
-      await supabase.from('user_badges')
-        .update({ hidden: b.hidden || false })
-        .eq('username', username)
-        .eq('badge', b.badge)
-    }
-    setSavingBadges(false)
-    showToast('Badge settings saved!')
-  }
-
-  const toggleBadgeHidden = (badgeId) => {
-    setUserBadges(prev => prev.map(b => b.badge === badgeId ? { ...b, hidden: !b.hidden } : b))
-  }
-
-  return (
-    <>
-      <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
-      <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Your <span style={{ color: '#e03030' }}>Badges</span></h1>
-      <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>Collect badges by being active on fate.rip</p>
-
-      {/* Badge Position Picker */}
-      <Card style={{ marginBottom: 16 }}>
-        <CardHeader
-          title="Badge Position"
-          sub="Choose where badges appear on your profile"
-          icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>}
-        />
-        <div style={{ padding: 20, display: 'flex', gap: 8 }}>
-          {[
-            { value: 'below_username', label: 'Below Username' },
-            { value: 'below_bio',     label: 'Below Bio' },
-            { value: 'above_links',   label: 'Above Links' },
-          ].map(opt => (
-            <button
-              key={opt.value}
-              onClick={() => setBadgePosition(opt.value)}
-              style={{
-                flex: 1, padding: '10px 8px', borderRadius: 10, fontSize: 12, fontWeight: 500,
-                cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s',
-                border: `1px solid ${badgePosition === opt.value ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`,
-                background: badgePosition === opt.value ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)',
-                color: badgePosition === opt.value ? '#e03030' : 'rgba(255,255,255,0.45)',
-              }}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </Card>
-
-      {/* Earned badges with toggle */}
-      {userBadges.length > 0 && (
-        <Card style={{ marginBottom: 16 }}>
-          <CardHeader title="Visibility" sub="Toggle which badges show on your profile" />
-          <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {userBadges.map(b => {
-              const def = BADGE_DEFS.find(d => d.id === b.badge)
-              if (!def) return null
-              const isHidden = b.hidden || false
-              return (
-                <div key={b.badge} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', background: isHidden ? 'rgba(255,255,255,0.01)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.05)' : def.border}`, borderRadius: 12, opacity: isHidden ? 0.5 : 1, transition: 'all .2s' }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: isHidden ? 'rgba(255,255,255,0.04)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.07)' : def.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: isHidden ? 'rgba(255,255,255,0.2)' : def.color, flexShrink: 0 }}>
-                    {def.icon}
+          {activePage === 'badges' && (() => {
+            const saveBadgeSettings = async () => {
+              setSavingBadges(true)
+              await supabase.from('users').update({ badge_position: badgePosition }).eq('username', username)
+              for (const b of userBadges) {
+                await supabase.from('user_badges').update({ hidden: b.hidden || false }).eq('username', username).eq('badge', b.badge)
+              }
+              setSavingBadges(false)
+              showToast('Badge settings saved!')
+            }
+            const toggleBadgeHidden = (badgeId) => {
+              setUserBadges(prev => prev.map(b => b.badge === badgeId ? { ...b, hidden: !b.hidden } : b))
+            }
+            return (
+              <>
+                <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Badges</div>
+                <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Your <span style={{ color: '#e03030' }}>Badges</span></h1>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 24 }}>Collect badges by being active on fate.rip</p>
+                <Card style={{ marginBottom: 16 }}>
+                  <CardHeader title="Badge Position" sub="Choose where badges appear on your profile" icon={<svg width="20" height="20" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M8.21 13.89 7 23l5-3 5 3-1.21-9.12"/></svg>} />
+                  <div style={{ padding: 20, display: 'flex', gap: 8 }}>
+                    {[{ value: 'below_username', label: 'Below Username' }, { value: 'below_bio', label: 'Below Bio' }, { value: 'above_links', label: 'Above Links' }].map(opt => (
+                      <button key={opt.value} onClick={() => setBadgePosition(opt.value)} style={{ flex: 1, padding: '10px 8px', borderRadius: 10, fontSize: 12, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', border: `1px solid ${badgePosition === opt.value ? 'rgba(224,48,48,0.4)' : 'rgba(255,255,255,0.07)'}`, background: badgePosition === opt.value ? 'rgba(224,48,48,0.1)' : 'rgba(255,255,255,0.02)', color: badgePosition === opt.value ? '#e03030' : 'rgba(255,255,255,0.45)' }}>{opt.label}</button>
+                    ))}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: isHidden ? 'rgba(255,255,255,0.35)' : '#fff' }}>{def.name}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{isHidden ? 'Hidden on profile' : 'Visible on profile'}</div>
+                </Card>
+                {userBadges.length > 0 && (
+                  <Card style={{ marginBottom: 16 }}>
+                    <CardHeader title="Visibility" sub="Toggle which badges show on your profile" />
+                    <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {userBadges.map(b => {
+                        const def = BADGE_DEFS.find(d => d.id === b.badge)
+                        if (!def) return null
+                        const isHidden = b.hidden || false
+                        return (
+                          <div key={b.badge} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', background: isHidden ? 'rgba(255,255,255,0.01)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.05)' : def.border}`, borderRadius: 12, opacity: isHidden ? 0.5 : 1, transition: 'all .2s' }}>
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: isHidden ? 'rgba(255,255,255,0.04)' : def.bg, border: `1px solid ${isHidden ? 'rgba(255,255,255,0.07)' : def.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: isHidden ? 'rgba(255,255,255,0.2)' : def.color, flexShrink: 0 }}>{def.icon}</div>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ fontSize: 13, fontWeight: 700, color: isHidden ? 'rgba(255,255,255,0.35)' : '#fff' }}>{def.name}</div>
+                              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{isHidden ? 'Hidden on profile' : 'Visible on profile'}</div>
+                            </div>
+                            <Toggle checked={!isHidden} onChange={() => toggleBadgeHidden(b.badge)} />
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </Card>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {BADGE_DEFS.map(badge => {
+                    const owned = userBadges.some(b => b.badge === badge.id)
+                    return (
+                      <div key={badge.id} className="badge-row" style={{ opacity: owned ? 1 : 0.8, border: owned ? `1px solid ${badge.border}` : undefined, background: owned ? badge.bg : undefined }}>
+                        <div className="badge-locked-icon" style={{ background: owned ? badge.bg : 'rgba(255,255,255,0.04)', border: `1px solid ${owned ? badge.border : 'rgba(255,255,255,0.07)'}`, color: owned ? badge.color : 'rgba(255,255,255,0.25)' }}>{badge.icon}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: owned ? '#fff' : 'rgba(255,255,255,0.55)' }}>{badge.name}</span>
+                            {owned && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}>Earned</span>}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{badge.desc}</div>
+                        </div>
+                        {!owned && badge.how && (badge.howHref ? <a href={badge.howHref} target="_blank" rel="noopener noreferrer" className="badge-action-btn" style={{ textDecoration: 'none' }}>{badge.how}</a> : <button className="badge-action-btn" onClick={() => showToast(`${badge.name} — coming soon!`)}>{badge.how}</button>)}
+                        {!owned && !badge.how && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>Staff assigned</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+                {userBadges.length > 0 && (
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                    <BtnAccent onClick={saveBadgeSettings} disabled={savingBadges}>{savingBadges ? 'Saving…' : 'Save Badge Settings'}</BtnAccent>
                   </div>
-                  <Toggle checked={!isHidden} onChange={() => toggleBadgeHidden(b.badge)} />
-                </div>
-              )
-            })}
-          </div>
-        </Card>
-      )}
+                )}
+              </>
+            )
+          })()}
 
-      {/* All badges list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {BADGE_DEFS.map(badge => {
-          const owned = userBadges.some(b => b.badge === badge.id)
-          return (
-            <div key={badge.id} className="badge-row" style={{ opacity: owned ? 1 : 0.8, border: owned ? `1px solid ${badge.border}` : undefined, background: owned ? badge.bg : undefined }}>
-              <div className="badge-locked-icon" style={{ background: owned ? badge.bg : 'rgba(255,255,255,0.04)', border: `1px solid ${owned ? badge.border : 'rgba(255,255,255,0.07)'}`, color: owned ? badge.color : 'rgba(255,255,255,0.25)' }}>{badge.icon}</div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: owned ? '#fff' : 'rgba(255,255,255,0.55)' }}>{badge.name}</span>
-                  {owned && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: badge.bg, border: `1px solid ${badge.border}`, color: badge.color }}>Earned</span>}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{badge.desc}</div>
-              </div>
-              {!owned && badge.how && (badge.howHref ? <a href={badge.howHref} target="_blank" rel="noopener noreferrer" className="badge-action-btn" style={{ textDecoration: 'none' }}>{badge.how}</a> : <button className="badge-action-btn" onClick={() => showToast(`${badge.name} — coming soon!`)}>{badge.how}</button>)}
-              {!owned && !badge.how && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>Staff assigned</span>}
-            </div>
-          )
-        })}
-      </div>
-
-      {userBadges.length > 0 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
-          <BtnAccent onClick={saveBadgeSettings} disabled={savingBadges}>
-            {savingBadges ? 'Saving…' : 'Save Badge Settings'}
-          </BtnAccent>
-        </div>
-      )}
-    </>
-  )
-})()}
-
-          {/* ═══ WIDGETS / TEMPLATES ═══ */}
-          {(activePage === 'widgets' || activePage === 'templates') && (
+          {/* ═══ WIDGETS ═══ */}
+          {activePage === 'widgets' && (
             <>
-              <PageHeader breadcrumb={`Dashboard · ${activePage === 'widgets' ? 'Widgets' : 'Templates'}`} title={activePage === 'widgets' ? 'Profile <span style="color:#e03030">Widgets</span>' : 'Browse <span style="color:#e03030">Templates</span>'} subtitle={activePage === 'widgets' ? 'Add widgets to your page' : 'Pick a pre-built layout'} />
+              <PageHeader breadcrumb="Dashboard · Widgets" title='Profile <span style="color:#e03030">Widgets</span>' subtitle="Add widgets to your page" />
               <div style={{ padding: 40, textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 12 }}>
-                <div style={{ fontSize: 36, marginBottom: 12 }}>{activePage === 'widgets' ? '⊞' : '⊟'}</div>
+                <div style={{ fontSize: 36, marginBottom: 12 }}>⊞</div>
                 <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>Coming Soon</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>{activePage === 'widgets' ? 'Add countdown timers, now-playing widgets, Discord status, and more.' : 'Pick from pre-built layouts to instantly style your profile.'}</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', marginTop: 6, maxWidth: 300, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>Add countdown timers, now-playing widgets, Discord status, and more.</div>
               </div>
+            </>
+          )}
+
+          {/* ═══ TEMPLATES ═══ */}
+          {activePage === 'templates' && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: 8 }}>Dashboard · Templates</div>
+              <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 4px', fontFamily: 'Syne, sans-serif' }}>Browse <span style={{ color: '#e03030' }}>Templates</span></h1>
+              <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 28 }}>One-click styles — your avatar, bio, and links stay exactly the same. Only visuals change.</p>
+
+              <div className="tpl-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                {TEMPLATES.map(tpl => {
+                  const l = tpl.settings.layout || {}
+                  const avatarPos = l.avatarPos || 'center'
+                  const alignItems = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
+                  const panelMaxW = { compact:120, medium:150, wide:180, full:210 }[l.panelSize] || 150
+                  return (
+                    <div key={tpl.id} className="tpl-card"
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = `${tpl.accent}55`; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.transform = 'translateY(0)' }}>
+                      {/* Mini canvas */}
+                      <div style={{ height: 160, background: tpl.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ width: panelMaxW, background: 'rgba(255,255,255,0.03)', border: `1px solid ${tpl.accent}33`, borderRadius: 12, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems, gap: 7, fontFamily: `'${tpl.settings.font}', sans-serif` }}>
+                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${tpl.accent}22`, border: `2px solid ${tpl.accent}55`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: tpl.accent, overflow: 'hidden', flexShrink: 0 }}>
+                            {avatarPreview ? <img src={avatarPreview} alt="av" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} /> : initial}
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: tpl.accent, textShadow: tpl.settings.glowIntensity > 40 ? `0 0 8px ${tpl.accent}88` : 'none' }}>{displayName || username}</div>
+                          {appBio && <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', textAlign: avatarPos === 'center' ? 'center' : 'left', lineHeight: 1.3, maxWidth: '100%', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{appBio}</div>}
+                          {links.length > 0 && (
+                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', justifyContent: avatarPos === 'center' ? 'center' : 'flex-start' }}>
+                              {links.slice(0, 4).map((lnk, i) => {
+                                const p = lnk.platform || { id: 'custom', color: '#e03030' }
+                                const sz = Math.round((tpl.settings.iconSize / 44) * 22)
+                                return (
+                                  <div key={i} style={{ width: sz, height: sz, borderRadius: Math.round(sz * 0.27), background: lnk.iconDataUrl ? 'transparent' : p.color, overflow: 'hidden', flexShrink: 0 }}>
+                                    {lnk.iconDataUrl
+                                      ? <img src={lnk.iconDataUrl} alt="icon" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                                      : SIMPLE_ICONS[p.id]
+                                        ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt="" style={{ width: '60%', height: '60%', objectFit: 'contain', margin: '20% auto', display: 'block' }} />
+                                        : null}
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {/* Info row */}
+                      <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 2 }}>{tpl.name}</div>
+                          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4, marginBottom: 6 }}>{tpl.desc}</div>
+                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                            {tpl.tags.map(tag => <span key={tag} style={{ fontSize: 9, fontWeight: 600, padding: '2px 7px', borderRadius: 99, background: `${tpl.accent}18`, border: `1px solid ${tpl.accent}40`, color: tpl.accent }}>{tag}</span>)}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setTemplatePreview(tpl)}
+                          style={{ flexShrink: 0, padding: '8px 14px', borderRadius: 10, border: `1px solid ${tpl.accent}55`, background: `${tpl.accent}15`, color: tpl.accent, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', transition: 'all .15s', whiteSpace: 'nowrap' }}
+                          onMouseEnter={e => e.currentTarget.style.background = `${tpl.accent}30`}
+                          onMouseLeave={e => e.currentTarget.style.background = `${tpl.accent}15`}
+                        >
+                          Preview →
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* ── Template Preview Modal ── */}
+              {templatePreview && (() => {
+                const tpl = templatePreview
+                const s = tpl.settings
+                const l = s.layout || {}
+                const avatarPos = l.avatarPos || 'center'
+                const alignItems = avatarPos === 'left' ? 'flex-start' : avatarPos === 'right' ? 'flex-end' : 'center'
+                const textAlign = avatarPos === 'left' ? 'left' : avatarPos === 'right' ? 'right' : 'center'
+                const panelMaxW = { compact:320, medium:420, wide:520, full:600 }[l.panelSize] || 420
+                const hexToRgb = hex => { const r = parseInt(hex.slice(1,3),16); const g = parseInt(hex.slice(3,5),16); const b = parseInt(hex.slice(5,7),16); return `${r},${g},${b}` }
+                const bgRgb = hexToRgb(s.bgColor || '#080808')
+                const glowAlpha = (s.glowIntensity || 50) / 100
+
+                const nameStyle = (() => {
+                  if (s.usernameFx === 'rainbow') return { background:'linear-gradient(90deg,#ff0,#0f0,#0ff,#f0f,#f00)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }
+                  if (s.usernameFx === 'gold')    return { background:'linear-gradient(90deg,#b8860b,#ffd700,#b8860b)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }
+                  if (s.usernameFx === 'neon')    return { color: s.accentColor, textShadow:`0 0 12px ${s.accentColor}dd, 0 0 24px ${s.accentColor}66` }
+                  if (s.usernameFx === 'glitch')  return { color:'#fff', animation:'glitch 0.4s infinite' }
+                  return { color:'#fff', textShadow:`0 0 ${12+(s.glowIntensity||50)*0.2}px ${s.accentColor}${Math.round(glowAlpha*99).toString(16).padStart(2,'0')}` }
+                })()
+
+                const applyTemplate = async () => {
+                  applySettings(s)
+                  // persist immediately
+                  const newSettings = { ...buildSettings(), ...s, layout: { ...buildSettings().layout, ...s.layout } }
+                  await supabase.from('users').update({ settings: newSettings, username_fx: s.usernameFx || '', bg_fx: s.bgFx || 'none' }).eq('username', username)
+                  showToast(`"${tpl.name}" applied & saved!`)
+                  setTemplatePreview(null)
+                }
+
+                return (
+                  <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.85)', zIndex:1000, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 16px', backdropFilter:'blur(8px)' }} onClick={() => setTemplatePreview(null)}>
+                    <div onClick={e => e.stopPropagation()} style={{ width:'100%', maxWidth:680, display:'flex', flexDirection:'column', maxHeight:'90vh', overflow:'hidden', borderRadius:20, border:'1px solid rgba(255,255,255,0.08)', boxShadow:'0 24px 80px rgba(0,0,0,0.8)' }}>
+                      {/* Header */}
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', background:'#0d0505', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
+                        <div>
+                          <div style={{ fontSize:16, fontWeight:700, color:'#fff' }}>{tpl.name} <span style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:500 }}>· Preview</span></div>
+                          <div style={{ fontSize:11, color:'rgba(255,255,255,0.35)', marginTop:2 }}>Your avatar, bio & links — this template&apos;s style</div>
+                        </div>
+                        <button onClick={() => setTemplatePreview(null)} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:6, borderRadius:8, display:'flex' }}>
+                          <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        </button>
+                      </div>
+
+                      {/* Canvas */}
+                      <div style={{ flex:1, overflowY:'auto', background: s.bgColor || '#080808', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'40px 24px', minHeight:380, position:'relative' }}>
+                        <style>{`@import url('https://fonts.googleapis.com/css2?family=${FONT_QUERY_MAP[s.font] || 'Inter:wght@400;700'}&display=swap');`}</style>
+                        <div style={{ width:'100%', maxWidth:panelMaxW, display:'flex', flexDirection:'column', alignItems, position:'relative', zIndex:2 }}>
+                          {/* Floating avatar */}
+                          <div style={{ alignSelf:alignItems, marginLeft:avatarPos==='left'?20:0, marginRight:avatarPos==='right'?20:0, marginBottom:'-38px', zIndex:3, position:'relative' }}>
+                            <div style={{ width:76, height:76, borderRadius:'50%', padding:3, background:`linear-gradient(135deg,${s.accentColor},${s.accentColor}66)`, boxShadow:`0 0 0 4px rgba(10,10,10,0.6),0 4px 20px ${s.accentColor}44` }}>
+                              <div style={{ width:'100%', height:'100%', borderRadius:'50%', background:'#0a0a0a', display:'flex', alignItems:'center', justifyContent:'center', fontSize:26, fontWeight:900, color:s.accentColor, overflow:'hidden' }}>
+                                {avatarPreview ? <img src={avatarPreview} alt="av" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} /> : initial}
+                              </div>
+                            </div>
+                          </div>
+                          {/* Panel */}
+                          <div style={{ width:'100%', background:`rgba(${bgRgb},${(l.panelOpacity||85)/100})`, backdropFilter:`blur(${l.panelBlur||24}px)`, border:'1px solid rgba(255,255,255,0.08)', borderRadius:20, padding:'56px 24px 24px', display:'flex', flexDirection:'column', alignItems, boxShadow:'0 8px 40px rgba(0,0,0,0.5)', fontFamily:`'${s.font}', sans-serif` }}>
+                            <div style={{ fontSize:20, fontWeight:900, letterSpacing:'-0.5px', marginBottom:4, textAlign, ...nameStyle }}>{displayName || `@${username}`}</div>
+                            {displayName && <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', fontWeight:600, marginBottom:6, textAlign }}>@{username}</div>}
+                            {appBio && <div style={{ fontSize:12, color:'rgba(255,255,255,0.5)', fontWeight:600, textAlign, lineHeight:1.6, marginBottom:12 }}>{appBio}</div>}
+                            {links.length > 0 && (
+                              <>
+                                <div style={{ width:'100%', height:1, background:'rgba(255,255,255,0.06)', margin:'8px 0 16px' }} />
+                                <div style={{ display:'flex', flexWrap:'wrap', gap:14, justifyContent:textAlign==='center'?'center':textAlign==='right'?'flex-end':'flex-start' }}>
+                                  {links.map((lnk, i) => {
+                                    const p = lnk.platform || { id:'custom', color:'#e03030' }
+                                    const sz = s.iconSize || 44
+                                    return (
+                                      <div key={i} style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5, width:Math.max(sz,40) }}>
+                                        <div style={{ width:sz, height:sz, borderRadius:Math.round(sz*0.27), background:lnk.iconDataUrl?'transparent':p.color, display:'flex', alignItems:'center', justifyContent:'center', boxShadow:`0 4px 16px ${p.color}66`, overflow:'hidden', flexShrink:0 }}>
+                                          {lnk.iconDataUrl ? <img src={lnk.iconDataUrl} alt="icon" style={{ width:'100%', height:'100%', objectFit:'contain' }} />
+                                            : SIMPLE_ICONS[p.id] ? <img src={`https://cdn.simpleicons.org/${SIMPLE_ICONS[p.id]}/ffffff`} alt={p.name} style={{ width:'55%', height:'55%', objectFit:'contain' }} />
+                                            : <span style={{ fontSize:11, fontWeight:800, color:'#fff' }}>{PLATFORM_ABBR[p.id]||'?'}</span>}
+                                        </div>
+                                        {s.showLinkLabels && <span style={{ fontSize:9, color:'rgba(255,255,255,0.4)', textAlign:'center', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', maxWidth:Math.max(sz,40) }}>{lnk.title||p.name}</span>}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </>
+                            )}
+                            <div style={{ marginTop:16, fontSize:11, color:'rgba(255,255,255,0.1)', fontWeight:700, alignSelf:'center' }}>powered by fate.rip</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', background:'#0d0505', borderTop:'1px solid rgba(255,255,255,0.06)', gap:12, flexWrap:'wrap', flexShrink:0 }}>
+                        <div style={{ display:'flex', gap:12, fontSize:12, color:'rgba(255,255,255,0.3)', flexWrap:'wrap' }}>
+                          <span>Font: <span style={{ color:'rgba(255,255,255,0.55)', fontWeight:600 }}>{s.font}</span></span>
+                          <span>·</span>
+                          <span>FX: <span style={{ color:'rgba(255,255,255,0.55)', fontWeight:600 }}>{s.bgFx !== 'none' ? s.bgFx : s.particleEnabled ? s.particleStyle : 'None'}</span></span>
+                          <span>·</span>
+                          <span>Entrance: <span style={{ color:'rgba(255,255,255,0.55)', fontWeight:600 }}>{s.entranceAnim}</span></span>
+                        </div>
+                        <div style={{ display:'flex', gap:8 }}>
+                          <BtnGhost onClick={() => setTemplatePreview(null)}>Cancel</BtnGhost>
+                          <BtnAccent onClick={applyTemplate} style={{ background: tpl.accent }}>Apply Template</BtnAccent>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
             </>
           )}
 
@@ -1265,6 +1468,7 @@ setBadgePosition(data.badge_position || 'below_bio')
         </div>
       </div>
 
+      {/* ── Add Button Modal ── */}
       {showAddBtnModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowAddBtnModal(false)}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#0d0505', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 16, padding: 28, width: '100%', maxWidth: 420, position: 'relative' }}>
@@ -1278,6 +1482,7 @@ setBadgePosition(data.badge_position || 'below_bio')
         </div>
       )}
 
+      {/* ── Toast ── */}
       {toastVisible && (
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#1a0808', border: '1px solid rgba(224,48,48,0.22)', color: '#fff', fontSize: 13, padding: '10px 18px', borderRadius: 100, zIndex: 2000, display: 'flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap', animation: 'toastIn .3s ease' }}>
           <svg width="14" height="14" fill="none" stroke="#e03030" strokeWidth="2" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
