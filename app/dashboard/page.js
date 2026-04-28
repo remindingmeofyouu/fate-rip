@@ -366,7 +366,7 @@ function AddLinkModal({ platform, onClose, onAdd }) {
 }
 
 // ─── Create Template Modal ─────────────────────────────────────────────────────
-function CreateTemplateModal({ onClose, onSave, currentSettings, username, avatarUrl }) {
+function CreateTemplateModal({ onClose, onSave, currentSettings, username, avatarUrl, bgUrl, bio, location, opacity, blur, usernameFx, bgFx, glowState, displayName }) {
   const [name, setName]           = useState('')
   const [desc, setDesc]           = useState('')
   const [tags, setTags]           = useState('')
@@ -405,6 +405,15 @@ function CreateTemplateModal({ onClose, onSave, currentSettings, username, avata
       creator_avatar:   avatarUrl || null,
       bg_image_url: bgImageUrl,
       settings:     currentSettings,
+      profile_bg_url: bgUrl || null,
+profile_bio: bio || null,
+profile_location: location || null,
+profile_opacity: opacity ?? 100,
+profile_blur: blur ?? 0,
+profile_username_fx: usernameFx || '',
+profile_bg_fx: bgFx || 'none',
+profile_glow_settings: glowState || null,
+profile_display_name: displayName || null,
       uses:         0,
       likes:        0,
       created_at:   new Date().toISOString(),
@@ -783,12 +792,29 @@ export default function Dashboard() {
   const handleUseTemplate = async (tpl) => {
     const templateSettings = tpl.settings || {}
     applySettings(templateSettings)
-    const { error } = await supabase.from('users').update({ settings: templateSettings, audio_url: templateSettings?.music?.url || null }).eq('username', username)
-    if (error) {
-      console.error('Apply template error:', error)
-      showToast('Failed to apply template')
-      return
-    }
+    if (tpl.profile_bg_url !== undefined)       setBgPreview(tpl.profile_bg_url)
+    if (tpl.profile_bio)                        setAppBio(tpl.profile_bio)
+    if (tpl.profile_location)                   setLocation(tpl.profile_location)
+    if (tpl.profile_opacity !== undefined)      setOpacity(tpl.profile_opacity)
+    if (tpl.profile_blur !== undefined)         setBlur(tpl.profile_blur)
+    if (tpl.profile_username_fx !== undefined)  setUsernameFx(tpl.profile_username_fx)
+    if (tpl.profile_bg_fx)                      setBgFx(tpl.profile_bg_fx)
+    if (tpl.profile_glow_settings)              setGlowState(tpl.profile_glow_settings)
+    if (tpl.profile_display_name !== undefined) setDisplayName(tpl.profile_display_name)
+    const { error } = await supabase.from('users').update({
+      settings:      templateSettings,
+      audio_url:     templateSettings?.music?.url || null,
+      bg_url:        tpl.profile_bg_url || null,
+      bio:           tpl.profile_bio || null,
+      location:      tpl.profile_location || null,
+      opacity:       tpl.profile_opacity ?? 100,
+      blur:          tpl.profile_blur ?? 0,
+      username_fx:   tpl.profile_username_fx || '',
+      bg_fx:         tpl.profile_bg_fx || 'none',
+      glow_settings: tpl.profile_glow_settings || null,
+      display_name:  tpl.profile_display_name || null,
+    }).eq('username', username)
+    if (error) { showToast('Failed to apply template'); return }
     await supabase.from('community_templates').update({ uses:(tpl.uses||0)+1 }).eq('id', tpl.id)
     showToast(`"${tpl.name}" applied & saved!`)
   }
@@ -1472,12 +1498,21 @@ export default function Dashboard() {
 
               {showCreateTpl && (
                 <CreateTemplateModal
-                  onClose={() => setShowCreateTpl(false)}
-                  onSave={() => { fetchTemplates(); showToast('Template published!') }}
-                  currentSettings={buildSettings()}
-                  username={username}
-                  avatarUrl={avatarPreview}
-                />
+  onClose={() => setShowCreateTpl(false)}
+  onSave={() => { fetchTemplates(); showToast('Template published!') }}
+  currentSettings={buildSettings()}
+  username={username}
+  avatarUrl={avatarPreview}
+  bgUrl={bgPreview}
+  bio={appBio}
+  location={location}
+  opacity={opacity}
+  blur={blur}
+  usernameFx={usernameFx}
+  bgFx={bgFx}
+  glowState={glowState}
+  displayName={displayName}
+/>
               )}
               {previewTpl && (
                 <TemplatePreviewModal
