@@ -783,7 +783,7 @@ export default function Dashboard() {
   const handleUseTemplate = async (tpl) => {
     const templateSettings = tpl.settings || {}
     applySettings(templateSettings)
-    const { error } = await supabase.from('users').update({ settings: templateSettings }).eq('username', username)
+    const { error } = await supabase.from('users').update({ settings: templateSettings, audio_url: templateSettings?.music?.url || null }).eq('username', username)
     if (error) {
       console.error('Apply template error:', error)
       showToast('Failed to apply template')
