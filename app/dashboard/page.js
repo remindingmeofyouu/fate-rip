@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
+import WidgetsPage from './WidgetsPage'
 
 // ─── Platform definitions ──────────────────────────────────────────────────────
 const PLATFORMS = [
@@ -1382,15 +1383,12 @@ export default function Dashboard() {
 
           {/* ═══ WIDGETS ═══ */}
           {activePage === 'widgets' && (
-            <>
-              <PageHeader breadcrumb="Dashboard · Widgets" title='Profile <span style="color:#e03030">Widgets</span>' subtitle="Add widgets to your page" />
-              <div style={{ padding:40, textAlign:'center', background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.05)', borderRadius:12 }}>
-                <div style={{ fontSize:36, marginBottom:12 }}>⊞</div>
-                <div style={{ fontSize:14, fontWeight:600, color:'rgba(255,255,255,0.5)' }}>Coming Soon</div>
-                <div style={{ fontSize:13, color:'rgba(255,255,255,0.25)', marginTop:6, maxWidth:300, marginLeft:'auto', marginRight:'auto', lineHeight:1.6 }}>Add countdown timers, now-playing widgets, Discord status, and more.</div>
-              </div>
-            </>
-          )}
+  <WidgetsPage
+    username={username}
+    supabase={supabase}
+    showToast={showToast}
+  />
+)}
 
           {/* ═══ TEMPLATES ═══ */}
           {activePage === 'templates' && (
