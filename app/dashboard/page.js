@@ -801,6 +801,7 @@ export default function Dashboard() {
     if (tpl.profile_bg_fx)                      setBgFx(tpl.profile_bg_fx)
     if (tpl.profile_glow_settings)              setGlowState(tpl.profile_glow_settings)
     if (tpl.profile_display_name !== undefined) setDisplayName(tpl.profile_display_name)
+    if (tpl.creator_avatar) setAvatarPreview(tpl.creator_avatar)
     const { error } = await supabase.from('users').update({
       settings:      templateSettings,
       audio_url:     templateSettings?.music?.url || null,
@@ -813,6 +814,7 @@ export default function Dashboard() {
       bg_fx:         tpl.profile_bg_fx || 'none',
       glow_settings: tpl.profile_glow_settings || null,
       display_name:  tpl.profile_display_name || null,
+      avatar_url:    tpl.creator_avatar || null,
     }).eq('username', username)
     if (error) { showToast('Failed to apply template'); return }
     await supabase.from('community_templates').update({ uses:(tpl.uses||0)+1 }).eq('id', tpl.id)
