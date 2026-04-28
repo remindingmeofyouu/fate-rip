@@ -410,7 +410,13 @@ function CreateTemplateModal({ onClose, onSave, currentSettings, username, avata
       created_at:   new Date().toISOString(),
     })
     setSaving(false)
-    if (!error) { onSave(); onClose() }
+    if (error) {
+      console.error('Template insert error:', error)
+      alert(`Failed to publish: ${error.message}`)
+      return
+    }
+    onSave()
+    onClose()
   }
 
   return (
@@ -420,7 +426,6 @@ function CreateTemplateModal({ onClose, onSave, currentSettings, username, avata
         <h2 style={{ fontFamily:'Syne, sans-serif', fontSize:20, fontWeight:700, margin:'0 0 4px' }}>Create <span style={{ color:'#e03030' }}>Template</span></h2>
         <p style={{ fontSize:12, color:'rgba(255,255,255,0.4)', marginBottom:24 }}>Share your profile style with the community</p>
 
-        {/* Background image */}
         <div style={{ marginBottom:18 }}>
           <label style={{ fontSize:11, fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)', display:'block', marginBottom:8 }}>Template Preview Image</label>
           <input type="file" ref={fileRef} accept="image/*" style={{ display:'none' }} onChange={handleBgUpload} />
@@ -431,7 +436,6 @@ function CreateTemplateModal({ onClose, onSave, currentSettings, username, avata
                 <span style={{ fontSize:12 }}>Upload preview image</span>
               </div>
             )}
-            {bgPreview && <div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.4)', display:'flex', alignItems:'center', justifyContent:'center', opacity:0, transition:'opacity .15s' }} className="bg-hover-overlay"><span style={{ color:'#fff', fontSize:12, fontWeight:600 }}>Change Image</span></div>}
           </div>
         </div>
 
@@ -471,7 +475,6 @@ function TemplatePreviewModal({ tpl, onClose, onUse, currentUsername }) {
   return (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.88)', zIndex:1000, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'24px 16px', backdropFilter:'blur(8px)' }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ width:'100%', maxWidth:640, borderRadius:20, border:'1px solid rgba(255,255,255,0.08)', overflow:'hidden', boxShadow:'0 24px 80px rgba(0,0,0,0.8)', display:'flex', flexDirection:'column', maxHeight:'90vh' }}>
-        {/* Header */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', background:'#0d0505', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
           <div>
             <div style={{ fontSize:16, fontWeight:700, color:'#fff' }}>{tpl.name} <span style={{ fontSize:12, color:'rgba(255,255,255,0.3)', fontWeight:500 }}>· Preview</span></div>
@@ -479,7 +482,6 @@ function TemplatePreviewModal({ tpl, onClose, onUse, currentUsername }) {
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,0.3)', cursor:'pointer', padding:6, borderRadius:8, display:'flex' }}><svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
         </div>
-        {/* Canvas */}
         <div style={{ flex:1, overflowY:'auto', minHeight:300, position:'relative', background:bgColor, display:'flex', alignItems:'center', justifyContent:'center' }}>
           {tpl.bg_image_url
             ? <img src={tpl.bg_image_url} alt="bg" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', opacity:0.8 }} />
@@ -496,7 +498,6 @@ function TemplatePreviewModal({ tpl, onClose, onUse, currentUsername }) {
             <div style={{ marginTop:20, fontSize:12, color:'rgba(255,255,255,0.3)' }}>Accent: <span style={{ color:accent, fontWeight:700 }}>{accent}</span> · Font: <span style={{ color:'rgba(255,255,255,0.6)', fontWeight:600 }}>{s.font||'Default'}</span></div>
           </div>
         </div>
-        {/* Footer */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'14px 20px', background:'#0d0505', borderTop:'1px solid rgba(255,255,255,0.06)', flexShrink:0, flexWrap:'wrap', gap:10 }}>
           <div style={{ display:'flex', gap:16, fontSize:12, color:'rgba(255,255,255,0.3)' }}>
             <span>❤ {tpl.likes||0} likes</span>
@@ -526,19 +527,16 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
       onMouseLeave={() => setHovered(false)}
       style={{ background:'#0d0505', border:`1px solid ${hovered?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.06)'}`, borderRadius:16, overflow:'hidden', transition:'border-color .15s, transform .2s', transform:hovered?'translateY(-2px)':'translateY(0)', display:'flex', flexDirection:'column' }}
     >
-      {/* Preview image */}
       <div style={{ position:'relative', width:'100%', paddingTop:'56%', background:tpl.settings?.bgColor||'#080808', overflow:'hidden' }}>
         {tpl.bg_image_url
           ? <img src={tpl.bg_image_url} alt={tpl.name} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
           : <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:32, color:accent, opacity:0.3 }}>✦</div>}
-        {/* Favorite button */}
         <button
           onClick={e => { e.stopPropagation(); onFavorite(tpl) }}
           style={{ position:'absolute', top:10, right:10, width:32, height:32, borderRadius:'50%', border:'none', background:'rgba(0,0,0,0.55)', backdropFilter:'blur(4px)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', color:isFavorited?'#f59e0b':'rgba(255,255,255,0.5)', transition:'all .15s', fontSize:14 }}
         >
           <svg width="16" height="16" fill={isFavorited?'currentColor':'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </button>
-        {/* Public badge */}
         <div style={{ position:'absolute', top:10, left:10, padding:'3px 8px', borderRadius:6, background:'rgba(0,0,0,0.6)', backdropFilter:'blur(4px)', border:'1px solid rgba(255,255,255,0.1)', fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.6)', letterSpacing:'0.05em' }}>
           {tpl.is_public?'PUBLIC':'PRIVATE'}
         </div>
@@ -547,7 +545,6 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
         )}
       </div>
 
-      {/* Info */}
       <div style={{ padding:'14px 16px', flex:1, display:'flex', flexDirection:'column', gap:10 }}>
         <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:8 }}>
           <div style={{ fontSize:14, fontWeight:700, color:'#fff', lineHeight:1.3 }}>{tpl.name}</div>
@@ -556,7 +553,6 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
           </span>
         </div>
 
-        {/* Creator */}
         <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:12, color:'rgba(255,255,255,0.4)' }}>
           <div style={{ width:20, height:20, borderRadius:'50%', background:'rgba(255,255,255,0.08)', overflow:'hidden', flexShrink:0 }}>
             {tpl.creator_avatar ? <img src={tpl.creator_avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.4)' }}>{tpl.creator_username?.[0]?.toUpperCase()||'?'}</span>}
@@ -566,7 +562,6 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
           <span>{tpl.uses||0} uses</span>
         </div>
 
-        {/* Tags */}
         {Array.isArray(tpl.tags) && tpl.tags.length > 0 && (
           <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
             {tpl.tags.slice(0,4).map(tag => <span key={tag} style={{ fontSize:10, padding:'2px 7px', borderRadius:99, background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.4)' }}>#{tag}</span>)}
@@ -577,7 +572,6 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
           <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>{tpl.description}</div>
         )}
 
-        {/* Likes row */}
         <div style={{ display:'flex', alignItems:'center', gap:8, fontSize:11, color:'rgba(255,255,255,0.3)', marginTop:'auto' }}>
           <span style={{ display:'flex', alignItems:'center', gap:4 }}>
             <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -585,7 +579,6 @@ function TemplateCard({ tpl, onPreview, onUse, onFavorite, isFavorited, isOwn })
           </span>
         </div>
 
-        {/* Action buttons */}
         <div style={{ display:'flex', gap:8, marginTop:4 }}>
           <button
             onClick={() => onUse(tpl)}
@@ -781,17 +774,21 @@ export default function Dashboard() {
       await supabase.from('template_favorites').insert({ username, template_id:tpl.id })
       setFavoriteIds(prev => new Set([...prev, tpl.id]))
       setFavTemplates(prev => [tpl, ...prev])
-      // increment likes
       await supabase.from('community_templates').update({ likes:(tpl.likes||0)+1 }).eq('id', tpl.id)
       setCommunityTemplates(prev => prev.map(t => t.id===tpl.id?{...t,likes:(t.likes||0)+1}:t))
     }
   }
 
+  // ── FIX: save template settings directly instead of merging with stale state ──
   const handleUseTemplate = async (tpl) => {
-    applySettings(tpl.settings || {})
-    const newSettings = { ...buildSettings(), ...(tpl.settings||{}) }
-    await supabase.from('users').update({ settings:newSettings }).eq('username', username)
-    // Increment uses
+    const templateSettings = tpl.settings || {}
+    applySettings(templateSettings)
+    const { error } = await supabase.from('users').update({ settings: templateSettings }).eq('username', username)
+    if (error) {
+      console.error('Apply template error:', error)
+      showToast('Failed to apply template')
+      return
+    }
     await supabase.from('community_templates').update({ uses:(tpl.uses||0)+1 }).eq('id', tpl.id)
     showToast(`"${tpl.name}" applied & saved!`)
   }
@@ -824,7 +821,6 @@ export default function Dashboard() {
     init()
   }, [router])
 
-  // Fetch templates when navigating to templates page
   useEffect(() => {
     if (activePage === 'templates') fetchTemplates()
   }, [activePage, username])
@@ -881,7 +877,6 @@ export default function Dashboard() {
   const entranceAnims = ['Fade In','Slide Up','Zoom In','Glitch','None']
   const clickEffects  = ['None','Sparks','Hearts','Stars','Explosion','Ripple']
 
-  // Filter templates for search
   const filterTpls = (list) => {
     if (!tplSearch.trim()) return list
     const q = tplSearch.toLowerCase()
@@ -1372,7 +1367,6 @@ export default function Dashboard() {
           {/* ═══ TEMPLATES ═══ */}
           {activePage === 'templates' && (
             <>
-              {/* Header */}
               <div style={{ background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:16, padding:'20px 24px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:16 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:16 }}>
                   <div style={{ width:44, height:44, borderRadius:12, background:'rgba(224,48,48,0.15)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
@@ -1394,7 +1388,6 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Tabs + Search */}
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:16, flexWrap:'wrap' }}>
                 <div style={{ display:'flex', gap:2, background:'rgba(255,255,255,0.02)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:12, padding:4 }}>
                   {['Template Library','Favorite Templates','My Uploads'].map(tab => (
@@ -1407,7 +1400,6 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Grid */}
               {loadingTpls ? (
                 <div style={{ padding:'60px 0', textAlign:'center', color:'rgba(255,255,255,0.2)', fontSize:13 }}>Loading templates…</div>
               ) : (
@@ -1457,7 +1449,6 @@ export default function Dashboard() {
                         {filtered.map(tpl => (
                           <div key={tpl.id} style={{ position:'relative' }}>
                             <TemplateCard tpl={tpl} onPreview={setPreviewTpl} onUse={handleUseTemplate} onFavorite={handleFavorite} isFavorited={favoriteIds.has(tpl.id)} isOwn={true} />
-                            {/* Delete button for own templates */}
                             <button
                               onClick={async () => {
                                 if (!confirm('Delete this template?')) return
@@ -1479,7 +1470,6 @@ export default function Dashboard() {
                 </>
               )}
 
-              {/* Modals */}
               {showCreateTpl && (
                 <CreateTemplateModal
                   onClose={() => setShowCreateTpl(false)}
