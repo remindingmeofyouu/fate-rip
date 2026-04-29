@@ -169,7 +169,7 @@ export default function ProfilePage() {
     document.body.style.cursor = `url('${resized}') 16 16, auto`
   }
   img.src = profile.cursor_url
-}
+} else {
       const s = profile.settings || {}
       const cursorMap = { 'Dot':'crosshair','Ring':'cell','Crosshair':'crosshair','Arrow':'default','Default':'auto' }
       document.body.style.cursor = cursorMap[s.cursorStyle] || 'auto'
