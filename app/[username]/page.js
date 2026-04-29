@@ -150,82 +150,66 @@ function WError({ color, label, msg }) {
 }
 
 // ─── Discord Presence ──────────────────────────────────────────────────────────
-function LiveDiscordWidget({ config, accentColor }) {
+function LiveDiscordWidget({ config }) {
   const [data, setData] = useState(null)
   const [err,  setErr]  = useState('')
   const [load, setLoad] = useState(true)
-  const wsRef = useRef(null)
 
   useEffect(() => {
     const id = config?.discordId?.trim()
     if (!id) { setErr('Not configured'); setLoad(false); return }
-    let heartbeat
-    const restFallback = async (uid) => {
-      try {
-        const d = await safeFetch(`https://api.lanyard.rest/v1/users/${uid}`)
-        if (d?.success) { setData(d.data); setErr('') }
-        else setErr('User must join discord.gg/lanyard')
-      } catch { setErr('Lanyard unreachable') }
-      setLoad(false)
-    }
-    try {
-      const ws = new WebSocket('wss://api.lanyard.rest/socket')
-      wsRef.current = ws
-      ws.onopen = () => ws.send(JSON.stringify({ op:2, d:{ subscribe_to_id:id } }))
-      ws.onmessage = (e) => {
-        const msg = JSON.parse(e.data)
-        if (msg.op === 1) heartbeat = setInterval(() => ws.readyState === WebSocket.OPEN && ws.send(JSON.stringify({ op:3 })), msg.d.heartbeat_interval)
-        if (msg.op === 0 && (msg.t === 'INIT_STATE' || msg.t === 'PRESENCE_UPDATE')) { setData(msg.d); setLoad(false); setErr('') }
-      }
-      ws.onerror = () => restFallback(id)
-      ws.onclose = () => clearInterval(heartbeat)
-    } catch { restFallback(id) }
-    return () => { wsRef.current?.close(); clearInterval(heartbeat) }
+
+    supabase.from('presence').select('*').eq('discord_id', id).single()
+      .then(({ data: row, error }) => {
+        if (error || !row) { setErr('User not found — join discord.gg/faterip'); setLoad(false); return }
+        setData(row); setLoad(false)
+      })
+
+    const channel = supabase
+      .channel(`presence-profile-${id}`)
+      .on('postgres_changes', { event:'*', schema:'public', table:'presence', filter:`discord_id=eq.${id}` },
+        (payload) => { if (payload.new) setData(payload.new) })
+      .subscribe()
+
+    return () => supabase.removeChannel(channel)
   }, [config?.discordId])
 
   if (load) return <WSkeleton color="#5865F2" label="DISCORD" />
   if (err)  return <WError color="#5865F2" label="DISCORD" msg={err} />
 
-  const status   = data?.discord_status || 'offline'
-  const user     = data?.discord_user
-  const activity = data?.activities?.find(a => a.type === 0)
-  const spotify  = data?.spotify
+  const status = data.status || 'offline'
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
       <div style={{ display:'flex', alignItems:'center', gap:10 }}>
         <div style={{ position:'relative', flexShrink:0 }}>
           <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(88,101,242,0.2)', border:'1px solid rgba(88,101,242,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:700, color:'#5865F2', overflow:'hidden' }}>
-            {user?.avatar ? <img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} /> : (user?.username?.[0]||'D').toUpperCase()}
+            {data.avatar ? <img src={data.avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} /> : (data.global_name||data.username||'D')[0].toUpperCase()}
           </div>
           <div style={{ position:'absolute', bottom:0, right:0, width:12, height:12, borderRadius:'50%', background:STATUS_COLORS[status]||STATUS_COLORS.offline, border:'2px solid rgba(0,0,0,0.5)' }} />
         </div>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{user?.global_name||user?.username||'Unknown'}</div>
+          <div style={{ fontSize:13, fontWeight:700, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.global_name||data.username||'Unknown'}</div>
           <div style={{ fontSize:11, color:STATUS_COLORS[status], fontWeight:600, marginTop:1, textTransform:'capitalize' }}>{status}</div>
         </div>
         <WBadge color="#5865F2">DISCORD</WBadge>
       </div>
-      {spotify && (
+      {data.activity_type === 'spotify' && (
         <div style={{ background:'rgba(29,185,84,0.08)', border:'1px solid rgba(29,185,84,0.2)', borderRadius:9, padding:'7px 10px', display:'flex', alignItems:'center', gap:8 }}>
-          {spotify.album_art_url && <img src={spotify.album_art_url} alt="" style={{ width:30, height:30, borderRadius:5, flexShrink:0 }} />}
+          {data.spotify_album_art && <img src={data.spotify_album_art} alt="" style={{ width:30, height:30, borderRadius:5, flexShrink:0 }} />}
           <div style={{ minWidth:0, flex:1 }}>
             <div style={{ fontSize:10, color:'#1DB954', fontWeight:700, marginBottom:1 }}>♪ Spotify</div>
-            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{spotify.song}</div>
-            <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{spotify.artist}</div>
+            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.spotify_song}</div>
+            <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.spotify_artist}</div>
           </div>
         </div>
       )}
-      {activity && !spotify && (
+      {data.activity_type && data.activity_type !== 'spotify' && data.activity_name && (
         <div style={{ background:'rgba(88,101,242,0.08)', border:'1px solid rgba(88,101,242,0.18)', borderRadius:9, padding:'7px 10px', display:'flex', alignItems:'center', gap:8 }}>
-          {activity.assets?.large_image && (
-            <img src={activity.assets.large_image.startsWith('mp:') ? `https://media.discordapp.net/${activity.assets.large_image.slice(3)}` : `https://cdn.discordapp.com/app-assets/${activity.application_id}/${activity.assets.large_image}.png`}
-              alt="" style={{ width:30, height:30, borderRadius:5, flexShrink:0 }} onError={e => e.target.style.display='none'} />
-          )}
           <div style={{ minWidth:0, flex:1 }}>
             <div style={{ fontSize:10, color:'#5865F2', fontWeight:700, marginBottom:1 }}>🎮 Playing</div>
-            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{activity.name}</div>
-            {activity.details && <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{activity.details}</div>}
+            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_name}</div>
+            {data.activity_details && <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_details}</div>}
           </div>
         </div>
       )}
