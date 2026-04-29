@@ -228,6 +228,7 @@ return (
     )}
   </div>
 )
+}
 
 // ─── GitHub ────────────────────────────────────────────────────────────────────
 function LiveGitHubWidget({ config }) {
