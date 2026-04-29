@@ -202,10 +202,7 @@ return (
       <WBadge color="#5865F2">DISCORD</WBadge>
     </div>
     {data.activity_type === 'custom' && data.activity_name && (
-      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'rgba(88,101,242,0.08)', border:'1px solid rgba(88,101,242,0.15)', borderRadius:8 }}>
-        <span style={{ fontSize:13 }}>💬</span>
-        <span style={{ fontSize:12, color:'rgba(255,255,255,0.6)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_name}</span>
-      </div>
+      <div style={{ fontSize:12, color:'rgba(255,255,255,0.5)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', paddingLeft:2 }}>{data.activity_name}</div>
     )}
     {data.activity_type === 'spotify' && (
       <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'rgba(29,185,84,0.08)', border:'1px solid rgba(29,185,84,0.18)', borderRadius:8 }}>
