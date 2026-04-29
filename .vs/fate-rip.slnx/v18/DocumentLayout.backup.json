@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\ualex\\fate-rip\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\[username]\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app\\dashboard\\page.js||{3B902123-F8A7-4915-9F01-361F908088D0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -24,26 +24,26 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
-              "RelativeDocumentMoniker": "app\\[username]\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
-              "RelativeToolTip": "app\\[username]\\page.js",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAADMAAAAKAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
+              "RelativeDocumentMoniker": "app\\dashboard\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
+              "RelativeToolTip": "app\\dashboard\\page.js",
+              "ViewState": "AgIAAN8EAAAAAAAAAADwvwgFAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-22T00:13:22.401Z",
+              "WhenOpened": "2026-04-24T02:48:58.08Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "page.js",
-              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
-              "RelativeDocumentMoniker": "app\\dashboard\\page.js",
-              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\dashboard\\page.js",
-              "RelativeToolTip": "app\\dashboard\\page.js",
-              "ViewState": "AgIAAD0AAAAAAAAAAADwv2YAAAABAAAAAAAAAA==",
+              "DocumentMoniker": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
+              "RelativeDocumentMoniker": "app\\[username]\\page.js",
+              "ToolTip": "C:\\Users\\ualex\\fate-rip\\app\\[username]\\page.js",
+              "RelativeToolTip": "app\\[username]\\page.js",
+              "ViewState": "AgIAAN8CAAAAAAAAAADwvwsDAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2026-04-24T02:48:58.08Z",
+              "WhenOpened": "2026-04-22T00:13:22.401Z",
               "EditorCaption": ""
             }
           ]

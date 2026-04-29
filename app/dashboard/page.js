@@ -64,6 +64,10 @@ const BADGE_DEFS = [
   { id:'premium', name:'Premium', desc:'Purchase the fate.rip premium package.', color:'#8b5cf6', bg:'rgba(139,92,246,0.12)', border:'rgba(139,92,246,0.3)', how:'Purchase', howHref:null, icon:<img src="/Premium_Diamond.png" width="22" height="22" style={{objectFit:'contain'}} /> },
   { id:'bug_hunter', name:'Bug Hunter', desc:'Report a verified bug on fate.rip.', color:'#84cc16', bg:'rgba(132,204,22,0.12)', border:'rgba(132,204,22,0.3)', how:'Report', howHref:'https://discord.gg/faterip', icon:<img src="/bug_hunter.png" width="22" height="22" style={{objectFit:'contain'}} /> },
   { id:'gifter', name:'Gifter', desc:'Gift premium to another fate.rip user.', color:'#fb7185', bg:'rgba(251,113,133,0.12)', border:'rgba(251,113,133,0.3)', how:'Gift', howHref:null, icon:<img src="/Presente.png" width="22" height="22" style={{objectFit:'contain'}} /> },
+  { id:'friend',    name:'Friend',    desc:'Be a friend of an owner of fate.rip.', color:'#e8e8e8', bg:'rgba(255,255,255,0.07)', border:'rgba(255,255,255,0.18)', how:null, icon:<img src="/black_bat.png" width="22" height="22" style={{objectFit:'contain'}} /> },
+  { id:'cool_user', name:'Cool User', desc:'Assigned by an owner of fate.rip.',    color:'#b0b0b0', bg:'rgba(200,200,200,0.07)', border:'rgba(200,200,200,0.18)', how:null, icon:<img src="/Aura.png"      width="22" height="22" style={{objectFit:'contain'}} /> },
+  { id:'known',     name:'Known',     desc:'Be a known creator.',                  color:'#3b9fef', bg:'rgba(59,159,239,0.12)', border:'rgba(59,159,239,0.3)',   how:null, icon:<img src="/known.png"     width="22" height="22" style={{objectFit:'contain'}} /> },
+
 ]
 
 const SIMPLE_ICONS = {

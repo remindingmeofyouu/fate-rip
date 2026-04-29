@@ -67,6 +67,9 @@ const BADGE_DEFS = [
   { id:'premium',   name:'Premium',       color:'#8b5cf6', bg:'rgba(139,92,246,0.12)',  border:'rgba(139,92,246,0.3)',    icon:<img src="/Premium_Diamond.png" width="18" height="18" style={{objectFit:'contain'}} /> },
   { id:'bug_hunter',name:'Bug Hunter',    color:'#84cc16', bg:'rgba(132,204,22,0.12)',  border:'rgba(132,204,22,0.3)',    icon:<img src="/bug_hunter.png" width="18" height="18" style={{objectFit:'contain'}} /> },
   { id:'gifter',    name:'Gifter',        color:'#fb7185', bg:'rgba(251,113,133,0.12)', border:'rgba(251,113,133,0.3)',   icon:<img src="/Presente.png" width="18" height="18" style={{objectFit:'contain'}} /> },
+  { id:'friend',    name:'Friend',    color:'#e8e8e8', bg:'rgba(255,255,255,0.07)', border:'rgba(255,255,255,0.18)', icon:<img src="/black_bat.png" width="18" height="18" style={{objectFit:'contain'}} /> },
+  { id:'cool_user', name:'Cool User', color:'#b0b0b0', bg:'rgba(200,200,200,0.07)', border:'rgba(200,200,200,0.18)', icon:<img src="/Aura.png"      width="18" height="18" style={{objectFit:'contain'}} /> },
+  { id:'known',     name:'Known',     color:'#3b9fef', bg:'rgba(59,159,239,0.12)',  border:'rgba(59,159,239,0.3)',   icon:<img src="/known.png"     width="18" height="18" style={{objectFit:'contain'}} /> },
 ]
 
 // ─── Badge Strip ───────────────────────────────────────────────────────────────
