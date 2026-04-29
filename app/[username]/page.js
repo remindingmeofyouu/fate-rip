@@ -179,43 +179,55 @@ function LiveDiscordWidget({ config }) {
 
   const status = data.status || 'offline'
 
-  return (
-    <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-      <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-        <div style={{ position:'relative', flexShrink:0 }}>
-          <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(88,101,242,0.2)', border:'1px solid rgba(88,101,242,0.3)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:15, fontWeight:700, color:'#5865F2', overflow:'hidden' }}>
-            {data.avatar ? <img src={data.avatar} alt="" style={{ width:'100%', height:'100%', objectFit:'cover', borderRadius:'50%' }} /> : (data.global_name||data.username||'D')[0].toUpperCase()}
+return (
+  <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+      <div style={{ position:'relative', flexShrink:0 }}>
+        <img src={data.avatar||(data.global_name||data.username||'D')[0]} alt=""
+          style={{ width:48, height:48, borderRadius:'50%', background:'rgba(88,101,242,0.3)', display:'block', objectFit:'cover' }}
+          onError={e=>{ e.target.style.display='none' }}
+        />
+        {!data.avatar && (
+          <div style={{ width:48, height:48, borderRadius:'50%', background:'#5865F2', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, fontWeight:800, color:'#fff', position:'absolute', top:0, left:0 }}>
+            {(data.global_name||data.username||'D')[0].toUpperCase()}
           </div>
-          <div style={{ position:'absolute', bottom:0, right:0, width:12, height:12, borderRadius:'50%', background:STATUS_COLORS[status]||STATUS_COLORS.offline, border:'2px solid rgba(0,0,0,0.5)' }} />
-        </div>
-        <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:13, fontWeight:700, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.global_name||data.username||'Unknown'}</div>
-          <div style={{ fontSize:11, color:STATUS_COLORS[status], fontWeight:600, marginTop:1, textTransform:'capitalize' }}>{status}</div>
-        </div>
-        <WBadge color="#5865F2">DISCORD</WBadge>
+        )}
+        <div style={{ position:'absolute', bottom:0, right:0, width:14, height:14, borderRadius:'50%', background:STATUS_COLORS[status]||STATUS_COLORS.offline, border:'2px solid rgba(0,0,0,0.6)' }} />
       </div>
-      {data.activity_type === 'spotify' && (
-        <div style={{ background:'rgba(29,185,84,0.08)', border:'1px solid rgba(29,185,84,0.2)', borderRadius:9, padding:'7px 10px', display:'flex', alignItems:'center', gap:8 }}>
-          {data.spotify_album_art && <img src={data.spotify_album_art} alt="" style={{ width:30, height:30, borderRadius:5, flexShrink:0 }} />}
-          <div style={{ minWidth:0, flex:1 }}>
-            <div style={{ fontSize:10, color:'#1DB954', fontWeight:700, marginBottom:1 }}>♪ Spotify</div>
-            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.spotify_song}</div>
-            <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.spotify_artist}</div>
-          </div>
-        </div>
-      )}
-      {data.activity_type && data.activity_type !== 'spotify' && data.activity_name && (
-        <div style={{ background:'rgba(88,101,242,0.08)', border:'1px solid rgba(88,101,242,0.18)', borderRadius:9, padding:'7px 10px', display:'flex', alignItems:'center', gap:8 }}>
-          <div style={{ minWidth:0, flex:1 }}>
-            <div style={{ fontSize:10, color:'#5865F2', fontWeight:700, marginBottom:1 }}>🎮 Playing</div>
-            <div style={{ fontSize:11, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_name}</div>
-            {data.activity_details && <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_details}</div>}
-          </div>
-        </div>
-      )}
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:14, fontWeight:700, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.global_name||data.username||'Unknown'}</div>
+        <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginTop:1 }}>@{data.username}</div>
+        <div style={{ fontSize:11, color:STATUS_COLORS[status], fontWeight:600, marginTop:2, textTransform:'capitalize' }}>{status.replace('dnd','Do Not Disturb')}</div>
+      </div>
+      <WBadge color="#5865F2">DISCORD</WBadge>
     </div>
-  )
-}
+    {data.activity_type === 'custom' && data.activity_name && (
+      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'rgba(88,101,242,0.08)', border:'1px solid rgba(88,101,242,0.15)', borderRadius:8 }}>
+        <span style={{ fontSize:13 }}>💬</span>
+        <span style={{ fontSize:12, color:'rgba(255,255,255,0.6)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.activity_name}</span>
+      </div>
+    )}
+    {data.activity_type === 'spotify' && (
+      <div style={{ display:'flex', alignItems:'center', gap:10, padding:'8px 10px', background:'rgba(29,185,84,0.08)', border:'1px solid rgba(29,185,84,0.18)', borderRadius:8 }}>
+        {data.spotify_album_art && <img src={data.spotify_album_art} alt="" style={{ width:36, height:36, borderRadius:6, flexShrink:0 }} />}
+        <div style={{ minWidth:0, flex:1 }}>
+          <div style={{ fontSize:10, color:'#1DB954', fontWeight:700, marginBottom:2 }}>LISTENING TO SPOTIFY</div>
+          <div style={{ fontSize:12, fontWeight:600, color:'#fff', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{data.spotify_song}</div>
+          <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>by {data.spotify_artist}</div>
+        </div>
+      </div>
+    )}
+    {data.activity_type && data.activity_type !== 'spotify' && data.activity_type !== 'custom' && data.activity_name && (
+      <div style={{ padding:'8px 10px', background:'rgba(88,101,242,0.08)', border:'1px solid rgba(88,101,242,0.15)', borderRadius:8 }}>
+        <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', fontWeight:700, textTransform:'uppercase', marginBottom:4 }}>
+          {{ playing:'Playing a game', watching:'Watching', listening:'Listening', streaming:'Live on Twitch', competing:'Competing' }[data.activity_type]||'Activity'}
+        </div>
+        <div style={{ fontSize:12, fontWeight:600, color:'#fff' }}>{data.activity_name}</div>
+        {data.activity_details && <div style={{ fontSize:11, color:'rgba(255,255,255,0.4)', marginTop:2 }}>{data.activity_details}</div>}
+      </div>
+    )}
+  </div>
+)
 
 // ─── GitHub ────────────────────────────────────────────────────────────────────
 function LiveGitHubWidget({ config }) {
