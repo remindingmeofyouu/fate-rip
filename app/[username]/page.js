@@ -157,8 +157,19 @@ export default function ProfilePage() {
     if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link) }
     link.href = '/scythe.png'
     if (profile.cursor_url) {
-      document.body.style.cursor = `url('${profile.cursor_url}'), auto`
-    } else {
+  const img = new Image()
+  img.crossOrigin = 'anonymous'
+  img.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 32
+    canvas.height = 32
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(img, 0, 0, 32, 32)
+    const resized = canvas.toDataURL()
+    document.body.style.cursor = `url('${resized}') 16 16, auto`
+  }
+  img.src = profile.cursor_url
+}
       const s = profile.settings || {}
       const cursorMap = { 'Dot':'crosshair','Ring':'cell','Crosshair':'crosshair','Arrow':'default','Default':'auto' }
       document.body.style.cursor = cursorMap[s.cursorStyle] || 'auto'
